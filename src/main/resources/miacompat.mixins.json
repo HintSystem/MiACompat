@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"package": "dev.hintsystem.miacompat.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"InfoDisplaysMixin",
+        "WaypointMixin",
+        "WaypointWorldRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

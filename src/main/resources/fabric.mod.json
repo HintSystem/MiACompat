@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "miacompat",
+	"version": "${version}",
+	"name": "MiACompat",
+	"description": "Adds Xaeros minimap / map mod support to the Mine in Abyss minecraft server",
+	"authors": ["HintSystem"],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "GNU GPL",
+	"icon": "assets/miacompat/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.hintsystem.miacompat.MiACompat"
+		]
+	},
+	"mixins": [
+		"miacompat.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.17.0",
+		"minecraft": "~1.21.8",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
