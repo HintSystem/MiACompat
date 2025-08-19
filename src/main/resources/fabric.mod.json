@@ -6,8 +6,7 @@
 	"description": "Adds Xaeros minimap / map mod support to the Mine in Abyss minecraft server",
 	"authors": ["HintSystem"],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/HintSystem/MiACompat"
 	},
 	"license": "GNU GPL",
 	"icon": "assets/miacompat/icon.png",

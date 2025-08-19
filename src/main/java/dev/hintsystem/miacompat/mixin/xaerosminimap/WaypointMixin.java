@@ -1,12 +1,13 @@
-package dev.hintsystem.miacompat.mixin;
+package dev.hintsystem.miacompat.mixin.xaerosminimap;
 
 import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
 import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
 
+import xaero.common.minimap.waypoints.Waypoint;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Vec3d;
-import xaero.common.minimap.waypoints.Waypoint;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

@@ -3,9 +3,12 @@
 	"package": "dev.hintsystem.miacompat.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"InfoDisplaysMixin",
-        "WaypointMixin",
-        "WaypointWorldRendererMixin"
+      "pingwheel.PingLocationS2CPacketMixin",
+      "xaerosminimap.InfoDisplaysMixin",
+      "xaerosminimap.PlayerTrackerMinimapElementRendererMixin",
+      "xaerosminimap.SyncedTrackedPlayerMixin",
+      "xaerosminimap.WaypointMixin",
+      "xaerosminimap.WaypointWorldRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

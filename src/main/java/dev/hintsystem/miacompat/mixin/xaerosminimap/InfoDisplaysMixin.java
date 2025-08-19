@@ -1,14 +1,15 @@
-package dev.hintsystem.miacompat.mixin;
+package dev.hintsystem.miacompat.mixin.xaerosminimap;
 
 import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
 import xaero.hud.minimap.info.InfoDisplay;
 import xaero.hud.minimap.info.InfoDisplays;
 import xaero.hud.minimap.info.codec.InfoDisplayCommonStateCodecs;
 import xaero.hud.minimap.info.widget.InfoDisplayCommonWidgetFactories;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
