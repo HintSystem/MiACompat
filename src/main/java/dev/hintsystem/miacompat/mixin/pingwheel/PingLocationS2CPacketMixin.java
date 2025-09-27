@@ -2,7 +2,7 @@ package dev.hintsystem.miacompat.mixin.pingwheel;
 
 import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
 
-import nx.pingwheel.common.networking.PingLocationS2CPacket;
+import nx.pingwheel.common.network.PingLocationS2CPacket;
 
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.client.MinecraftClient;

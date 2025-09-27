@@ -36,6 +36,6 @@ public class SyncedTrackedPlayerMixin {
 
         cir.setReturnValue(MiaWorldCoordinates.relativizeWrapped(
             new Vec3d(player.getX(), player.getY(), 0), new Vec3d(this.x, this.y, 0)
-        ).getX());
+        ).getY());
     }
 }
