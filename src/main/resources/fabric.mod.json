@@ -14,15 +14,26 @@
 	"entrypoints": {
 		"client": [
 			"dev.hintsystem.miacompat.MiACompat"
-		]
+		],
+        "modmenu": [
+            "dev.hintsystem.miacompat.mods.SupportModMenu"
+        ]
 	},
 	"mixins": [
 		"miacompat.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.17.0",
-		"minecraft": "~1.21.8",
 		"java": ">=21",
-		"fabric-api": "*"
-	}
+		"minecraft": "~1.21.8",
+		"fabricloader": ">=0.17.0",
+		"fabric-api": "*",
+        "yet_another_config_lib_v3": "*"
+	},
+    "recommends": {
+        "xaerominimap": "*",
+        "xaeroworldmap": "*"
+    },
+    "suggests": {
+        "pingwheel": "~1.12.0"
+    }
 }

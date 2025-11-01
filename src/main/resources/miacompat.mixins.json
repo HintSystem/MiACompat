@@ -1,19 +1,22 @@
 {
-	"required": true,
-	"package": "dev.hintsystem.miacompat.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-      "pingwheel.PingLocationS2CPacketMixin",
-      "xaerosminimap.InfoDisplaysMixin",
-      "xaerosminimap.PlayerTrackerMinimapElementRendererMixin",
-      "xaerosminimap.SyncedTrackedPlayerMixin",
-      "xaerosminimap.WaypointMixin",
-      "xaerosminimap.WaypointWorldRendererMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+    "required": true,
+    "package": "dev.hintsystem.miacompat.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "client": [
+        "pingwheel.PingLocationS2CPacketMixin",
+        "xaerosminimap.SupportXaeroMinimapMixin",
+        "xaerosminimap.InfoDisplaysMixin",
+        "xaerosminimap.PlayerTrackerMinimapElementMixin",
+        "xaerosminimap.PlayerTrackerMinimapElementRendererMixin",
+        "xaerosminimap.WaypointMixin",
+        "xaerosminimap.WaypointCollectorMixin",
+        "xaerosminimap.WaypointWorldRendererMixin",
+        "MessageHandlerMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "overwrites": {
+        "requireAnnotations": true
+    }
 }
