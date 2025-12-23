@@ -3,15 +3,16 @@
     "package": "dev.hintsystem.miacompat.mixin",
     "compatibilityLevel": "JAVA_21",
     "client": [
+        "MessageHandlerMixin",
         "pingwheel.PingLocationS2CPacketMixin",
-        "xaerosminimap.SupportXaeroMinimapMixin",
         "xaerosminimap.InfoDisplaysMixin",
         "xaerosminimap.PlayerTrackerMinimapElementMixin",
         "xaerosminimap.PlayerTrackerMinimapElementRendererMixin",
-        "xaerosminimap.WaypointMixin",
+        "xaerosminimap.SupportXaeroMinimapMixin",
+        "xaerosminimap.WaypointIOMixin",
         "xaerosminimap.WaypointCollectorMixin",
-        "xaerosminimap.WaypointWorldRendererMixin",
-        "MessageHandlerMixin"
+        "xaerosminimap.WaypointMixin",
+        "xaerosminimap.WaypointWorldRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1
