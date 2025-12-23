@@ -1,7 +1,5 @@
 package dev.hintsystem.miacompat;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 
@@ -10,6 +8,8 @@ import net.minecraft.text.Text;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.awt.*;
 import java.lang.reflect.Field;
@@ -28,6 +28,8 @@ public class Config {
 
     public int maxWaypointRadius = 0;
     public boolean showBonfireWaypoint = true;
+    public boolean ghostSeekDistanceHint = true;
+    public int ghostSeekBreadcrumbDuration = 300;
 
     public Screen createScreen(Screen parent) {
         return YetAnotherConfigLib.createBuilder()
@@ -60,6 +62,42 @@ public class Config {
                     .binding(DEFAULTS.showBonfireWaypoint, () -> showBonfireWaypoint, val -> showBonfireWaypoint = val)
                     .controller(TickBoxControllerBuilder::create)
                     .build())
+
+                .group(OptionGroup.createBuilder()
+                    .name(Text.literal("Ghost Seek"))
+
+                    .option(Option.<Boolean>createBuilder()
+                        .name(Text.literal("Distance Hints"))
+                        .description(OptionDescription.of(Text.literal(
+                            """
+                            If enabled, displays the approximate distance from a praying skeleton in the action bar when you get a ghost seek ping
+                            
+                            Example:
+                            du dum (75m ± 25m)
+                            """
+                        )))
+                        .binding(DEFAULTS.ghostSeekDistanceHint, () -> ghostSeekDistanceHint, val -> ghostSeekDistanceHint = val)
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
+
+                    .option(Option.<Integer>createBuilder()
+                        .name(Text.literal("Breadcrumb Duration"))
+                        .description(OptionDescription.of(Text.literal(
+                            """
+                            How long ghost seek breadcrumbs remain visible before disappearing.
+                            
+                            Set to 0 to disable ghost seek breadcrumbs.
+                            """
+                        )))
+                        .binding(DEFAULTS.ghostSeekBreadcrumbDuration, () -> ghostSeekBreadcrumbDuration, val -> ghostSeekBreadcrumbDuration = val)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                            .formatValue(val -> Text.literal(String.format("%ds", val)))
+                            .step(5)
+                            .range(0, 3_600))
+                        .build())
+
+                    .build())
+
                 .build())
 
             .save(this::saveToFile)

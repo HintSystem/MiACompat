@@ -1,8 +1,7 @@
 package dev.hintsystem.miacompat;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
+import dev.hintsystem.miacompat.mods.SupportIris;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.entity.decoration.DisplayEntity;
@@ -13,6 +12,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.ActionResult;
 
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.api.ClientModInitializer;
@@ -33,6 +37,9 @@ public class MiACompat implements ClientModInitializer {
 
     public static Config config = new Config();
 
+    public static final GhostSeekTracker ghostSeekTracker = new GhostSeekTracker();
+    private static final GhostSeekRenderer ghostSeekRenderer = new GhostSeekRenderer(ghostSeekTracker);
+
     public static boolean isMiAServer() {
         ServerInfo serverInfo = MinecraftClient.getInstance().getCurrentServerEntry();
         return serverInfo != null && serverInfo.address.contains("mineinabyss");
@@ -40,14 +47,19 @@ public class MiACompat implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+        if (FabricLoader.getInstance().isModLoaded("iris")) SupportIris.assignPipelines();
+
         config.loadFromFile();
         BonfireTracker.loadFromFile();
 
         MinecraftClient client = MinecraftClient.getInstance();
 
-        ClientTickEvents.END_CLIENT_TICK.register((c) -> {
+        ClientTickEvents.END_CLIENT_TICK.register(c -> {
             BonfireTracker.tick();
+            ghostSeekTracker.tick(c);
         });
+
+        WorldRenderEvents.BEFORE_DEBUG_RENDER.register(this::onRenderWorld);
 
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             if (!world.isClient || !(entity instanceof InteractionEntity interaction)) return ActionResult.PASS;
@@ -63,11 +75,19 @@ public class MiACompat implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 
             dispatcher.register(ClientCommandManager.literal("miacompat")
+
                 .then(ClientCommandManager.literal("config")
                     .executes(context -> {
                         client.send(() -> client.setScreen(config.createScreen(null)));
                         return 1;
                     }))
+
+                .then(ClientCommandManager.literal("clear_breadcrumbs")
+                    .executes(context -> {
+                        ghostSeekTracker.clearMeasurements();
+                        return 1;
+                    }))
+
                 .then(ClientCommandManager.literal("bonfire")
                     .executes(context -> {
                         var bonfire = BonfireTracker.bonfireData;
@@ -126,4 +146,12 @@ public class MiACompat implements ClientModInitializer {
 
         });
 	}
+
+    private void onRenderWorld(WorldRenderContext context) {
+        ghostSeekRenderer.render(context);
+    }
+
+    public static void close() {
+        ghostSeekRenderer.close();
+    }
 }

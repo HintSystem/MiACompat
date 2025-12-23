@@ -3,6 +3,8 @@
     "package": "dev.hintsystem.miacompat.mixin",
     "compatibilityLevel": "JAVA_21",
     "client": [
+        "GameRendererMixin",
+        "HudMixin",
         "MessageHandlerMixin",
         "pingwheel.PingLocationS2CPacketMixin",
         "xaerosminimap.InfoDisplaysMixin",
