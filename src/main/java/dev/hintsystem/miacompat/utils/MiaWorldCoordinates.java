@@ -4,8 +4,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class MiaWorldCoordinates {
-    private static final int LAYER_HEIGHT = 480;
-    private static final int X_SHIFT = 16384;
+    public static final int LAYER_HEIGHT = 480;
+    public static final int X_SHIFT = 16384;
 
     public static int layerFromX(int x) {
         return Math.floorDiv(x - Math.floorDiv(X_SHIFT, 2), X_SHIFT) + 1;

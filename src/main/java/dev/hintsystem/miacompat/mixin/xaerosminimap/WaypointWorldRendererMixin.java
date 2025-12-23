@@ -61,9 +61,9 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
         super(elementReader, provider, context);
     }
 
-    // Inject at the start of preRender - runs once per frame before all waypoints are rendered
-    @Inject(method = "preRender", at = @At("HEAD"))
-    public void beforePreRender(MinimapElementRenderInfo renderInfo, VertexConsumerProvider.Immediate vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
+    // Inject at the end of preRender - runs once per frame before all waypoints are rendered
+    @Inject(method = "preRender", at = @At("TAIL"))
+    public void afterPreRender(MinimapElementRenderInfo renderInfo, VertexConsumerProvider.Immediate vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                 CallbackInfo ci) {
         SupportXaerosMinimap.setInWorldRenderer(true);
     }
