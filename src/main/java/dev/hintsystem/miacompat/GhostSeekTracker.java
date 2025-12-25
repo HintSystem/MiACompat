@@ -6,6 +6,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.dynamic.Range;
 import net.minecraft.util.math.Vec3d;
 
 import org.jetbrains.annotations.Nullable;
@@ -63,10 +64,11 @@ public class GhostSeekTracker {
         GhostSeekType type = getGhostSeekType();
         if (type == null) return null;
 
+        Range<Integer> pingRange = type.getPingRange(pingLength);
         Measurement measurement = type.getPingMeasurement(player.getPos(), pingLength);
         addMeasurement(measurement);
 
-        String range = "%.0fm ± %.0fm".formatted(measurement.distance, measurement.uncertainty);
+        String range = "%d-%d blocks".formatted(pingRange.minInclusive(), pingRange.maxInclusive());
         MiACompat.LOGGER.info("Ghost seek ping: {}, range: {}", pingLength, range);
 
         if (!MiACompat.config.ghostSeekDistanceHint) return null;
@@ -114,7 +116,8 @@ public class GhostSeekTracker {
 
     public enum GhostSeekType {
         MAKESHIFT("makeshift", new int[] {150, 100, 50, 25}),
-        REPAIRED("repaired", new int[] {200, 150, 100, 50, 25});
+        REPAIRED("repaired", new int[] {200, 150, 100, 50, 25}),
+        REFINED("refined", new int[] {250, 150, 100, 50, 25});
 
         private final String itemName;
         private final int[] ranges;
@@ -126,13 +129,19 @@ public class GhostSeekTracker {
 
         public int getMaxRange() { return ranges[0]; }
 
-        public Measurement getPingMeasurement(Vec3d pos, int pingLength) {
+        public Range<Integer> getPingRange(int pingLength) {
             int rangeIndex = Math.clamp(pingLength - 1, 0, ranges.length - 1);
-            int maxDistance = ranges[rangeIndex];
             int minDistance = (rangeIndex < ranges.length - 1) ? ranges[rangeIndex + 1] : 0;
+            int maxDistance = ranges[rangeIndex];
 
-            double midDistance = (maxDistance + minDistance) / 2.0;
-            double uncertainty = (maxDistance - minDistance) / 2.0;
+            return new Range<>(minDistance, maxDistance);
+        }
+
+        public Measurement getPingMeasurement(Vec3d pos, int pingLength) {
+            Range<Integer> pingRange = getPingRange(pingLength);
+
+            double midDistance = (pingRange.maxInclusive() + pingRange.minInclusive()) / 2.0;
+            double uncertainty = (pingRange.maxInclusive() - pingRange.minInclusive()) / 2.0;
 
             return new Measurement(pos, midDistance, uncertainty);
         }

@@ -73,7 +73,7 @@ public class Config {
                             If enabled, displays the approximate distance from a praying skeleton in the action bar when you get a ghost seek ping
                             
                             Example:
-                            du dum (75m ± 25m)
+                            dum tick (100-150 blocks)
                             """
                         )))
                         .binding(DEFAULTS.ghostSeekDistanceHint, () -> ghostSeekDistanceHint, val -> ghostSeekDistanceHint = val)

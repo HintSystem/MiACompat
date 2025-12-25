@@ -55,7 +55,7 @@ public class MiACompat implements ClientModInitializer {
         MinecraftClient client = MinecraftClient.getInstance();
 
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
-            BonfireTracker.tick();
+            BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
         });
 

@@ -1,9 +1,6 @@
 package dev.hintsystem.miacompat;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.Entity;
@@ -11,12 +8,17 @@ import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3i;
-import org.jetbrains.annotations.Nullable;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,8 +46,29 @@ public class BonfireTracker {
         public BlockPos getBlockPos() { return new BlockPos(x, y, z); }
     }
 
-    public static void tick() {
-        updateBonfireState();
+    public static void tick(MinecraftClient client) {
+        boolean isBonfireTracked = updateTrackedBonfireState();
+
+        // Update untracked bonfire
+        if (!isBonfireTracked && MiACompat.isMiAServer()) {
+            if (client.world == null || client.player == null) return;
+
+            int blockViewDistance = client.options.getClampedViewDistance() * 16;
+            double bonfireSquaredDistance = bonfireData.getBlockPos().getSquaredDistance(client.player.getPos());
+
+            // Check if bonfire is close enough to be loaded
+            if (bonfireSquaredDistance < blockViewDistance * blockViewDistance) {
+                DisplayEntity.ItemDisplayEntity bonfire = findBonfire(
+                    client.world.getOtherEntities(client.player, new Box(bonfireData.getBlockPos()))
+                );
+
+                if (bonfire != null) {
+                    setTrackedBonfire(bonfire);
+                } else {
+                    setBonfireStatus(false);
+                }
+            }
+        }
     }
 
     public static void onServerMessage(Text message) {
@@ -61,14 +84,14 @@ public class BonfireTracker {
 
     public static void setTrackedBonfire(DisplayEntity.ItemDisplayEntity bonfireEntity) {
         trackedBonfireEntity = bonfireEntity;
-        updateBonfireState();
+        updateTrackedBonfireState();
     }
 
-    public static void updateBonfireState() {
-        if (trackedBonfireEntity == null) return;
+    public static boolean updateTrackedBonfireState() {
+        if (trackedBonfireEntity == null) return false;
         if (trackedBonfireEntity.isRemoved()) {
             trackedBonfireEntity = null;
-            return;
+            return false;
         }
 
         CustomModelDataComponent modelData = trackedBonfireEntity.getItemStack().get(DataComponentTypes.CUSTOM_MODEL_DATA);
@@ -76,6 +99,7 @@ public class BonfireTracker {
         bonfireData.setPos(trackedBonfireEntity.getBlockPos());
 
         setBonfireStatus(isBonfireSet);
+        return true;
     }
 
     public static void setBonfireStatus(boolean isBonfireSet) {
@@ -90,6 +114,11 @@ public class BonfireTracker {
         }
     }
 
+    public static boolean isBonfireId(Identifier modelId) {
+        return modelId.getNamespace().equals("mineinabyss")
+            && modelId.getPath().contains("bonfire");
+    }
+
     @Nullable
     public static DisplayEntity.ItemDisplayEntity findBonfire(List<Entity> entityList) {
         for (Entity entity : entityList) {
@@ -97,9 +126,7 @@ public class BonfireTracker {
                 ItemStack stack = displayEntity.getItemStack();
                 Identifier itemModel = stack.get(DataComponentTypes.ITEM_MODEL);
 
-                if (itemModel != null && itemModel.equals(Identifier.of("mineinabyss", "bonfire"))) {
-                    return displayEntity;
-                }
+                if (itemModel != null && isBonfireId(itemModel)) return displayEntity;
             }
         }
 
