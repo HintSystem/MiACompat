@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat;
 
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.MappableRingBuffer;
@@ -9,7 +9,7 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3d;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
@@ -20,6 +20,9 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
@@ -39,7 +42,7 @@ public class GhostSeekRenderer {
             .build()
     );
 
-    private static final BufferAllocator allocator = new BufferAllocator(RenderLayer.CUTOUT_BUFFER_SIZE);
+    private static final BufferAllocator allocator = new BufferAllocator(1024);
     private static final Vector4f COLOR_MODULATOR = new Vector4f(1f, 1f, 1f, 1f);
 
     private final GhostSeekTracker ghostSeekTracker;
@@ -57,9 +60,9 @@ public class GhostSeekRenderer {
     }
 
     public boolean isOverlayEnabled() {
-        return overlayEnabled
-            && MiACompat.config.ghostSeekBreadcrumbDuration > 0
-            && ghostSeekTracker.getGhostSeekType() != null;
+        return overlayEnabled;
+//            && MiACompat.config.ghostSeekBreadcrumbDuration > 0
+//            && ghostSeekTracker.getGhostSeekType() != null;
     }
 
     public void render(WorldRenderContext context) {
@@ -79,10 +82,9 @@ public class GhostSeekRenderer {
     }
 
     private void extractRenderData(WorldRenderContext context) {
-        MatrixStack matrices = context.matrixStack();
-        Vec3d camera = context.camera().getCameraPos();
+        MatrixStack matrices = context.matrices();
+        Vec3d camera = context.worldState().cameraRenderState.pos;
 
-        assert matrices != null;
         matrices.push();
         matrices.translate(-camera.x, -camera.y, -camera.z);
 
@@ -96,23 +98,32 @@ public class GhostSeekRenderer {
         for (GhostSeekTracker.Measurement m : measurements) {
             float normalizedDistance = (float) Math.min((m.distance + m.uncertainty) / maxDistance, 1.0);
 
-            VertexRendering.drawBox(matrices, buffer, createCenteredBox(m.position, 0.5), 1.0f, 1.0f - normalizedDistance, 0.0f, 0.6f);
+            drawBeam(buffer, matrices.peek().getPositionMatrix(), m.position, 1, 1.0f - normalizedDistance, 1, 0.5f);
+
+            VertexRendering.drawOutline(matrices, buffer, createCenteredBox(m.position, 0.5), 0, 0, 0,
+                ColorHelper.fromFloats(1, 1, 1.0f - normalizedDistance, 0), LINE_WIDTH);
         }
 
         matrices.pop();
     }
 
-    private Box createCenteredBox(Vec3d center, double size) {
+    private VoxelShape createCenteredBox(Vec3d center, double size) {
         return createCenteredBox(center, size, size);
     }
 
-    private Box createCenteredBox(Vec3d center, double width, double height) {
+    private VoxelShape createCenteredBox(Vec3d center, double width, double height) {
         double halfWidth = width / 2.0;
         double halfHeight = height / 2.0;
-        return new Box(
+        return VoxelShapes.cuboid(
             center.x - halfWidth, center.y - halfHeight, center.z - halfWidth,
             center.x + halfWidth, center.y + halfHeight, center.z + halfWidth
         );
+    }
+
+    private void drawBeam(BufferBuilder buffer, Matrix4f matrix, Vec3d pos,
+                          float r, float g, float b, float a) {
+        buffer.vertex(matrix, (float)pos.x, -64, (float)pos.z).color(r, g, b, a).normal(0, 1, 0).lineWidth(LINE_WIDTH);
+        buffer.vertex(matrix, (float)pos.x, 320, (float)pos.z).color(r, g, b, a).normal(0, 1, 0).lineWidth(LINE_WIDTH);
     }
 
     private void drawThroughWalls(MinecraftClient client) {
@@ -152,7 +163,7 @@ public class GhostSeekRenderer {
         VertexFormat.IndexType indexType = shapeIndexBuffer.getIndexType();
 
         GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-            .write(RenderSystem.getModelViewMatrix(), COLOR_MODULATOR, new Vector3f(), RenderSystem.getTextureMatrix(), LINE_WIDTH);
+            .write(RenderSystem.getModelViewMatrix(), COLOR_MODULATOR, new Vector3f(), new Matrix4f());
 
         try (RenderPass renderPass = RenderSystem.getDevice()
             .createCommandEncoder()

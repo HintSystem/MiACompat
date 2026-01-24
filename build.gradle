@@ -40,20 +40,44 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    xaeroLib
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-    modImplementation "dev.isxander:yet-another-config-lib:3.7.1+1.21.6-fabric"
-    modImplementation "com.terraformersmc:modmenu:15.0.0"
+    modImplementation "dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric"
+    modImplementation "com.terraformersmc:modmenu:17.0.0-beta.2"
 
-    modImplementation 'maven.modrinth:ping-wheel:1.12.0-fabric,1.21.8'
+    modImplementation 'maven.modrinth:ping-wheel:1.12.1-fabric,1.21.11'
 
-    modImplementation 'maven.modrinth:xaeros-minimap:25.2.12_Fabric_1.21.8'
-    modImplementation 'maven.modrinth:xaeros-world-map:1.39.13_Fabric_1.21.8'
+    modImplementation 'maven.modrinth:xaeros-minimap:fabric-1.21.11-25.3.5'
+    modImplementation 'maven.modrinth:xaeros-world-map:fabric-1.21.11-1.40.6'
+
+    xaeroLib 'maven.modrinth:xaeros-minimap:fabric-1.21.11-25.3.5'
+}
+
+// Extract xaerolib jar-in-jar dependency
+def xaeroLibDir = 'build/xaerolib'
+copy {
+    from(zipTree(configurations.xaeroLib.singleFile)) {
+        include 'META-INF/jars/xaerolib-*.jar'
+        eachFile { fcd ->
+            fcd.path = fcd.name
+        }
+    }
+    into xaeroLibDir
+    includeEmptyDirs = false
+}
+
+dependencies {
+    def libJar = fileTree(xaeroLibDir).matching { include '*.jar' }.singleFile
+    modImplementation files(libJar)
 }
 
 processResources {
@@ -107,7 +131,7 @@ publishMods {
     modrinth {
         accessToken = project.findProperty("MODRINTH_API_KEY") ?: providers.environmentVariable("MODRINTH_API_KEY")
         projectId = "Jmct2KwW"
-        minecraftVersions.addAll("1.21.8")
+        minecraftVersions.addAll("1.21.11")
 
         requires("fabric-api")
         requires("yacl")

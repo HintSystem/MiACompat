@@ -4,8 +4,8 @@ import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
 
 import xaero.hud.minimap.info.InfoDisplay;
 import xaero.hud.minimap.info.InfoDisplays;
-import xaero.hud.minimap.info.codec.InfoDisplayCommonStateCodecs;
 import xaero.hud.minimap.info.widget.InfoDisplayCommonWidgetFactories;
+import xaero.lib.common.config.option.value.io.serialization.BuiltInConfigValueIOCodecs;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -26,9 +26,9 @@ public class InfoDisplaysMixin {
         self.getManager().add(
             InfoDisplay.Builder.<Boolean>begin()
                 .setId("mia_coords").setName(Text.literal("MiA Coordinates"))
-                .setDefaultState(true).setCodec(InfoDisplayCommonStateCodecs.BOOLEAN).setWidgetFactory(InfoDisplayCommonWidgetFactories.OFF_ON)
+                .setDefaultState(true).setCodec(BuiltInConfigValueIOCodecs.BOOLEAN).setWidgetFactory(InfoDisplayCommonWidgetFactories.OFF_ON)
                 .setCompiler((displayInfo, compiler, session, availableWidth, playerPos) -> {
-                    if (displayInfo.getState()) {
+                    if (displayInfo.getEffectiveState()) {
                         BlockPos MiAPos = MiaWorldCoordinates.unwrap(playerPos);
                         String coords = MiAPos.getX() + ", " + MiAPos.getY() + ", " + MiAPos.getZ();
 

@@ -22,6 +22,6 @@ public class PingLocationS2CPacketMixin {
         if (player == null) { return; }
 
         Vec3d original = cir.getReturnValue();
-        cir.setReturnValue(MiaWorldCoordinates.relativizeWrapped(player.getPos(), original));
+        cir.setReturnValue(MiaWorldCoordinates.relativizeWrapped(player.getEntityPos(), original));
     }
 }

@@ -4,11 +4,8 @@ import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
 
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
 
 import xaero.common.graphics.renderer.multitexture.MultiTextureRenderTypeRendererProvider;
 import xaero.common.minimap.waypoints.Waypoint;
@@ -16,8 +13,8 @@ import xaero.hud.minimap.element.render.*;
 import xaero.hud.minimap.waypoint.WaypointPurpose;
 import xaero.hud.minimap.waypoint.render.world.WaypointWorldRenderContext;
 import xaero.hud.minimap.waypoint.render.world.WaypointWorldRenderer;
+import xaero.lib.client.graphics.XaeroBufferProvider;
 
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,27 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import org.joml.Matrix4f;
 
-@Mixin(WaypointWorldRenderer.class)
+@Mixin(value = WaypointWorldRenderer.class, remap = false)
 public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<Waypoint, WaypointWorldRenderContext> {
-    @Unique
-    private static final Identifier BONFIRE_ICON_TEXTURE = Identifier.of(MiACompat.MOD_ID, "textures/gui/bonfire_icon.png");
-
-    @Unique
-    private static final RenderLayer BONFIRE_ICON = RenderLayer.of(
-        "xaero_bonfire",
-        786432,
-        false,
-        false,
-        RenderPipelines.GUI_TEXTURED,
-        RenderLayer.MultiPhaseParameters.builder()
-            .texture(new RenderPhase.Texture(BONFIRE_ICON_TEXTURE, false))
-            .target(RenderPhase.MAIN_TARGET)
-            .build(false)
-    );
-
-    @Unique
-    private static final VertexConsumerProvider.Immediate BONFIRE_CONSUMER = VertexConsumerProvider.immediate(new BufferAllocator(256));
-
     @Shadow(remap = false)
     private boolean dimensionScaleDistance;
     @Shadow(remap = false)
@@ -118,12 +96,7 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
 
     @Inject(method = "renderIcon", at = @At("HEAD"), cancellable = true)
     private void renderBonfireIcon(
-        Waypoint w,
-        boolean highlight,
-        MatrixStack matrixStack,
-        TextRenderer fontRenderer,
-        VertexConsumerProvider.Immediate bufferSource,
-        CallbackInfo ci
+        Waypoint w, boolean highlight, MatrixStack matrixStack, TextRenderer fontRenderer, XaeroBufferProvider bufferSource, CallbackInfo ci
     ) {
         if (!"Bonfire".equals(w.getName())) return;
 
@@ -145,14 +118,12 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
         waypointBackgroundConsumer.vertex(matrix, halfSize, 0.0F, 0.0F).color(r, g, b, a);
         waypointBackgroundConsumer.vertex(matrix, halfSize, -size, 0.0F).color(r, g, b, a);
 
-        VertexConsumer vertexConsumer = BONFIRE_CONSUMER.getBuffer(BONFIRE_ICON);
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(SupportXaerosMinimap.GUI_BONFIRE);
 
-        vertexConsumer.vertex(matrix, -halfSize, -size, 0.0F).color(240, 240, 240, 255).texture(0f, 0f);
-        vertexConsumer.vertex(matrix, -halfSize,  0, 0.0F).color(240, 240, 240, 255).texture(0f, 1f);
-        vertexConsumer.vertex(matrix,  halfSize,  0, 0.0F).color(240, 240, 240, 255).texture(1f, 1f);
-        vertexConsumer.vertex(matrix,  halfSize, -size, 0.0F).color(240, 240, 240, 255).texture(1f, 0f);
-
-        BONFIRE_CONSUMER.draw();
+        vertexConsumer.vertex(matrix, -halfSize, -size, 0.0F).texture(0f, 0f).color(240, 240, 240, 255);
+        vertexConsumer.vertex(matrix, -halfSize,  0, 0.0F).texture(0f, 1f).color(240, 240, 240, 255);
+        vertexConsumer.vertex(matrix,  halfSize,  0, 0.0F).texture(1f, 1f).color(240, 240, 240, 255);
+        vertexConsumer.vertex(matrix,  halfSize, -size, 0.0F).texture(1f, 0f).color(240, 240, 240, 255);
 
         ci.cancel();
     }

@@ -65,7 +65,7 @@ public class GhostSeekTracker {
         if (type == null) return null;
 
         Range<Integer> pingRange = type.getPingRange(pingLength);
-        Measurement measurement = type.getPingMeasurement(player.getPos(), pingLength);
+        Measurement measurement = type.getPingMeasurement(player.getEntityPos(), pingLength);
         addMeasurement(measurement);
 
         String range = "%d-%d blocks".formatted(pingRange.minInclusive(), pingRange.maxInclusive());

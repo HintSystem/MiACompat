@@ -4,8 +4,13 @@ import dev.hintsystem.miacompat.mods.SupportIris;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.Window;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.decoration.InteractionEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -14,13 +19,14 @@ import net.minecraft.util.ActionResult;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.api.ClientModInitializer;
 
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
@@ -40,6 +46,8 @@ public class MiACompat implements ClientModInitializer {
     public static final GhostSeekTracker ghostSeekTracker = new GhostSeekTracker();
     private static final GhostSeekRenderer ghostSeekRenderer = new GhostSeekRenderer(ghostSeekTracker);
 
+    private static boolean wasDebugKeyDown = false;
+
     public static boolean isMiAServer() {
         ServerInfo serverInfo = MinecraftClient.getInstance().getCurrentServerEntry();
         return serverInfo != null && serverInfo.address.contains("mineinabyss");
@@ -57,12 +65,22 @@ public class MiACompat implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
+
+
+            Window window = c.getWindow();
+            boolean debugKeyDown = InputUtil.isKeyPressed(window, InputUtil.GLFW_KEY_V);
+
+            if (debugKeyDown && !wasDebugKeyDown && c.world != null && c.player != null) {
+                ghostSeekTracker.addMeasurement(new GhostSeekTracker.Measurement(c.player.getEntityPos(), 100, 5));
+                LOGGER.info("KEY PRESSED (V)");
+            }
+            wasDebugKeyDown = debugKeyDown;
         });
 
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(this::onRenderWorld);
 
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (!world.isClient || !(entity instanceof InteractionEntity interaction)) return ActionResult.PASS;
+            if (!world.isClient() || !(entity instanceof InteractionEntity interaction)) return ActionResult.PASS;
 
             DisplayEntity.ItemDisplayEntity bonfire = BonfireTracker.findBonfire(
                 world.getOtherEntities(player, interaction.getBoundingBox().expand(0.5))

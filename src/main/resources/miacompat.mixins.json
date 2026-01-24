@@ -7,6 +7,7 @@
         "HudMixin",
         "MessageHandlerMixin",
         "pingwheel.PingLocationS2CPacketMixin",
+        "xaerosminimap.CustomRenderTypesMixin",
         "xaerosminimap.InfoDisplaysMixin",
         "xaerosminimap.PlayerTrackerMinimapElementMixin",
         "xaerosminimap.PlayerTrackerMinimapElementRendererMixin",

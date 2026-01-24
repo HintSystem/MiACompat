@@ -54,7 +54,7 @@ public class BonfireTracker {
             if (client.world == null || client.player == null) return;
 
             int blockViewDistance = client.options.getClampedViewDistance() * 16;
-            double bonfireSquaredDistance = bonfireData.getBlockPos().getSquaredDistance(client.player.getPos());
+            double bonfireSquaredDistance = bonfireData.getBlockPos().getSquaredDistance(client.player.getEntityPos());
 
             // Check if bonfire is close enough to be loaded
             if (bonfireSquaredDistance < blockViewDistance * blockViewDistance) {
