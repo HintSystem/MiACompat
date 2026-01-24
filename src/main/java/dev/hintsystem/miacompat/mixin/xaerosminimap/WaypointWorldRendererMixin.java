@@ -3,10 +3,6 @@ package dev.hintsystem.miacompat.mixin.xaerosminimap;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-
 import xaero.common.graphics.renderer.multitexture.MultiTextureRenderTypeRendererProvider;
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.hud.minimap.element.render.*;
@@ -14,6 +10,11 @@ import xaero.hud.minimap.waypoint.WaypointPurpose;
 import xaero.hud.minimap.waypoint.render.world.WaypointWorldRenderContext;
 import xaero.hud.minimap.waypoint.render.world.WaypointWorldRenderer;
 import xaero.lib.client.graphics.XaeroBufferProvider;
+
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -41,20 +42,20 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
 
     // Inject at the end of preRender - runs once per frame before all waypoints are rendered
     @Inject(method = "preRender", at = @At("TAIL"))
-    public void afterPreRender(MinimapElementRenderInfo renderInfo, VertexConsumerProvider.Immediate vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
+    public void afterPreRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                 CallbackInfo ci) {
         SupportXaerosMinimap.setInWorldRenderer(true);
     }
 
     // Inject at the start of postRender - runs once per frame after all waypoints are rendered
     @Inject(method = "postRender", at = @At("HEAD"))
-    public void beforePostRender(MinimapElementRenderInfo renderInfo, VertexConsumerProvider.Immediate vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
+    public void beforePostRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                  CallbackInfo ci) {
         SupportXaerosMinimap.setInWorldRenderer(false);
     }
 
     @Inject(
-        method = "renderElement(Lxaero/common/minimap/waypoints/Waypoint;ZZDFDDLxaero/hud/minimap/element/render/MinimapElementRenderInfo;Lxaero/hud/minimap/element/render/MinimapElementGraphics;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;)Z",
+        method = "renderElement(Lxaero/common/minimap/waypoints/Waypoint;ZZDFDDLxaero/hud/minimap/element/render/MinimapElementRenderInfo;Lxaero/hud/minimap/element/render/MinimapElementGraphics;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)Z",
         at = @At("HEAD"),
         cancellable = true
     )
@@ -68,7 +69,7 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
         double partialY,
         MinimapElementRenderInfo renderInfo,
         MinimapElementGraphics guiGraphics,
-        VertexConsumerProvider.Immediate vanillaBufferSource,
+        MultiBufferSource.BufferSource vanillaBufferSource,
         CallbackInfoReturnable<Boolean> cir
     ) {
         if (MiACompat.config.maxWaypointRadius <= 0) return;
@@ -96,7 +97,7 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
 
     @Inject(method = "renderIcon", at = @At("HEAD"), cancellable = true)
     private void renderBonfireIcon(
-        Waypoint w, boolean highlight, MatrixStack matrixStack, TextRenderer fontRenderer, XaeroBufferProvider bufferSource, CallbackInfo ci
+        Waypoint w, boolean highlight, PoseStack matrixStack, Font fontRenderer, XaeroBufferProvider bufferSource, CallbackInfo ci
     ) {
         if (!"Bonfire".equals(w.getName())) return;
 
@@ -112,18 +113,18 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
         float halfSize = 8f;
         float size = halfSize*2;
 
-        Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-        waypointBackgroundConsumer.vertex(matrix, -halfSize, -size, 0.0F).color(r, g, b, a);
-        waypointBackgroundConsumer.vertex(matrix, -halfSize, 0.0F, 0.0F).color(r, g, b, a);
-        waypointBackgroundConsumer.vertex(matrix, halfSize, 0.0F, 0.0F).color(r, g, b, a);
-        waypointBackgroundConsumer.vertex(matrix, halfSize, -size, 0.0F).color(r, g, b, a);
+        Matrix4f matrix = matrixStack.last().pose();
+        waypointBackgroundConsumer.addVertex(matrix, -halfSize, -size, 0.0F).setColor(r, g, b, a);
+        waypointBackgroundConsumer.addVertex(matrix, -halfSize, 0.0F, 0.0F).setColor(r, g, b, a);
+        waypointBackgroundConsumer.addVertex(matrix, halfSize, 0.0F, 0.0F).setColor(r, g, b, a);
+        waypointBackgroundConsumer.addVertex(matrix, halfSize, -size, 0.0F).setColor(r, g, b, a);
 
         VertexConsumer vertexConsumer = bufferSource.getBuffer(SupportXaerosMinimap.GUI_BONFIRE);
 
-        vertexConsumer.vertex(matrix, -halfSize, -size, 0.0F).texture(0f, 0f).color(240, 240, 240, 255);
-        vertexConsumer.vertex(matrix, -halfSize,  0, 0.0F).texture(0f, 1f).color(240, 240, 240, 255);
-        vertexConsumer.vertex(matrix,  halfSize,  0, 0.0F).texture(1f, 1f).color(240, 240, 240, 255);
-        vertexConsumer.vertex(matrix,  halfSize, -size, 0.0F).texture(1f, 0f).color(240, 240, 240, 255);
+        vertexConsumer.addVertex(matrix, -halfSize, -size, 0.0F).setUv(0f, 0f).setColor(240, 240, 240, 255);
+        vertexConsumer.addVertex(matrix, -halfSize,  0, 0.0F).setUv(0f, 1f).setColor(240, 240, 240, 255);
+        vertexConsumer.addVertex(matrix,  halfSize,  0, 0.0F).setUv(1f, 1f).setColor(240, 240, 240, 255);
+        vertexConsumer.addVertex(matrix,  halfSize, -size, 0.0F).setUv(1f, 0f).setColor(240, 240, 240, 255);
 
         ci.cancel();
     }

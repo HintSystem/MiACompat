@@ -2,7 +2,7 @@ package dev.hintsystem.miacompat.mixin;
 
 import dev.hintsystem.miacompat.MiACompat;
 
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.renderer.GameRenderer;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

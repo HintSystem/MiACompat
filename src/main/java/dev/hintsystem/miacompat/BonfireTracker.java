@@ -1,34 +1,33 @@
 package dev.hintsystem.miacompat;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomModelDataComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3i;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.phys.AABB;
 
 import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class BonfireTracker {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path SAVE_PATH = MiACompat.CONFIG_DIR.resolve(MiACompat.MOD_ID + "-bonfire.json");
 
-    public static DisplayEntity.ItemDisplayEntity trackedBonfireEntity;
+    public static Display.ItemDisplay trackedBonfireEntity;
     public static BonfireData bonfireData = new BonfireData();
 
     public static class BonfireData {
@@ -46,20 +45,20 @@ public class BonfireTracker {
         public BlockPos getBlockPos() { return new BlockPos(x, y, z); }
     }
 
-    public static void tick(MinecraftClient client) {
+    public static void tick(Minecraft client) {
         boolean isBonfireTracked = updateTrackedBonfireState();
 
         // Update untracked bonfire
         if (!isBonfireTracked && MiACompat.isMiAServer()) {
-            if (client.world == null || client.player == null) return;
+            if (client.level == null || client.player == null) return;
 
-            int blockViewDistance = client.options.getClampedViewDistance() * 16;
-            double bonfireSquaredDistance = bonfireData.getBlockPos().getSquaredDistance(client.player.getEntityPos());
+            int blockViewDistance = client.options.getEffectiveRenderDistance() * 16;
+            double bonfireSquaredDistance = bonfireData.getBlockPos().distToCenterSqr(client.player.position());
 
             // Check if bonfire is close enough to be loaded
             if (bonfireSquaredDistance < blockViewDistance * blockViewDistance) {
-                DisplayEntity.ItemDisplayEntity bonfire = findBonfire(
-                    client.world.getOtherEntities(client.player, new Box(bonfireData.getBlockPos()))
+                Display.ItemDisplay bonfire = findBonfire(
+                    client.level.getEntities(client.player, new AABB(bonfireData.getBlockPos()))
                 );
 
                 if (bonfire != null) {
@@ -71,7 +70,7 @@ public class BonfireTracker {
         }
     }
 
-    public static void onServerMessage(Text message) {
+    public static void onServerMessage(Component message) {
         if (trackedBonfireEntity != null) return;
 
         String msg = message.getString().toLowerCase();
@@ -82,7 +81,7 @@ public class BonfireTracker {
         }
     }
 
-    public static void setTrackedBonfire(DisplayEntity.ItemDisplayEntity bonfireEntity) {
+    public static void setTrackedBonfire(Display.ItemDisplay bonfireEntity) {
         trackedBonfireEntity = bonfireEntity;
         updateTrackedBonfireState();
     }
@@ -94,9 +93,9 @@ public class BonfireTracker {
             return false;
         }
 
-        CustomModelDataComponent modelData = trackedBonfireEntity.getItemStack().get(DataComponentTypes.CUSTOM_MODEL_DATA);
+        CustomModelData modelData = trackedBonfireEntity.getItemStack().get(DataComponents.CUSTOM_MODEL_DATA);
         boolean isBonfireSet = modelData != null && modelData.flags().size() >= 2 && modelData.flags().get(1);
-        bonfireData.setPos(trackedBonfireEntity.getBlockPos());
+        bonfireData.setPos(trackedBonfireEntity.blockPosition());
 
         setBonfireStatus(isBonfireSet);
         return true;
@@ -104,13 +103,13 @@ public class BonfireTracker {
 
     public static void setBonfireStatus(boolean isBonfireSet) {
         if (bonfireData.isBonfireSet != isBonfireSet) {
-            if (isBonfireSet) bonfireData.lastSetTimestamp = Util.getEpochTimeMs();
+            if (isBonfireSet) bonfireData.lastSetTimestamp = Util.getEpochMillis();
             bonfireData.isBonfireSet = isBonfireSet;
             saveToFile();
 
             MiACompat.LOGGER.info("[MiACompat] Bonfire {} detected! ({})",
                 isBonfireSet ? "spawn point set" : "spawn point remove",
-                trackedBonfireEntity != null ? trackedBonfireEntity.getItemStack().get(DataComponentTypes.CUSTOM_MODEL_DATA) : null);
+                trackedBonfireEntity != null ? trackedBonfireEntity.getItemStack().get(DataComponents.CUSTOM_MODEL_DATA) : null);
         }
     }
 
@@ -120,11 +119,11 @@ public class BonfireTracker {
     }
 
     @Nullable
-    public static DisplayEntity.ItemDisplayEntity findBonfire(List<Entity> entityList) {
+    public static Display.ItemDisplay findBonfire(List<Entity> entityList) {
         for (Entity entity : entityList) {
-            if (entity instanceof DisplayEntity.ItemDisplayEntity displayEntity) {
+            if (entity instanceof Display.ItemDisplay displayEntity) {
                 ItemStack stack = displayEntity.getItemStack();
-                Identifier itemModel = stack.get(DataComponentTypes.ITEM_MODEL);
+                Identifier itemModel = stack.get(DataComponents.ITEM_MODEL);
 
                 if (itemModel != null && isBonfireId(itemModel)) return displayEntity;
             }

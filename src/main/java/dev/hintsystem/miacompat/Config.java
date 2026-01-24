@@ -3,13 +3,8 @@ package dev.hintsystem.miacompat;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 import java.awt.*;
 import java.lang.reflect.Field;
@@ -17,6 +12,10 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class Config {
     private static final Path SAVE_PATH = MiACompat.CONFIG_DIR.resolve(MiACompat.MOD_ID + ".json");
@@ -33,14 +32,14 @@ public class Config {
 
     public Screen createScreen(Screen parent) {
         return YetAnotherConfigLib.createBuilder()
-            .title(Text.literal("PlayerRelayClient Config"))
+            .title(Component.literal("PlayerRelayClient Config"))
 
             .category(ConfigCategory.createBuilder()
-                .name(Text.literal("General"))
+                .name(Component.literal("General"))
 
                 .option(Option.<Integer>createBuilder()
-                    .name(Text.literal("Max Waypoint Distance"))
-                    .description(OptionDescription.of(Text.literal(
+                    .name(Component.literal("Max Waypoint Distance"))
+                    .description(OptionDescription.of(Component.literal(
                         """
                         Defines the maximum distance (in meters) at which waypoints are visible.
                         
@@ -52,23 +51,23 @@ public class Config {
                     )))
                     .binding(DEFAULTS.maxWaypointRadius, () -> maxWaypointRadius, val -> maxWaypointRadius = val)
                     .controller(opt -> IntegerSliderControllerBuilder.create(opt)
-                        .formatValue(val -> Text.literal(String.format("%dm", val)))
+                        .formatValue(val -> Component.literal(String.format("%dm", val)))
                         .step(100)
                         .range(0, 10_000))
                     .build())
 
                 .option(Option.<Boolean>createBuilder()
-                    .name(Text.literal("Show Bonfire Waypoint"))
+                    .name(Component.literal("Show Bonfire Waypoint"))
                     .binding(DEFAULTS.showBonfireWaypoint, () -> showBonfireWaypoint, val -> showBonfireWaypoint = val)
                     .controller(TickBoxControllerBuilder::create)
                     .build())
 
                 .group(OptionGroup.createBuilder()
-                    .name(Text.literal("Ghost Seek"))
+                    .name(Component.literal("Ghost Seek"))
 
                     .option(Option.<Boolean>createBuilder()
-                        .name(Text.literal("Distance Hints"))
-                        .description(OptionDescription.of(Text.literal(
+                        .name(Component.literal("Distance Hints"))
+                        .description(OptionDescription.of(Component.literal(
                             """
                             If enabled, displays the approximate distance from a praying skeleton in the action bar when you get a ghost seek ping
                             
@@ -81,8 +80,8 @@ public class Config {
                         .build())
 
                     .option(Option.<Integer>createBuilder()
-                        .name(Text.literal("Breadcrumb Duration"))
-                        .description(OptionDescription.of(Text.literal(
+                        .name(Component.literal("Breadcrumb Duration"))
+                        .description(OptionDescription.of(Component.literal(
                             """
                             How long ghost seek breadcrumbs remain visible before disappearing.
                             
@@ -91,7 +90,7 @@ public class Config {
                         )))
                         .binding(DEFAULTS.ghostSeekBreadcrumbDuration, () -> ghostSeekBreadcrumbDuration, val -> ghostSeekBreadcrumbDuration = val)
                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
-                            .formatValue(val -> Text.literal(String.format("%ds", val)))
+                            .formatValue(val -> Component.literal(String.format("%ds", val)))
                             .step(5)
                             .range(0, 3_600))
                         .build())

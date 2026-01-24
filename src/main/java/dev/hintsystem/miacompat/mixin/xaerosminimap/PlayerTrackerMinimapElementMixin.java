@@ -6,9 +6,9 @@ import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
 import xaero.hud.minimap.player.tracker.PlayerTrackerMinimapElement;
 import xaero.hud.minimap.player.tracker.system.IRenderedPlayerTracker;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.phys.Vec3;
 
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,28 +25,28 @@ public class PlayerTrackerMinimapElementMixin<P> {
 
     @Inject(method = "getX()D", at = @At("RETURN"), cancellable = true)
     private void modifyGetX(CallbackInfoReturnable<Double> cir) {
-        ClientPlayerEntity clientPlayer = MinecraftClient.getInstance().player;
+        LocalPlayer clientPlayer = Minecraft.getInstance().player;
         if (!SupportXaerosMinimap.isInWorldRenderer() || clientPlayer == null) { return; }
 
         double trackedX = system.getReader().getX(player);
 
         cir.setReturnValue(MiaWorldCoordinates.relativizeWrapped(
-            new Vec3d(clientPlayer.getX(), 0, 0),
-            new Vec3d(trackedX, 0, 0)
-        ).getX());
+            new Vec3(clientPlayer.getX(), 0, 0),
+            new Vec3(trackedX, 0, 0)
+        ).x());
     }
 
     @Inject(method = "getY()D", at = @At("RETURN"), cancellable = true)
     private void modifyGetY(CallbackInfoReturnable<Double> cir) {
-        ClientPlayerEntity clientPlayer = MinecraftClient.getInstance().player;
+        LocalPlayer clientPlayer = Minecraft.getInstance().player;
         if (!SupportXaerosMinimap.isInWorldRenderer() || clientPlayer == null) { return; }
 
         double trackedX = system.getReader().getX(player);
         double trackedY = system.getReader().getY(player);
 
         cir.setReturnValue(MiaWorldCoordinates.relativizeWrapped(
-            new Vec3d(clientPlayer.getX(), clientPlayer.getY(), 0),
-            new Vec3d(trackedX, trackedY, 0)
-        ).getY());
+            new Vec3(clientPlayer.getX(), clientPlayer.getY(), 0),
+            new Vec3(trackedX, trackedY, 0)
+        ).y());
     }
 }

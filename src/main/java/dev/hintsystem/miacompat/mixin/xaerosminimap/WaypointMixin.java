@@ -5,9 +5,9 @@ import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
 
 import xaero.common.minimap.waypoints.Waypoint;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.phys.Vec3;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,21 +41,21 @@ public class WaypointMixin {
 
     @Unique
     private int adjustX() {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         if (!SupportXaerosMinimap.isInWorldRenderer() || player == null) { return this.x; }
 
         return (int)MiaWorldCoordinates.relativizeWrapped(
-            new Vec3d(player.getX(), 0, 0), new Vec3d(this.x, 0, 0)
-        ).getX();
+            new Vec3(player.getX(), 0, 0), new Vec3(this.x, 0, 0)
+        ).x();
     }
 
     @Unique
     private int adjustY() {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         if (!SupportXaerosMinimap.isInWorldRenderer() || player == null) { return this.y; }
 
         return (int)MiaWorldCoordinates.relativizeWrapped(
-            new Vec3d(player.getX(), player.getY(), 0), new Vec3d(this.x, this.y, 0)
-        ).getY();
+            new Vec3(player.getX(), player.getY(), 0), new Vec3(this.x, this.y, 0)
+        ).y();
     }
 }

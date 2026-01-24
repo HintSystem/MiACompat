@@ -2,21 +2,6 @@ package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.mods.SupportIris;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.entity.decoration.InteractionEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.ActionResult;
-
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
@@ -26,7 +11,16 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.api.ClientModInitializer;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Interaction;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
@@ -46,11 +40,9 @@ public class MiACompat implements ClientModInitializer {
     public static final GhostSeekTracker ghostSeekTracker = new GhostSeekTracker();
     private static final GhostSeekRenderer ghostSeekRenderer = new GhostSeekRenderer(ghostSeekTracker);
 
-    private static boolean wasDebugKeyDown = false;
-
     public static boolean isMiAServer() {
-        ServerInfo serverInfo = MinecraftClient.getInstance().getCurrentServerEntry();
-        return serverInfo != null && serverInfo.address.contains("mineinabyss");
+        ServerData serverInfo = Minecraft.getInstance().getCurrentServer();
+        return serverInfo != null && serverInfo.ip.contains("mineinabyss");
     }
 
 	@Override
@@ -60,34 +52,24 @@ public class MiACompat implements ClientModInitializer {
         config.loadFromFile();
         BonfireTracker.loadFromFile();
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
-
-
-            Window window = c.getWindow();
-            boolean debugKeyDown = InputUtil.isKeyPressed(window, InputUtil.GLFW_KEY_V);
-
-            if (debugKeyDown && !wasDebugKeyDown && c.world != null && c.player != null) {
-                ghostSeekTracker.addMeasurement(new GhostSeekTracker.Measurement(c.player.getEntityPos(), 100, 5));
-                LOGGER.info("KEY PRESSED (V)");
-            }
-            wasDebugKeyDown = debugKeyDown;
         });
 
-        WorldRenderEvents.BEFORE_DEBUG_RENDER.register(this::onRenderWorld);
+        WorldRenderEvents.END_MAIN.register(this::onRenderWorld);
 
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (!world.isClient() || !(entity instanceof InteractionEntity interaction)) return ActionResult.PASS;
+            if (!world.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
 
-            DisplayEntity.ItemDisplayEntity bonfire = BonfireTracker.findBonfire(
-                world.getOtherEntities(player, interaction.getBoundingBox().expand(0.5))
+            Display.ItemDisplay bonfire = BonfireTracker.findBonfire(
+                world.getEntities(player, interaction.getBoundingBox().inflate(0.5))
             );
             if (bonfire != null) BonfireTracker.setTrackedBonfire(bonfire);
 
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
@@ -96,7 +78,7 @@ public class MiACompat implements ClientModInitializer {
 
                 .then(ClientCommandManager.literal("config")
                     .executes(context -> {
-                        client.send(() -> client.setScreen(config.createScreen(null)));
+                        client.schedule(() -> client.setScreen(config.createScreen(null)));
                         return 1;
                     }))
 
@@ -112,8 +94,8 @@ public class MiACompat implements ClientModInitializer {
 
                         if (bonfire.lastSetTimestamp == 0) {
                             context.getSource().sendFeedback(
-                                Text.literal("No bonfire has been tracked yet. Link yourself to a bonfire again to start tracking.")
-                                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW))
+                                Component.literal("No bonfire has been tracked yet. Link yourself to a bonfire again to start tracking.")
+                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW))
                             );
                             return 1;
                         }
@@ -147,15 +129,15 @@ public class MiACompat implements ClientModInitializer {
 
                         String pos = String.format("(%d, %d, %d)", bonfire.x, bonfire.y, bonfire.z);
 
-                        MutableText bonfireSetMessage = bonfire.isBonfireSet
-                            ? Text.literal("You have a linked bonfire\n").setStyle(Style.EMPTY.withBold(true).withColor(Formatting.GREEN))
-                            : Text.literal("You have no linked bonfire\n").setStyle(Style.EMPTY.withBold(true).withColor(Formatting.RED));
+                        MutableComponent bonfireSetMessage = bonfire.isBonfireSet
+                            ? Component.literal("You have a linked bonfire\n").setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN))
+                            : Component.literal("You have no linked bonfire\n").setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED));
 
-                        MutableText feedback = Text.empty().append(bonfireSetMessage)
-                            .append(Text.literal("Last position: ").setStyle(Style.EMPTY.withColor(Formatting.AQUA)))
-                            .append(Text.literal(pos).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))
-                            .append(Text.literal("\nLast linked: ").setStyle(Style.EMPTY.withColor(Formatting.AQUA)))
-                            .append(Text.literal(timeDisplay).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+                        MutableComponent feedback = Component.empty().append(bonfireSetMessage)
+                            .append(Component.literal("Last position: ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
+                            .append(Component.literal(pos).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)))
+                            .append(Component.literal("\nLast linked: ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
+                            .append(Component.literal(timeDisplay).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)));
 
                         context.getSource().sendFeedback(feedback);
                         return 1;

@@ -1,13 +1,13 @@
 package dev.hintsystem.miacompat;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
@@ -29,11 +29,11 @@ public class GhostSeekTracker {
 
     public static class Measurement {
         public final Instant timestamp;
-        public final Vec3d position;
+        public final Vec3 position;
         public final double distance;
         public final double uncertainty;
 
-        public Measurement(Vec3d position, double distance, double uncertainty) {
+        public Measurement(Vec3 position, double distance, double uncertainty) {
             this.timestamp = Instant.now();
             this.position = position;
             this.distance = distance;
@@ -41,7 +41,7 @@ public class GhostSeekTracker {
         }
     }
 
-    public void tick(MinecraftClient client) {
+    public void tick(Minecraft client) {
         if (MiACompat.config.ghostSeekBreadcrumbDuration > 0) {
             measurements.removeIf(m -> Instant.now().isAfter(
                 m.timestamp.plusSeconds(MiACompat.config.ghostSeekBreadcrumbDuration)
@@ -52,8 +52,8 @@ public class GhostSeekTracker {
     }
 
     @Nullable
-    public Text onActionbarMessage(Text message) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+    public Component onActionbarMessage(Component message) {
+        LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return null;
 
         String messageText = message.getString().trim().toLowerCase();
@@ -64,8 +64,8 @@ public class GhostSeekTracker {
         GhostSeekType type = getGhostSeekType();
         if (type == null) return null;
 
-        Range<Integer> pingRange = type.getPingRange(pingLength);
-        Measurement measurement = type.getPingMeasurement(player.getEntityPos(), pingLength);
+        InclusiveRange<Integer> pingRange = type.getPingRange(pingLength);
+        Measurement measurement = type.getPingMeasurement(player.position(), pingLength);
         addMeasurement(measurement);
 
         String range = "%d-%d blocks".formatted(pingRange.minInclusive(), pingRange.maxInclusive());
@@ -74,7 +74,7 @@ public class GhostSeekTracker {
         if (!MiACompat.config.ghostSeekDistanceHint) return null;
 
         return message.copy()
-            .append(Text.literal(" (" + range + ")")).setStyle(message.getStyle());
+            .append(Component.literal(" (" + range + ")")).setStyle(message.getStyle());
     }
 
     public List<Measurement> getMeasurements() { return new ArrayList<>(measurements); }
@@ -129,16 +129,16 @@ public class GhostSeekTracker {
 
         public int getMaxRange() { return ranges[0]; }
 
-        public Range<Integer> getPingRange(int pingLength) {
+        public InclusiveRange<Integer> getPingRange(int pingLength) {
             int rangeIndex = Math.clamp(pingLength - 1, 0, ranges.length - 1);
             int minDistance = (rangeIndex < ranges.length - 1) ? ranges[rangeIndex + 1] : 0;
             int maxDistance = ranges[rangeIndex];
 
-            return new Range<>(minDistance, maxDistance);
+            return new InclusiveRange<>(minDistance, maxDistance);
         }
 
-        public Measurement getPingMeasurement(Vec3d pos, int pingLength) {
-            Range<Integer> pingRange = getPingRange(pingLength);
+        public Measurement getPingMeasurement(Vec3 pos, int pingLength) {
+            InclusiveRange<Integer> pingRange = getPingRange(pingLength);
 
             double midDistance = (pingRange.maxInclusive() + pingRange.minInclusive()) / 2.0;
             double uncertainty = (pingRange.maxInclusive() - pingRange.minInclusive()) / 2.0;
@@ -147,7 +147,7 @@ public class GhostSeekTracker {
         }
 
         public static GhostSeekType fromItemStack(ItemStack stack) {
-            Text itemName = stack.get(DataComponentTypes.ITEM_NAME);
+            Component itemName = stack.get(DataComponents.ITEM_NAME);
             if (itemName == null) return MAKESHIFT;
 
             String name = itemName.getString().toLowerCase();
@@ -166,17 +166,17 @@ public class GhostSeekTracker {
         // Use cache to avoid repeated inventory checks
         if (cacheValidTicks > 0) return;
 
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
             cachedGhostSeekType = null;
             cachedGhostSeek = null;
             return;
         }
 
-        PlayerInventory inventory = player.getInventory();
+        Inventory inventory = player.getInventory();
 
         for (int slotIndex : PASSIVE_SLOTS) {
-            ItemStack stack = inventory.getStack(slotIndex);
+            ItemStack stack = inventory.getItem(slotIndex);
             if (isItemGhostSeek(stack)) {
                 cachedGhostSeekType = GhostSeekType.fromItemStack(stack);
                 cachedGhostSeek = stack;
@@ -191,7 +191,7 @@ public class GhostSeekTracker {
     }
 
     private static boolean isItemGhostSeek(ItemStack stack) {
-        Text itemName = stack.get(DataComponentTypes.ITEM_NAME);
+        Component itemName = stack.get(DataComponents.ITEM_NAME);
         if (itemName == null) return false;
 
         return itemName.getString().toLowerCase().contains(GHOST_SEEK_ITEM_NAME);

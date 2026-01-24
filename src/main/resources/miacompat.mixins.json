@@ -4,8 +4,8 @@
     "compatibilityLevel": "JAVA_21",
     "client": [
         "GameRendererMixin",
-        "HudMixin",
-        "MessageHandlerMixin",
+        "GuiMixin",
+        "ChatListenerMixin",
         "pingwheel.PingLocationS2CPacketMixin",
         "xaerosminimap.CustomRenderTypesMixin",
         "xaerosminimap.InfoDisplaysMixin",
