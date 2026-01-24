@@ -116,7 +116,7 @@ public class GhostSeekRenderer {
                 red = 1.0f;
             }
 
-            int color = ARGB.colorFromFloat(1, red, green, 0);
+            int color = ARGB.colorFromFloat(0.6f, red, green, 0);
 
             double cameraDistance = camera.distanceTo(m.position);
             float scaledLineWidth = Math.max(LINE_WIDTH * (float)(6 / cameraDistance), 1.5f);

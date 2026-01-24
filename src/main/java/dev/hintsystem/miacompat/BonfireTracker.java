@@ -30,6 +30,9 @@ public class BonfireTracker {
     public static Display.ItemDisplay trackedBonfireEntity;
     public static BonfireData bonfireData = new BonfireData();
 
+    private static final int MAX_LOST_BONFIRE_TICKS = 10;
+    private static int lostBonfireTicks = 0;
+
     public static class BonfireData {
         public int x, y, z;
         public boolean isBonfireSet;
@@ -46,28 +49,34 @@ public class BonfireTracker {
     }
 
     public static void tick(Minecraft client) {
-        boolean isBonfireTracked = updateTrackedBonfireState();
+        if (!MiACompat.isMiAServer()) return;
 
-        // Update untracked bonfire
-        if (!isBonfireTracked && MiACompat.isMiAServer()) {
-            if (client.level == null || client.player == null) return;
+        if (updateTrackedBonfireState()) return; // Skip if the bonfire entity is loaded
 
-            int blockViewDistance = client.options.getEffectiveRenderDistance() * 16;
-            double bonfireSquaredDistance = bonfireData.getBlockPos().distToCenterSqr(client.player.position());
+        if (client.level == null || client.player == null) return;
 
-            // Check if bonfire is close enough to be loaded
-            if (bonfireSquaredDistance < blockViewDistance * blockViewDistance) {
-                Display.ItemDisplay bonfire = findBonfire(
-                    client.level.getEntities(client.player, new AABB(bonfireData.getBlockPos()))
-                );
+        int blockViewDistance = client.options.getEffectiveRenderDistance() * 16;
+        double bonfireSquaredDistance = bonfireData.getBlockPos().distToCenterSqr(client.player.position());
 
-                if (bonfire != null) {
-                    setTrackedBonfire(bonfire);
-                } else {
-                    setBonfireStatus(false);
-                }
+        // Check if bonfire is close enough to be loaded
+        if (bonfireSquaredDistance < blockViewDistance * blockViewDistance) {
+            Display.ItemDisplay bonfire = findBonfire(
+                client.level.getEntities(client.player, new AABB(bonfireData.getBlockPos()))
+            );
+
+            if (bonfire != null) {
+                setTrackedBonfire(bonfire);
+                return;
             }
+
+            // Unlink bonfire if it can't be found within tick limit
+            if (++lostBonfireTicks >= MAX_LOST_BONFIRE_TICKS) {
+                setBonfireStatus(false);
+            }
+            return;
         }
+
+        lostBonfireTicks = 0;
     }
 
     public static void onServerMessage(Component message) {
@@ -82,6 +91,7 @@ public class BonfireTracker {
     }
 
     public static void setTrackedBonfire(Display.ItemDisplay bonfireEntity) {
+        lostBonfireTicks = 0;
         trackedBonfireEntity = bonfireEntity;
         updateTrackedBonfireState();
     }
