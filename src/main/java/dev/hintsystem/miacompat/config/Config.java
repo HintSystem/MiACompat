@@ -37,8 +37,8 @@ public class Config {
     public GhostSeekRenderer.BreadcrumbRenderType breadcrumbRenderType = GhostSeekRenderer.BreadcrumbRenderType.FILLED_BOX;
     public float breadcrumbLineWidth = 8f;
     public float breadcrumbSize = 0.8f;
-    public double breadcrumbDistanceScale = 0.7f;
-    public double breadcrumbOpacity = 0.5f;
+    public double breadcrumbDistanceScale = 0.5f;
+    public double breadcrumbOpacity = 0.75f;
 
     public Screen createScreen(Screen parent) {
         Option<Float> breadcrumbLineWidthOption = Option.<Float>createBuilder()
@@ -144,7 +144,7 @@ public class Config {
                         .name(Component.literal("Breadcrumb Size"))
                         .binding(DEFAULTS.breadcrumbSize, () -> breadcrumbSize, val -> breadcrumbSize = val)
                         .controller(opt -> FloatFieldControllerBuilder.create(opt)
-                            .range(0.1f, 20f))
+                            .range(0.1f, 10f))
                         .build())
 
                     .option(Option.<Double>createBuilder()
