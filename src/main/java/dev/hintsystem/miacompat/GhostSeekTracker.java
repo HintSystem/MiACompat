@@ -4,12 +4,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import org.jetbrains.annotations.Nullable;
+
+import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +24,7 @@ public class GhostSeekTracker {
 
     private static final int[] PASSIVE_SLOTS = {9, 10};
     private static final String GHOST_SEEK_ITEM_NAME = "ghost seek";
+    private static final String PRAYING_SKELETON_PREFIX = "praying_skeleton";
 
     private GhostSeekType cachedGhostSeekType = null;
     private ItemStack cachedGhostSeek = null;
@@ -28,23 +34,57 @@ public class GhostSeekTracker {
     private final List<Measurement> measurements = new ArrayList<>();
 
     public static class Measurement {
+        private static final Color[] MEASUREMENT_COLORS = {
+            Color.decode("#32365d"), Color.decode("#5B62A5"), Color.decode("#F3CB2D"), Color.decode("#65C756"), Color.decode("#17D8C5")
+        };
+
         public final Instant timestamp;
         public final Vec3 position;
         public final double distance;
         public final double uncertainty;
+        public final Integer pingLength;
 
-        public Measurement(Vec3 position, double distance, double uncertainty) {
+        public Measurement(Vec3 position, double distance, double uncertainty, Integer pingLength) {
             this.timestamp = Instant.now();
             this.position = position;
             this.distance = distance;
             this.uncertainty = uncertainty;
+            this.pingLength = pingLength;
+        }
+
+        public int getColor(int maxRange) {
+            if (pingLength != null) {
+                int index = Math.clamp(pingLength - 1, 0, MEASUREMENT_COLORS.length - 1);
+                return MEASUREMENT_COLORS[index].getRGB();
+            }
+
+            double effectiveDistance = Math.max(distance - uncertainty, 0.0);
+            float t = 1.0f - (float)(effectiveDistance / maxRange);
+            t = Math.clamp(t, 0.0f, 1.0f);
+
+            return lerpColorRamp(MEASUREMENT_COLORS, t);
+        }
+
+        private static int lerpColorRamp(Color[] colors, float t) {
+            if (colors.length == 1) return colors[0].getRGB();
+
+            float scaled = t * (colors.length - 1);
+            int i0 = (int) Math.floor(scaled);
+            int i1 = Math.min(i0 + 1, colors.length - 1);
+            float localT = scaled - i0;
+
+            return ARGB.linearLerp(
+                localT,
+                colors[i0].getRGB(),
+                colors[i1].getRGB()
+            );
         }
     }
 
     public void tick(Minecraft client) {
-        if (MiACompat.config.ghostSeekBreadcrumbDuration > 0) {
+        if (MiACompat.config.breadcrumbDuration > 0) {
             measurements.removeIf(m -> Instant.now().isAfter(
-                m.timestamp.plusSeconds(MiACompat.config.ghostSeekBreadcrumbDuration)
+                m.timestamp.plusSeconds(MiACompat.config.breadcrumbDuration)
             ));
         }
 
@@ -80,7 +120,7 @@ public class GhostSeekTracker {
     public List<Measurement> getMeasurements() { return new ArrayList<>(measurements); }
 
     public void addMeasurement(Measurement measurement) {
-        if (MiACompat.config.ghostSeekBreadcrumbDuration <= 0) return;
+        if (MiACompat.config.breadcrumbDuration <= 0) return;
 
         for (Measurement existing : measurements) {
             if (existing.position.distanceTo(measurement.position) < MIN_MEASUREMENT_DISTANCE) return;
@@ -90,6 +130,17 @@ public class GhostSeekTracker {
     }
 
     public void clearMeasurements() { measurements.clear(); }
+
+    public static boolean isPrayingSkeleton(Display.ItemDisplay itemDisplayEntity) {
+        ItemStack stack = itemDisplayEntity.getItemStack();
+        Identifier modelName = stack.get(DataComponents.ITEM_MODEL);
+
+        return modelName != null && modelName.getPath().startsWith(PRAYING_SKELETON_PREFIX);
+    }
+
+    public int getMaxRange() {
+        return (getGhostSeekType() != null) ? getGhostSeekType().getMaxRange() : 150;
+    }
 
     @Nullable
     public GhostSeekType getGhostSeekType() {
@@ -143,7 +194,7 @@ public class GhostSeekTracker {
             double midDistance = (pingRange.maxInclusive() + pingRange.minInclusive()) / 2.0;
             double uncertainty = (pingRange.maxInclusive() - pingRange.minInclusive()) / 2.0;
 
-            return new Measurement(pos, midDistance, uncertainty);
+            return new Measurement(pos, midDistance, uncertainty, pingLength);
         }
 
         public static GhostSeekType fromItemStack(ItemStack stack) {

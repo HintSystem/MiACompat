@@ -1,4 +1,7 @@
-package dev.hintsystem.miacompat;
+package dev.hintsystem.miacompat.config;
+
+import dev.hintsystem.miacompat.GhostSeekRenderer;
+import dev.hintsystem.miacompat.MiACompat;
 
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
@@ -21,6 +24,7 @@ public class Config {
     private static final Path SAVE_PATH = MiACompat.CONFIG_DIR.resolve(MiACompat.MOD_ID + ".json");
     private static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
+        .registerTypeAdapter(Color.class, new ColorTypeAdapter())
         .create();
 
     public static final Config DEFAULTS = new Config();
@@ -28,9 +32,22 @@ public class Config {
     public int maxWaypointRadius = 0;
     public boolean showBonfireWaypoint = true;
     public boolean ghostSeekDistanceHint = true;
-    public int ghostSeekBreadcrumbDuration = 300;
+    public boolean clearBreadcrumbsOnFind = true;
+    public int breadcrumbDuration = 300;
+    public GhostSeekRenderer.BreadcrumbRenderType breadcrumbRenderType = GhostSeekRenderer.BreadcrumbRenderType.FILLED_BOX;
+    public float breadcrumbLineWidth = 8f;
+    public float breadcrumbSize = 0.8f;
+    public double breadcrumbDistanceScale = 0.7f;
+    public double breadcrumbOpacity = 0.5f;
 
     public Screen createScreen(Screen parent) {
+        Option<Float> breadcrumbLineWidthOption = Option.<Float>createBuilder()
+            .name(Component.literal("Breadcrumb Line Width"))
+            .binding(DEFAULTS.breadcrumbLineWidth, () -> breadcrumbLineWidth, val -> breadcrumbLineWidth = val)
+            .controller(opt -> FloatFieldControllerBuilder.create(opt)
+                .range(2f, 50f))
+            .build();
+
         return YetAnotherConfigLib.createBuilder()
             .title(Component.literal("PlayerRelayClient Config"))
 
@@ -79,6 +96,17 @@ public class Config {
                         .controller(TickBoxControllerBuilder::create)
                         .build())
 
+                    .option(Option.<Boolean>createBuilder()
+                        .name(Component.literal("Clear Breadcrumbs On Find"))
+                        .description(OptionDescription.of(Component.literal(
+                            """
+                            If enabled, breadcrumbs will be cleared when hitting a praying skeleton
+                            """
+                        )))
+                        .binding(DEFAULTS.clearBreadcrumbsOnFind, () -> clearBreadcrumbsOnFind, val -> clearBreadcrumbsOnFind = val)
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
+
                     .option(Option.<Integer>createBuilder()
                         .name(Component.literal("Breadcrumb Duration"))
                         .description(OptionDescription.of(Component.literal(
@@ -88,11 +116,60 @@ public class Config {
                             Set to 0 to disable ghost seek breadcrumbs.
                             """
                         )))
-                        .binding(DEFAULTS.ghostSeekBreadcrumbDuration, () -> ghostSeekBreadcrumbDuration, val -> ghostSeekBreadcrumbDuration = val)
+                        .binding(DEFAULTS.breadcrumbDuration, () -> breadcrumbDuration, val -> breadcrumbDuration = val)
                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
                             .formatValue(val -> Component.literal(String.format("%ds", val)))
                             .step(5)
                             .range(0, 3_600))
+                        .build())
+
+                    .option(Option.<GhostSeekRenderer.BreadcrumbRenderType>createBuilder()
+                        .name(Component.literal("Breadcrumb Visual Type"))
+                        .description(OptionDescription.of(Component.literal(
+                            """
+                            Adjusts how breadcrumbs are rendered.
+                            """
+                        )))
+                        .addListener((option, event) -> {
+                            breadcrumbLineWidthOption.setAvailable(option.pendingValue() == GhostSeekRenderer.BreadcrumbRenderType.WIREFRAME_BOX);
+                        })
+                        .binding(DEFAULTS.breadcrumbRenderType, () -> breadcrumbRenderType, val -> breadcrumbRenderType = val)
+                        .controller(opt -> EnumControllerBuilder.create(opt)
+                            .enumClass(GhostSeekRenderer.BreadcrumbRenderType.class))
+                        .build())
+
+                    .option(breadcrumbLineWidthOption)
+
+                    .option(Option.<Float>createBuilder()
+                        .name(Component.literal("Breadcrumb Size"))
+                        .binding(DEFAULTS.breadcrumbSize, () -> breadcrumbSize, val -> breadcrumbSize = val)
+                        .controller(opt -> FloatFieldControllerBuilder.create(opt)
+                            .range(0.1f, 20f))
+                        .build())
+
+                    .option(Option.<Double>createBuilder()
+                        .name(Component.literal("Breadcrumb Distance Scale"))
+                        .description(OptionDescription.of(Component.literal(
+                            """
+                            Scales breadcrumb size based on distance to the praying skeleton.
+                            
+                            0 = no scaling
+                            + = bigger when further away
+                            - = bigger when closer
+                            """
+                        )))
+                        .binding(DEFAULTS.breadcrumbDistanceScale, () -> breadcrumbDistanceScale, val -> breadcrumbDistanceScale = val)
+                        .controller(opt -> DoubleSliderControllerBuilder.create(opt)
+                            .range(-2d, 2d)
+                            .step(0.05d))
+                        .build())
+
+                    .option(Option.<Double>createBuilder()
+                        .name(Component.literal("Breadcrumb Opacity"))
+                        .binding(DEFAULTS.breadcrumbOpacity, () -> breadcrumbOpacity, val -> breadcrumbOpacity = val)
+                        .controller(opt -> DoubleSliderControllerBuilder.create(opt)
+                            .range(0d, 1d)
+                            .step(0.05d))
                         .build())
 
                     .build())

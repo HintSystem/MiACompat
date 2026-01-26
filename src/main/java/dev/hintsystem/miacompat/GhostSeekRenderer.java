@@ -32,18 +32,35 @@ import org.lwjgl.system.MemoryUtil;
 
 public class GhostSeekRenderer {
     private static final String RENDER_LABEL = MiACompat.MOD_ID + " ghost seek renderer";
-    private static final float LINE_WIDTH = 4.0f;
+
+    public static final RenderPipeline QUADS_THROUGH_WALLS = RenderPipelines.register(
+        RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath(MiACompat.MOD_ID, "pipeline/quads_through_walls"))
+            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .build()
+    );
 
     public static final RenderPipeline LINES_THROUGH_WALLS = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath(MiACompat.MOD_ID, "pipeline/lines_through_walls"))
             .withVertexShader("core/rendertype_lines")
             .withFragmentShader("core/rendertype_lines_no_fog")
             .withBlend(BlendFunction.TRANSLUCENT).withCull(false).withDepthWrite(false)
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
-            .withLocation(Identifier.fromNamespaceAndPath(MiACompat.MOD_ID, "pipeline/triangulation_lines"))
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
             .build()
     );
+
+    public enum BreadcrumbRenderType {
+        WIREFRAME_BOX(LINES_THROUGH_WALLS),
+        FILLED_BOX(QUADS_THROUGH_WALLS);
+
+        public final RenderPipeline pipeline;
+
+        BreadcrumbRenderType(RenderPipeline pipeline) {
+            this.pipeline = pipeline;
+        }
+    }
 
     private static final ByteBufferBuilder allocator = new ByteBufferBuilder(RenderType.SMALL_BUFFER_SIZE);
     private BufferBuilder buffer;
@@ -67,7 +84,7 @@ public class GhostSeekRenderer {
 
     public boolean isOverlayEnabled() {
         return overlayEnabled
-            && MiACompat.config.ghostSeekBreadcrumbDuration > 0
+            && MiACompat.config.breadcrumbDuration > 0
             && ghostSeekTracker.getGhostSeekType() != null;
     }
 
@@ -81,13 +98,14 @@ public class GhostSeekRenderer {
         if (ghostSeekTracker.getMeasurements().isEmpty()) return;
 
         // Extraction phase
-        extractRenderData(context);
+        BreadcrumbRenderType renderType = MiACompat.config.breadcrumbRenderType;
+        extractRenderData(context, renderType);
 
         // Drawing phase
-        if (buffer != null) drawThroughWalls(client);
+        if (buffer != null) drawThroughWalls(client, renderType.pipeline);
     }
 
-    private void extractRenderData(WorldRenderContext context) {
+    private void extractRenderData(WorldRenderContext context, BreadcrumbRenderType renderType) {
         PoseStack matrices = context.matrices();
         Vec3 camera = context.worldState().cameraRenderState.pos;
 
@@ -95,44 +113,46 @@ public class GhostSeekRenderer {
         matrices.translate(-camera.x, -camera.y, -camera.z);
 
         if (buffer == null) {
-            buffer = new BufferBuilder(allocator, LINES_THROUGH_WALLS.getVertexFormatMode(), LINES_THROUGH_WALLS.getVertexFormat());
+            buffer = new BufferBuilder(allocator, renderType.pipeline.getVertexFormatMode(), renderType.pipeline.getVertexFormat());
         }
 
         // Render breadcrumbs
-        int maxDistance = (ghostSeekTracker.getGhostSeekType() != null) ? ghostSeekTracker.getGhostSeekType().getMaxRange() : 150;
+        int maxDistance = ghostSeekTracker.getMaxRange();
         List<GhostSeekTracker.Measurement> measurements = ghostSeekTracker.getMeasurements();
         for (GhostSeekTracker.Measurement m : measurements) {
-            double distance = (m.distance - m.uncertainty > 0) ?
-                 m.distance + m.uncertainty : 0;
 
-            float normalizedDistance = (float) Math.min(distance / maxDistance, 1.0);
+            float t = (float) Math.clamp(m.distance / maxDistance, 0.0, 1.0);
+            float strength = (float) MiACompat.config.breadcrumbDistanceScale * 1.5f;
+            float growthFactor = strength >= 0
+                ? t * strength           // farther = bigger
+                : (1.0f - t) * -strength; // closer = bigger
 
-            float red, green;
-            if (normalizedDistance < 0.5f) {
-                green = 1.0f;
-                red = normalizedDistance * 2.0f;
-            } else {
-                green = 1.0f - (normalizedDistance - 0.5f) * 2.0f;
-                red = 1.0f;
+            float scale = 1.0f + growthFactor;
+            float size = (MiACompat.config.breadcrumbSize * scale);
+
+            int color = ARGB.color((float) MiACompat.config.breadcrumbOpacity, m.getColor(maxDistance));
+
+            switch (renderType) {
+                case WIREFRAME_BOX -> {
+                    float cameraDistance = (float) Math.max(camera.distanceTo(m.position) - size, 0);
+                    float lineScale = Math.min(6 / cameraDistance, 1f);
+                    float scaledLineWidth = Math.max(MiACompat.config.breadcrumbLineWidth * lineScale, 2f);
+
+                    renderOutlinedBox(matrices, buffer, m.position, size, color, scaledLineWidth);
+                }
+                case FILLED_BOX -> renderFilledBox(matrices, buffer, m.position, size, color);
             }
-
-            int color = ARGB.colorFromFloat(0.6f, red, green, 0);
-
-            double cameraDistance = camera.distanceTo(m.position);
-            float scaledLineWidth = Math.max(LINE_WIDTH * (float)(6 / cameraDistance), 1.5f);
-
-            ShapeRenderer.renderShape(matrices, buffer, createCenteredBox(m.position, 0.5),
-                0, 0, 0, color, scaledLineWidth);
         }
 
         matrices.popPose();
     }
 
-    private VoxelShape createCenteredBox(Vec3 center, double size) {
-        return createCenteredBox(center, size, size);
+    private static void renderOutlinedBox(PoseStack matrices, BufferBuilder buffer, Vec3 center, double size, int color, float lineWidth) {
+        ShapeRenderer.renderShape(matrices, buffer, createCenteredBox(center, size, size),
+            0, 0, 0, color, lineWidth);
     }
 
-    private VoxelShape createCenteredBox(Vec3 center, double width, double height) {
+    private static VoxelShape createCenteredBox(Vec3 center, double width, double height) {
         double halfWidth = width / 2.0;
         double halfHeight = height / 2.0;
         return Shapes.box(
@@ -141,13 +161,53 @@ public class GhostSeekRenderer {
         );
     }
 
-    private void drawThroughWalls(Minecraft client) {
+    private static void renderFilledBox(PoseStack matrices, BufferBuilder buffer, Vec3 center, double size, int color) {
+        double h = size / 2.0;
+
+        float x1 = (float)(center.x - h);
+        float y1 = (float)(center.y - h);
+        float z1 = (float)(center.z - h);
+        float x2 = (float)(center.x + h);
+        float y2 = (float)(center.y + h);
+        float z2 = (float)(center.z + h);
+
+        // +Y
+        quad(matrices, buffer, x1,y2,z2, x2,y2,z2, x2,y2,z1, x1,y2,z1, color);
+        // -Y
+        quad(matrices, buffer, x1,y1,z1, x2,y1,z1, x2,y1,z2, x1,y1,z2, color);
+        // +X
+        quad(matrices, buffer, x2,y1,z2, x2,y1,z1, x2,y2,z1, x2,y2,z2, color);
+        // -X
+        quad(matrices, buffer, x1,y1,z1, x1,y1,z2, x1,y2,z2, x1,y2,z1, color);
+        // +Z
+        quad(matrices, buffer, x1,y1,z2, x2,y1,z2, x2,y2,z2, x1,y2,z2, color);
+        // -Z
+        quad(matrices, buffer, x2,y1,z1, x1,y1,z1, x1,y2,z1, x2,y2,z1, color);
+    }
+
+    private static void quad(
+        PoseStack matrices, BufferBuilder b,
+        float x1, float y1, float z1,
+        float x2, float y2, float z2,
+        float x3, float y3, float z3,
+        float x4, float y4, float z4,
+        int color
+    ) {
+        PoseStack.Pose pose = matrices.last();
+
+        b.addVertex(pose, x1,y1,z1).setColor(color);
+        b.addVertex(pose, x2,y2,z2).setColor(color);
+        b.addVertex(pose, x3,y3,z3).setColor(color);
+        b.addVertex(pose, x4,y4,z4).setColor(color);
+    }
+
+    private void drawThroughWalls(Minecraft client, RenderPipeline pipeline) {
         MeshData builtBuffer = buffer.buildOrThrow();
         MeshData.DrawState drawParameters = builtBuffer.drawState();
         VertexFormat format = drawParameters.format();
 
         GpuBuffer vertices = upload(drawParameters, format, builtBuffer);
-        draw(client, LINES_THROUGH_WALLS, builtBuffer, drawParameters, vertices, format);
+        draw(client, pipeline, builtBuffer, drawParameters, vertices, format);
 
         // Rotate the vertex buffer so we are less likely to use buffers that the GPU is using
         if (vertexBuffer != null) vertexBuffer.rotate();

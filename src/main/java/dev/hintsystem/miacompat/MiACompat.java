@@ -1,11 +1,13 @@
 package dev.hintsystem.miacompat;
 
+import dev.hintsystem.miacompat.config.Config;
 import dev.hintsystem.miacompat.mods.SupportIris;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -19,7 +21,9 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Interaction;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +76,20 @@ public class MiACompat implements ClientModInitializer {
             return InteractionResult.PASS;
         });
 
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (!world.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
+            if (!config.clearBreadcrumbsOnFind) return InteractionResult.PASS;
+
+            for (Entity entityNear : world.getEntities(player, interaction.getBoundingBox())) {
+                if (entityNear instanceof Display.ItemDisplay itemDisplay && GhostSeekTracker.isPrayingSkeleton(itemDisplay)) {
+                    ghostSeekTracker.clearMeasurements();
+                    break;
+                }
+            }
+
+            return InteractionResult.PASS;
+        });
+
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 
             dispatcher.register(ClientCommandManager.literal("miacompat")
@@ -82,11 +100,22 @@ public class MiACompat implements ClientModInitializer {
                         return 1;
                     }))
 
-                .then(ClientCommandManager.literal("clear_breadcrumbs")
-                    .executes(context -> {
-                        ghostSeekTracker.clearMeasurements();
-                        return 1;
-                    }))
+                .then(ClientCommandManager.literal("breadcrumbs")
+                    .then(ClientCommandManager.literal("add")
+                        .then(ClientCommandManager.argument("pingLength", IntegerArgumentType.integer(0, 5))
+                            .executes(context -> {
+                                int pingLength = IntegerArgumentType.getInteger(context, "pingLength");
+
+                                ghostSeekTracker.addMeasurement(GhostSeekTracker.GhostSeekType.REFINED
+                                    .getPingMeasurement(client.player.position(), pingLength)
+                                );
+                                return 1;
+                            })))
+                    .then(ClientCommandManager.literal("clear")
+                        .executes(context -> {
+                            ghostSeekTracker.clearMeasurements();
+                            return 1;
+                        })))
 
                 .then(ClientCommandManager.literal("bonfire")
                     .executes(context -> {
