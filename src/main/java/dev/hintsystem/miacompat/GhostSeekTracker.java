@@ -131,6 +131,11 @@ public class GhostSeekTracker {
 
     public void clearMeasurements() { measurements.clear(); }
 
+    public boolean breadcrumbsVisible() {
+        return MiACompat.config.breadcrumbDuration > 0
+            && getGhostSeekType() != null;
+    }
+
     public static boolean isPrayingSkeleton(Display.ItemDisplay itemDisplayEntity) {
         ItemStack stack = itemDisplayEntity.getItemStack();
         Identifier modelName = stack.get(DataComponents.ITEM_MODEL);

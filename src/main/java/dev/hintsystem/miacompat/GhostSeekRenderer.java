@@ -83,9 +83,7 @@ public class GhostSeekRenderer {
     }
 
     public boolean isOverlayEnabled() {
-        return overlayEnabled
-            && MiACompat.config.breadcrumbDuration > 0
-            && ghostSeekTracker.getGhostSeekType() != null;
+        return overlayEnabled && ghostSeekTracker.breadcrumbsVisible();
     }
 
     public void render(WorldRenderContext context) {

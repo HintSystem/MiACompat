@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.mixin.xaerosminimap;
+package dev.hintsystem.miacompat.mixin.xaeroworldmap;
 
 import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
 

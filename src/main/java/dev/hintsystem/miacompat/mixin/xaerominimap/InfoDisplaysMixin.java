@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.mixin.xaerosminimap;
+package dev.hintsystem.miacompat.mixin.xaerominimap;
 
 import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
 

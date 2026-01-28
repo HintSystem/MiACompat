@@ -7,15 +7,16 @@
         "GuiMixin",
         "ChatListenerMixin",
         "pingwheel.PingLocationS2CPacketMixin",
-        "xaerosminimap.CustomRenderTypesMixin",
-        "xaerosminimap.InfoDisplaysMixin",
-        "xaerosminimap.PlayerTrackerMinimapElementMixin",
-        "xaerosminimap.PlayerTrackerMinimapElementRendererMixin",
-        "xaerosminimap.SupportXaeroMinimapMixin",
-        "xaerosminimap.WaypointIOMixin",
-        "xaerosminimap.WaypointCollectorMixin",
-        "xaerosminimap.WaypointMixin",
-        "xaerosminimap.WaypointWorldRendererMixin"
+        "xaerominimap.CustomRenderTypesMixin",
+        "xaerominimap.InfoDisplaysMixin",
+        "xaerominimap.PlayerTrackerMinimapElementMixin",
+        "xaerominimap.PlayerTrackerMinimapElementRendererMixin",
+        "xaerominimap.WaypointIOMixin",
+        "xaerominimap.WaypointCollectorMixin",
+        "xaerominimap.WaypointMixin",
+        "xaerominimap.WaypointWorldRendererMixin",
+        "xaeroworldmap.SupportXaeroMinimapMixin",
+        "xaeroworldmap.WaypointRenderProviderMixin"
     ],
     "injectors": {
         "defaultRequire": 1

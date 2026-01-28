@@ -39,6 +39,7 @@ public class Config {
     public float breadcrumbSize = 0.8f;
     public double breadcrumbDistanceScale = 0.5f;
     public double breadcrumbOpacity = 0.75f;
+    public boolean showBreadcrumbsOnMap = false;
 
     public Screen createScreen(Screen parent) {
         Option<Float> breadcrumbLineWidthOption = Option.<Float>createBuilder()
@@ -170,6 +171,12 @@ public class Config {
                         .controller(opt -> DoubleSliderControllerBuilder.create(opt)
                             .range(0d, 1d)
                             .step(0.05d))
+                        .build())
+
+                    .option(Option.<Boolean>createBuilder()
+                        .name(Component.literal("Breadcrumbs On World Map"))
+                        .binding(DEFAULTS.showBreadcrumbsOnMap, () -> showBreadcrumbsOnMap, val -> showBreadcrumbsOnMap = val)
+                        .controller(TickBoxControllerBuilder::create)
                         .build())
 
                     .build())
