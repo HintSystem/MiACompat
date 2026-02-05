@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
 import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
-import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
+import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
 
 import xaero.common.minimap.waypoints.Waypoint;
 
@@ -44,7 +44,7 @@ public class WaypointMixin {
         LocalPlayer player = Minecraft.getInstance().player;
         if (!SupportXaerosMinimap.isInWorldRenderer() || player == null) { return this.x; }
 
-        return (int)MiaWorldCoordinates.relativizeWrapped(
+        return (int) MiaDeeperWorld.relativizeWrapped(
             new Vec3(player.getX(), 0, 0), new Vec3(this.x, 0, 0)
         ).x();
     }
@@ -54,7 +54,7 @@ public class WaypointMixin {
         LocalPlayer player = Minecraft.getInstance().player;
         if (!SupportXaerosMinimap.isInWorldRenderer() || player == null) { return this.y; }
 
-        return (int)MiaWorldCoordinates.relativizeWrapped(
+        return (int) MiaDeeperWorld.relativizeWrapped(
             new Vec3(player.getX(), player.getY(), 0), new Vec3(this.x, this.y, 0)
         ).y();
     }

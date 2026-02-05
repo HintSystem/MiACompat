@@ -80,7 +80,7 @@ public class MiACompat implements ClientModInitializer {
             if (!world.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
             if (!config.clearBreadcrumbsOnFind) return InteractionResult.PASS;
 
-            for (Entity entityNear : world.getEntities(player, interaction.getBoundingBox())) {
+            for (Entity entityNear : world.getEntities(player, interaction.getBoundingBox().inflate(1.5))) {
                 if (entityNear instanceof Display.ItemDisplay itemDisplay && GhostSeekTracker.isPrayingSkeleton(itemDisplay)) {
                     ghostSeekTracker.clearMeasurements();
                     break;

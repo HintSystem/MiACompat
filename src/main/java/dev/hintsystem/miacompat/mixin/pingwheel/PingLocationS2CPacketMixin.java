@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin.pingwheel;
 
-import dev.hintsystem.miacompat.utils.MiaWorldCoordinates;
+import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
 
 import nx.pingwheel.common.network.PingLocationS2CPacket;
 
@@ -22,6 +22,6 @@ public class PingLocationS2CPacketMixin {
         if (player == null) { return; }
 
         Vec3 original = cir.getReturnValue();
-        cir.setReturnValue(MiaWorldCoordinates.relativizeWrapped(player.position(), original));
+        cir.setReturnValue(MiaDeeperWorld.relativizeWrapped(player.position(), original));
     }
 }

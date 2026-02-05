@@ -9,16 +9,18 @@ import dev.isxander.yacl3.api.controller.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.awt.*;
+import java.awt.Color;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 public class Config {
     private static final Path SAVE_PATH = MiACompat.CONFIG_DIR.resolve(MiACompat.MOD_ID + ".json");
@@ -40,6 +42,14 @@ public class Config {
     public double breadcrumbDistanceScale = 0.5f;
     public double breadcrumbOpacity = 0.75f;
     public boolean showBreadcrumbsOnMap = false;
+    public boolean pingColorMatchesBreadcrumb = true;
+    public List<Color> breadcrumbColors = List.of(
+        Color.decode("#A2453F"),
+        Color.decode("#5B62A5"),
+        Color.decode("#F3CB2D"),
+        Color.decode("#65C756"),
+        Color.decode("#17D8C5")
+    );
 
     public Screen createScreen(Screen parent) {
         Option<Float> breadcrumbLineWidthOption = Option.<Float>createBuilder()
@@ -48,6 +58,33 @@ public class Config {
             .controller(opt -> FloatFieldControllerBuilder.create(opt)
                 .range(2f, 50f))
             .build();
+
+        OptionGroup.Builder breadcrumbColorsGroup = OptionGroup.createBuilder()
+            .name(Component.literal("Ghost Seek Breadcrumb Colors"));
+
+        breadcrumbColorsGroup.option(Option.<Boolean>createBuilder()
+            .name(Component.literal("Match With Action Bar Pings"))
+            .description(OptionDescription.of(Component.literal(
+                """
+                If enabled, the action bar message you get after a ghost seek ping will be edited so its color matches the breadcrumb colors
+                """
+            )))
+            .binding(DEFAULTS.pingColorMatchesBreadcrumb, () -> pingColorMatchesBreadcrumb, val -> pingColorMatchesBreadcrumb = val)
+            .controller(TickBoxControllerBuilder::create)
+            .build());
+
+        for (int i = 0; i < DEFAULTS.breadcrumbColors.size(); i++) {
+            final int index = i; // Capture for lambda
+            breadcrumbColorsGroup.option(Option.<Color>createBuilder()
+                .name(Component.literal("Ping " + (i + 1)))
+                .binding(DEFAULTS.breadcrumbColors.get(index), () -> breadcrumbColors.get(index), val -> {
+                    List<Color> newList = new java.util.ArrayList<>(breadcrumbColors);
+                    newList.set(index, val);
+                    breadcrumbColors = newList;
+                })
+                .controller(ColorControllerBuilder::create)
+                .build());
+        }
 
         return YetAnotherConfigLib.createBuilder()
             .title(Component.literal("PlayerRelayClient Config"))
@@ -84,7 +121,7 @@ public class Config {
                     .name(Component.literal("Ghost Seek"))
 
                     .option(Option.<Boolean>createBuilder()
-                        .name(Component.literal("Distance Hints"))
+                        .name(Component.literal("Ping Distance Hints"))
                         .description(OptionDescription.of(Component.literal(
                             """
                             If enabled, displays the approximate distance from a praying skeleton in the action bar when you get a ghost seek ping
@@ -181,6 +218,8 @@ public class Config {
 
                     .build())
 
+                .group(breadcrumbColorsGroup.build())
+
                 .build())
 
             .save(this::saveToFile)
@@ -209,6 +248,23 @@ public class Config {
         }
     }
 
+    public void loadBreadcrumbColors(Field f, List<Color> loaded) throws IllegalAccessException {
+        if (loaded != null) {
+            int size = DEFAULTS.breadcrumbColors.size();
+
+            // Pad with defaults if too few
+            while (loaded.size() < size) {
+                loaded.add(DEFAULTS.breadcrumbColors.get(loaded.size()));
+            }
+            // Truncate if too many
+            if (loaded.size() > size) {
+                loaded = loaded.subList(0, size);
+            }
+
+            f.set(this, loaded);
+        }
+    }
+
     public void loadFromFile() {
         if (!Files.exists(SAVE_PATH)) {
             MiACompat.LOGGER.info("Config file not found at {}, using default", SAVE_PATH);
@@ -221,8 +277,15 @@ public class Config {
 
             for (Field f : this.getClass().getFields()) {
                 if (!Modifier.isStatic(f.getModifiers()) && root.has(f.getName())) {
-                    Object val = GSON.fromJson(root.get(f.getName()), f.getType());
-                    f.set(this, val);
+                    if (f.getName().equals("breadcrumbColors")) {
+                        loadBreadcrumbColors(
+                            f, GSON.fromJson(root.get(f.getName()), new TypeToken<List<Color>>(){}.getType())
+                        );
+                    } else {
+                        Object val = GSON.fromJson(root.get(f.getName()), f.getType());
+                        f.set(this, val);
+                    }
+
                 }
             }
         } catch (Exception e) {

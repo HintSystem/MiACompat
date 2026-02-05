@@ -4,6 +4,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.InclusiveRange;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -34,10 +37,6 @@ public class GhostSeekTracker {
     private final List<Measurement> measurements = new ArrayList<>();
 
     public static class Measurement {
-        private static final Color[] MEASUREMENT_COLORS = {
-            Color.decode("#32365d"), Color.decode("#5B62A5"), Color.decode("#F3CB2D"), Color.decode("#65C756"), Color.decode("#17D8C5")
-        };
-
         public final Instant timestamp;
         public final Vec3 position;
         public final double distance;
@@ -53,30 +52,33 @@ public class GhostSeekTracker {
         }
 
         public int getColor(int maxRange) {
+            List<Color> measurementColors = MiACompat.config.breadcrumbColors;
+
             if (pingLength != null) {
-                int index = Math.clamp(pingLength - 1, 0, MEASUREMENT_COLORS.length - 1);
-                return MEASUREMENT_COLORS[index].getRGB();
+                int index = Math.clamp(pingLength - 1, 0, measurementColors.size() - 1);
+                return measurementColors.get(index).getRGB();
             }
 
             double effectiveDistance = Math.max(distance - uncertainty, 0.0);
             float t = 1.0f - (float)(effectiveDistance / maxRange);
             t = Math.clamp(t, 0.0f, 1.0f);
 
-            return lerpColorRamp(MEASUREMENT_COLORS, t);
+            return lerpColorRamp(measurementColors, t);
         }
 
-        private static int lerpColorRamp(Color[] colors, float t) {
-            if (colors.length == 1) return colors[0].getRGB();
+        private static int lerpColorRamp(List<Color> colors, float t) {
+            if (colors.isEmpty()) return 0;
+            if (colors.size() == 1) return colors.getFirst().getRGB();
 
-            float scaled = t * (colors.length - 1);
+            float scaled = t * (colors.size() - 1);
             int i0 = (int) Math.floor(scaled);
-            int i1 = Math.min(i0 + 1, colors.length - 1);
+            int i1 = Math.min(i0 + 1, colors.size() - 1);
             float localT = scaled - i0;
 
             return ARGB.linearLerp(
                 localT,
-                colors[i0].getRGB(),
-                colors[i1].getRGB()
+                colors.get(i0).getRGB(),
+                colors.get(i1).getRGB()
             );
         }
     }
@@ -104,17 +106,25 @@ public class GhostSeekTracker {
         GhostSeekType type = getGhostSeekType();
         if (type == null) return null;
 
-        InclusiveRange<Integer> pingRange = type.getPingRange(pingLength);
+        InclusiveRange<@NotNull Integer> pingRange = type.getPingRange(pingLength);
         Measurement measurement = type.getPingMeasurement(player.position(), pingLength);
         addMeasurement(measurement);
 
         String range = "%d-%d blocks".formatted(pingRange.minInclusive(), pingRange.maxInclusive());
         MiACompat.LOGGER.info("Ghost seek ping: {}, range: {}", pingLength, range);
 
-        if (!MiACompat.config.ghostSeekDistanceHint) return null;
+        if (!MiACompat.config.ghostSeekDistanceHint && !MiACompat.config.pingColorMatchesBreadcrumb) return null;
 
-        return message.copy()
-            .append(Component.literal(" (" + range + ")")).setStyle(message.getStyle());
+        MutableComponent editedMessage = message.copy();
+        if (MiACompat.config.ghostSeekDistanceHint) {
+            editedMessage.append(" (" + range + ")");
+        }
+
+        if (MiACompat.config.pingColorMatchesBreadcrumb) {
+            editedMessage.setStyle(Style.EMPTY.withColor(measurement.getColor(type.getMaxRange())));
+        }
+
+        return editedMessage;
     }
 
     public List<Measurement> getMeasurements() { return new ArrayList<>(measurements); }
@@ -185,7 +195,7 @@ public class GhostSeekTracker {
 
         public int getMaxRange() { return ranges[0]; }
 
-        public InclusiveRange<Integer> getPingRange(int pingLength) {
+        public InclusiveRange<@NotNull Integer> getPingRange(int pingLength) {
             int rangeIndex = Math.clamp(pingLength - 1, 0, ranges.length - 1);
             int minDistance = (rangeIndex < ranges.length - 1) ? ranges[rangeIndex + 1] : 0;
             int maxDistance = ranges[rangeIndex];
@@ -194,7 +204,7 @@ public class GhostSeekTracker {
         }
 
         public Measurement getPingMeasurement(Vec3 pos, int pingLength) {
-            InclusiveRange<Integer> pingRange = getPingRange(pingLength);
+            InclusiveRange<@NotNull Integer> pingRange = getPingRange(pingLength);
 
             double midDistance = (pingRange.maxInclusive() + pingRange.minInclusive()) / 2.0;
             double uncertainty = (pingRange.maxInclusive() - pingRange.minInclusive()) / 2.0;
