@@ -20,7 +20,7 @@ import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
 public class SupportXaerosMinimap {
-    private static final Identifier BONFIRE_ICON_TEXTURE = Identifier.fromNamespaceAndPath(MiACompat.MOD_ID, "textures/gui/bonfire_icon.png");
+    private static final Identifier BONFIRE_ICON_TEXTURE = MiACompat.id("textures/gui/bonfire_icon.png");
 
     private static final Supplier<GpuSampler> NEAREST_NO_MIPMAPS = () -> RenderSystem.getDevice().createSampler(
         AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,

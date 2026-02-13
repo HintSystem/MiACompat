@@ -6,7 +6,6 @@ import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
 import xaero.common.minimap.waypoints.Waypoint;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,21 +40,21 @@ public class WaypointMixin {
 
     @Unique
     private int adjustX() {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (!SupportXaerosMinimap.isInWorldRenderer() || player == null) { return this.x; }
+        if (!SupportXaerosMinimap.isInWorldRenderer()) { return this.x; }
+        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().position();
 
         return (int) MiaDeeperWorld.relativizeWrapped(
-            new Vec3(player.getX(), 0, 0), new Vec3(this.x, 0, 0)
+            new Vec3(cameraPos.x, 0, 0), new Vec3(this.x, 0, 0)
         ).x();
     }
 
     @Unique
     private int adjustY() {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (!SupportXaerosMinimap.isInWorldRenderer() || player == null) { return this.y; }
+        if (!SupportXaerosMinimap.isInWorldRenderer()) { return this.y; }
+        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().position();
 
         return (int) MiaDeeperWorld.relativizeWrapped(
-            new Vec3(player.getX(), player.getY(), 0), new Vec3(this.x, this.y, 0)
+            new Vec3(cameraPos.x, cameraPos.y, 0), new Vec3(this.x, this.y, 0)
         ).y();
     }
 }

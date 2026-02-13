@@ -1,10 +1,13 @@
 package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.config.Config;
+import dev.hintsystem.miacompat.gui.Hud;
 import dev.hintsystem.miacompat.mods.SupportIris;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -19,6 +22,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
@@ -44,6 +48,8 @@ public class MiACompat implements ClientModInitializer {
     public static final GhostSeekTracker ghostSeekTracker = new GhostSeekTracker();
     private static final GhostSeekRenderer ghostSeekRenderer = new GhostSeekRenderer(ghostSeekTracker);
 
+    public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(MOD_ID, path); }
+
     public static boolean isMiAServer() {
         ServerData serverInfo = Minecraft.getInstance().getCurrentServer();
         return serverInfo != null && serverInfo.ip.contains("mineinabyss");
@@ -62,6 +68,8 @@ public class MiACompat implements ClientModInitializer {
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
         });
+
+        HudElementRegistry.attachElementBefore(VanillaHudElements.HELD_ITEM_TOOLTIP, id("miacompat_hud"), new Hud());
 
         WorldRenderEvents.END_MAIN.register(this::onRenderWorld);
 
@@ -106,8 +114,10 @@ public class MiACompat implements ClientModInitializer {
                             .executes(context -> {
                                 int pingLength = IntegerArgumentType.getInteger(context, "pingLength");
 
-                                ghostSeekTracker.addMeasurement(GhostSeekTracker.GhostSeekType.REFINED
-                                    .getPingMeasurement(client.player.position(), pingLength)
+                                GhostSeekTracker.GhostSeekType ghostSeekType = GhostSeekTracker.GhostSeekType.REFINED;
+                                ghostSeekTracker.awaitingPingTicks = ghostSeekType.pingIntervalTicks;
+                                ghostSeekTracker.addMeasurement(
+                                    ghostSeekType.getPingMeasurement(client.player.position(), pingLength)
                                 );
                                 return 1;
                             })))

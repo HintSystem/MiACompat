@@ -2,14 +2,11 @@ package dev.hintsystem.miacompat;
 
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -21,6 +18,8 @@ import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.vertex.*;
 
 import java.util.List;
 import java.util.OptionalDouble;
@@ -35,14 +34,14 @@ public class GhostSeekRenderer {
 
     public static final RenderPipeline QUADS_THROUGH_WALLS = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-            .withLocation(Identifier.fromNamespaceAndPath(MiACompat.MOD_ID, "pipeline/quads_through_walls"))
+            .withLocation(MiACompat.id("pipeline/quads_through_walls"))
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
             .build()
     );
 
     public static final RenderPipeline LINES_THROUGH_WALLS = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
-            .withLocation(Identifier.fromNamespaceAndPath(MiACompat.MOD_ID, "pipeline/lines_through_walls"))
+            .withLocation(MiACompat.id("pipeline/lines_through_walls"))
             .withVertexShader("core/rendertype_lines")
             .withFragmentShader("core/rendertype_lines_no_fog")
             .withBlend(BlendFunction.TRANSLUCENT).withCull(false).withDepthWrite(false)

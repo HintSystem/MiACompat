@@ -29,10 +29,12 @@ public class GhostSeekTracker {
     private static final String GHOST_SEEK_ITEM_NAME = "ghost seek";
     private static final String PRAYING_SKELETON_PREFIX = "praying_skeleton";
 
+    private static final int CACHE_DURATION = 20;
+    private int cacheValidTicks = 0;
+    public int awaitingPingTicks = 0;
+
     private GhostSeekType cachedGhostSeekType = null;
     private ItemStack cachedGhostSeek = null;
-    private int cacheValidTicks = 0;
-    private static final int CACHE_DURATION = 20;
 
     private final List<Measurement> measurements = new ArrayList<>();
 
@@ -90,6 +92,7 @@ public class GhostSeekTracker {
             ));
         }
 
+        if (awaitingPingTicks > 0) awaitingPingTicks--;
         if (cacheValidTicks > 0) cacheValidTicks--;
     }
 
@@ -106,6 +109,7 @@ public class GhostSeekTracker {
         GhostSeekType type = getGhostSeekType();
         if (type == null) return null;
 
+        awaitingPingTicks = type.pingIntervalTicks;
         InclusiveRange<@NotNull Integer> pingRange = type.getPingRange(pingLength);
         Measurement measurement = type.getPingMeasurement(player.position(), pingLength);
         addMeasurement(measurement);
@@ -154,19 +158,23 @@ public class GhostSeekTracker {
     }
 
     public int getMaxRange() {
-        return (getGhostSeekType() != null) ? getGhostSeekType().getMaxRange() : 150;
+        return (cachedGhostSeekType != null) ? cachedGhostSeekType.getMaxRange() : 150;
     }
+
+    /** @return last used ghost seek type, null if it hasn't been equipped before */
+    @Nullable
+    public GhostSeekType getLastGhostSeekType() { return cachedGhostSeekType; }
 
     @Nullable
     public GhostSeekType getGhostSeekType() {
-        updateGhostSeek();
-        return cachedGhostSeekType;
+        boolean valid = updateGhostSeek();
+        return valid ? cachedGhostSeekType : null;
     }
 
     @Nullable
     public ItemStack getGhostSeek() {
-        updateGhostSeek();
-        return cachedGhostSeek;
+        boolean valid = updateGhostSeek();
+        return valid ? cachedGhostSeek : null;
     }
 
     private static int parsePingLength(String message) {
@@ -181,15 +189,17 @@ public class GhostSeekTracker {
     }
 
     public enum GhostSeekType {
-        MAKESHIFT("makeshift", new int[] {150, 100, 50, 25}),
-        REPAIRED("repaired", new int[] {200, 150, 100, 50, 25}),
-        REFINED("refined", new int[] {250, 150, 100, 50, 25});
+        MAKESHIFT("makeshift", 20, new int[] {150, 100, 50, 25}),
+        REPAIRED("repaired", 20, new int[] {200, 150, 100, 50, 25}),
+        REFINED("refined", 15, new int[] {250, 150, 100, 50, 25});
 
         private final String itemName;
+        public final int pingIntervalTicks;
         private final int[] ranges;
 
-        GhostSeekType(String itemName, int[] ranges) {
+        GhostSeekType(String itemName, int pingIntervalSec, int[] ranges) {
             this.itemName = itemName;
+            this.pingIntervalTicks = pingIntervalSec * 20;
             this.ranges = ranges;
         }
 
@@ -228,15 +238,15 @@ public class GhostSeekTracker {
         }
     }
 
-    private void updateGhostSeek() {
+    /** @return true, if the ghost seek cache is valid */
+    private boolean updateGhostSeek() {
         // Use cache to avoid repeated inventory checks
-        if (cacheValidTicks > 0) return;
+        if (cacheValidTicks > 0) return cachedGhostSeek != null;
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
-            cachedGhostSeekType = null;
             cachedGhostSeek = null;
-            return;
+            return false;
         }
 
         Inventory inventory = player.getInventory();
@@ -247,13 +257,13 @@ public class GhostSeekTracker {
                 cachedGhostSeekType = GhostSeekType.fromItemStack(stack);
                 cachedGhostSeek = stack;
                 cacheValidTicks = CACHE_DURATION;
-                return;
+                return true;
             }
         }
 
-        cachedGhostSeekType = null;
         cachedGhostSeek = null;
         cacheValidTicks = CACHE_DURATION;
+        return false;
     }
 
     private static boolean isItemGhostSeek(ItemStack stack) {
