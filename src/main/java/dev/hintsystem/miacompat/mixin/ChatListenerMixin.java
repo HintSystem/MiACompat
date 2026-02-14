@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ChatListener.class)
 public class ChatListenerMixin {
     @Inject(method = "handleSystemMessage", at = @At("HEAD"))
-    public void onGameMessage(Component message, boolean overlay, CallbackInfo ci) {
+    public void miacompat$onGameMessage(Component message, boolean overlay, CallbackInfo ci) {
         if (overlay) return;
 
         BonfireTracker.onServerMessage(message);

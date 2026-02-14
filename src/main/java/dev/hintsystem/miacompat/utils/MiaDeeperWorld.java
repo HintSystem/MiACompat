@@ -1,19 +1,25 @@
 package dev.hintsystem.miacompat.utils;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class MiaDeeperWorld {
     public static final int LAYER_HEIGHT = 480;
     public static final int X_SHIFT = 16384;
 
     public enum LayerInfo {
-        Orth("Orth", 0, null, 0xFFA812),
-        L1("Edge of the Abyss", 0, 0, 0xDB4040, 0xBA1E1E),
-        L2("Forest of Temptation", 49152, -1368, 0x175ABF, 0x286FBF),
-        L3("Great Fault", 81920, -2424, 0xD428B1, 0xE82CC2),
-        L4("The Goblets of Giants", 131072, -3834, 0x557151),
-        L5("Sea of Corpses", 196608, -5629, 0x424767);
+        Orth("Orth", 0, null, 0xFFA812, List.of()),
+        L1("Edge of the Abyss", 0, 0, 0xDB4040, 0xBA1E1E, List.of(MobEffects.HUNGER)),
+        L2("Forest of Temptation", 49152, -1368, 0x175ABF, 0x286FBF, List.of(MobEffects.POISON, MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS)),
+        L3("Great Fault", 81920, -2424, 0xD428B1, 0xE82CC2, List.of(MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS)),
+        L4("The Goblets of Giants", 131072, -3834, 0x557151, List.of(MobEffects.WITHER, MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS)),
+        L5("Sea of Corpses", 196608, -5629, 0x424767, List.of(MobEffects.WITHER, MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS, MobEffects.DARKNESS));
 
         public final String title;
         public final int centerX;
@@ -21,18 +27,20 @@ public class MiaDeeperWorld {
         public final Integer startY;
         public final int titleColor;
         public final Integer subtitleColor;
+        public final List<Holder<@NotNull MobEffect>> ascensionEffects;
 
-        LayerInfo(String title, int centerX, Integer startY, int titleColor) {
-            this(title, centerX, startY, titleColor, null);
+        LayerInfo(String title, int centerX, Integer startY, int titleColor, List<Holder<@NotNull MobEffect>> ascensionEffects) {
+            this(title, centerX, startY, titleColor, null, ascensionEffects);
         }
 
-        LayerInfo(String title, int centerX, Integer startY, int titleColor, Integer subtitleColor) {
+        LayerInfo(String title, int centerX, Integer startY, int titleColor, Integer subtitleColor, List<Holder<@NotNull MobEffect>> ascensionEffects) {
             this.title = title;
             this.centerX = centerX;
             this.startSection = sectionFromX(centerX);
             this.startY = startY;
             this.titleColor = titleColor;
             this.subtitleColor = subtitleColor;
+            this.ascensionEffects = ascensionEffects;
         }
 
         public int getSubSection(int section) {

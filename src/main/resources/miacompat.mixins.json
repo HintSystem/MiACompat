@@ -4,6 +4,7 @@
     "compatibilityLevel": "JAVA_21",
     "client": [
         "GameRendererMixin",
+        "GuiGraphicsAccessor",
         "GuiMixin",
         "ChatListenerMixin",
         "pingwheel.PingLocationS2CPacketMixin",

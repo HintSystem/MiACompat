@@ -16,7 +16,7 @@ public class GuiMixin {
         at = @At("HEAD"),
         argsOnly = true
     )
-    public Component onOverlayMessage(Component message) {
+    public Component miacompat$onOverlayMessage(Component message) {
         Component newActionBarText = MiACompat.ghostSeekTracker.onActionbarMessage(message);
         return newActionBarText != null ? newActionBarText : message;
     }

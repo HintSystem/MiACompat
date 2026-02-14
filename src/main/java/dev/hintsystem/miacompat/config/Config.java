@@ -33,6 +33,8 @@ public class Config {
 
     public int maxWaypointRadius = 0;
     public boolean showBonfireWaypoint = true;
+    public boolean showCurseMeter = true;
+    public boolean showGhostSeekCooldown = true;
     public boolean ghostSeekDistanceHint = true;
     public boolean clearBreadcrumbsOnFind = true;
     public int breadcrumbDuration = 300;
@@ -117,8 +119,20 @@ public class Config {
                     .controller(TickBoxControllerBuilder::create)
                     .build())
 
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Show Curse Meter"))
+                    .binding(DEFAULTS.showCurseMeter, () -> showCurseMeter, val -> showCurseMeter = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
                 .group(OptionGroup.createBuilder()
                     .name(Component.literal("Ghost Seek"))
+
+                    .option(Option.<Boolean>createBuilder()
+                        .name(Component.literal("Show Cooldown Bar"))
+                        .binding(DEFAULTS.showGhostSeekCooldown, () -> showGhostSeekCooldown, val -> showGhostSeekCooldown = val)
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
 
                     .option(Option.<Boolean>createBuilder()
                         .name(Component.literal("Ping Distance Hints"))

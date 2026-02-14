@@ -48,6 +48,8 @@ public class MiACompat implements ClientModInitializer {
     public static final GhostSeekTracker ghostSeekTracker = new GhostSeekTracker();
     private static final GhostSeekRenderer ghostSeekRenderer = new GhostSeekRenderer(ghostSeekTracker);
 
+    private final Hud hud = new Hud();
+
     public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(MOD_ID, path); }
 
     public static boolean isMiAServer() {
@@ -67,9 +69,10 @@ public class MiACompat implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
+            hud.tick();
         });
 
-        HudElementRegistry.attachElementBefore(VanillaHudElements.HELD_ITEM_TOOLTIP, id("miacompat_hud"), new Hud());
+        HudElementRegistry.attachElementBefore(VanillaHudElements.HELD_ITEM_TOOLTIP, id("miacompat_hud"), hud);
 
         WorldRenderEvents.END_MAIN.register(this::onRenderWorld);
 
