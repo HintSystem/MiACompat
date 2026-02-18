@@ -20,9 +20,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
@@ -52,6 +54,12 @@ public class MiACompat implements ClientModInitializer {
 
     public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(MOD_ID, path); }
 
+    public static Style getIconStyle() {
+        return Style.EMPTY.withColor(CommonColors.WHITE).withFont(new FontDescription.Resource(id("icons")));
+    }
+
+    public static String getMiANamespace() { return "mineinabyss"; }
+
     public static boolean isMiAServer() {
         ServerData serverInfo = Minecraft.getInstance().getCurrentServer();
         return serverInfo != null && serverInfo.ip.contains("mineinabyss");
@@ -62,6 +70,7 @@ public class MiACompat implements ClientModInitializer {
         if (FabricLoader.getInstance().isModLoaded("iris")) SupportIris.assignPipelines();
 
         config.loadFromFile();
+        InventoryTracker.loadFromFile();
         BonfireTracker.loadFromFile();
 
         Minecraft client = Minecraft.getInstance();
@@ -115,6 +124,8 @@ public class MiACompat implements ClientModInitializer {
                     .then(ClientCommandManager.literal("add")
                         .then(ClientCommandManager.argument("pingLength", IntegerArgumentType.integer(0, 5))
                             .executes(context -> {
+                                if (client.player == null) return 0;
+
                                 int pingLength = IntegerArgumentType.getInteger(context, "pingLength");
 
                                 GhostSeekTracker.GhostSeekType ghostSeekType = GhostSeekTracker.GhostSeekType.REFINED;

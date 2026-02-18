@@ -25,7 +25,6 @@ import java.util.List;
 public class GhostSeekTracker {
     private static final double MIN_MEASUREMENT_DISTANCE = 6.0;
 
-    private static final int[] PASSIVE_SLOTS = {9, 10};
     private static final String GHOST_SEEK_ITEM_NAME = "ghost seek";
     private static final String PRAYING_SKELETON_PREFIX = "praying_skeleton";
 
@@ -251,7 +250,7 @@ public class GhostSeekTracker {
 
         Inventory inventory = player.getInventory();
 
-        for (int slotIndex : PASSIVE_SLOTS) {
+        for (int slotIndex : InventoryTracker.PASSIVE_SLOTS) {
             ItemStack stack = inventory.getItem(slotIndex);
             if (isItemGhostSeek(stack)) {
                 cachedGhostSeekType = GhostSeekType.fromItemStack(stack);

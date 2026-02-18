@@ -3,10 +3,12 @@
     "package": "dev.hintsystem.miacompat.mixin",
     "compatibilityLevel": "JAVA_21",
     "client": [
+        "ChatListenerMixin",
+        "ClientBundleTooltipMixin",
         "GameRendererMixin",
         "GuiGraphicsAccessor",
         "GuiMixin",
-        "ChatListenerMixin",
+        "ItemStackMixin",
         "pingwheel.PingLocationS2CPacketMixin",
         "xaerominimap.CustomRenderTypesMixin",
         "xaerominimap.InfoDisplaysMixin",
