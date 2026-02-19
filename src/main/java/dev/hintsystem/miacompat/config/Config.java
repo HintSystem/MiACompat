@@ -38,6 +38,7 @@ public class Config {
     public boolean showItemLoreInBundles = true;
     public boolean showContainerCoinWorth = true;
     public boolean showContainerExactCoinWorth = false;
+    public boolean hideWeaponRelicCooldowns = false;
 
     // Ghost Seek
     public boolean showGhostSeekCooldown = true;
@@ -132,6 +133,12 @@ public class Config {
                 .build())
 
             .option(showContainerExactCoinWorthOption)
+
+            .option(Option.<Boolean>createBuilder()
+                .name(Component.literal("Hide Weapon Relic Cooldowns in Action Bar"))
+                .binding(DEFAULTS.hideWeaponRelicCooldowns, () -> hideWeaponRelicCooldowns, val -> hideWeaponRelicCooldowns = val)
+                .controller(TickBoxControllerBuilder::create)
+                .build())
 
             .build();
 

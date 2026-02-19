@@ -1,7 +1,5 @@
-* Added Orth coin worth to container tooltips
-* Tooltips in bundles now display item lore
-* Added config options:
-  * `General`
-    * `Show Item Lore in Bundles`
-    * `Show Container Orth Coin Worth`
-    * `Show Precise Container Orth Coin Worth`
+* Added weapon relic cooldowns in item slots
+* Added config option:
+  * General
+    * `Hide Weapon Relic Cooldowns in Action Bar`
+* Fix rare bug where waypoints could flash across your screen

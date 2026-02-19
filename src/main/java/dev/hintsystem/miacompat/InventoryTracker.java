@@ -1,21 +1,28 @@
 package dev.hintsystem.miacompat;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class InventoryTracker {
     private static final Gson GSON = new Gson();
@@ -23,6 +30,41 @@ public class InventoryTracker {
     static final int[] PASSIVE_SLOTS = {9, 10};
 
     public static HashMap<String, Integer> orthTrades = new HashMap<>();
+
+    @Nullable
+    public static Component onActionbarMessage(Component message) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return null;
+
+        List<Component> siblings = message.getSiblings();
+        if (siblings.size() != 3) return null; // Cooldowns have 3 siblings
+
+        List<Component> cooldownSiblings = siblings.get(2).getSiblings();
+        if (cooldownSiblings.isEmpty()) return null;
+
+        if (cooldownSiblings.size() == 1 && cooldownSiblings.getFirst().getString().contains("✔")) {
+            return MiACompat.config.hideWeaponRelicCooldowns ? Component.empty() : null;
+        }
+
+        String cooldownText = cooldownSiblings.getLast().getString();
+        float cooldownSeconds;
+        try {
+            cooldownSeconds = Float.parseFloat(cooldownText.strip().replaceAll("[\\[\\]s]", ""));
+        } catch (NumberFormatException e) { return null; }
+
+        String itemName = siblings.getFirst().getString();
+
+        Stream.of(player.getMainHandItem(), player.getOffhandItem())
+            .filter(stack -> !stack.isEmpty() && stack.getItemName().getString().equals(itemName))
+            .findFirst()
+            .ifPresent(stack -> {
+                ItemCooldowns cooldowns = player.getCooldowns();
+
+                if (!cooldowns.isOnCooldown(stack)) cooldowns.addCooldown(stack, (int) (cooldownSeconds * 20));
+            });
+
+        return MiACompat.config.hideWeaponRelicCooldowns ? Component.empty() : null;
+    }
 
     /** Returns an iterable over the contents of a bundle or shulker box */
     @Nullable
