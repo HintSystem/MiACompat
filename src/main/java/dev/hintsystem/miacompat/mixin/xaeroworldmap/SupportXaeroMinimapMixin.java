@@ -1,8 +1,7 @@
 package dev.hintsystem.miacompat.mixin.xaeroworldmap;
 
-import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
+import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 
-import xaero.map.mods.SupportXaeroMinimap;
 import xaero.map.mods.gui.Waypoint;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = SupportXaeroMinimap.class, remap = false)
+@Mixin(value = xaero.map.mods.SupportXaeroMinimap.class, remap = false)
 public abstract class SupportXaeroMinimapMixin {
 
     @Shadow
@@ -21,14 +20,14 @@ public abstract class SupportXaeroMinimapMixin {
 
     @Inject(method = "getWaypoints", at = @At("RETURN"), cancellable = true)
     public void getWaypoints(CallbackInfoReturnable<ArrayList<Waypoint>> cir) {
-        if (!SupportXaerosMinimap.shouldShowBonfireWaypoint()) return;
+        if (!SupportXaeroMinimap.shouldShowBonfireWaypoint()) return;
 
-        SupportXaerosMinimap.updateBonfireWaypoint();
+        SupportXaeroMinimap.updateBonfireWaypoint();
 
         var originalArray = cir.getReturnValue();
 
         var newArray = new ArrayList<>(originalArray);
-        newArray.add(convertWaypoint(SupportXaerosMinimap.bonfireWaypoint, false, "", 1.0d));
+        newArray.add(convertWaypoint(SupportXaeroMinimap.bonfireWaypoint, false, "", 1.0d));
 
         cir.setReturnValue(newArray);
     }

@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
-import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
+import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -19,12 +19,12 @@ public class PlayerTrackerMinimapElementRendererMixin {
     @Inject(method = "preRender", at = @At("HEAD"))
     public void beforePreRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                 CallbackInfo ci) {
-        SupportXaerosMinimap.setInWorldRenderer(true);
+        SupportXaeroMinimap.setInWorldRenderer(true);
     }
 
     @Inject(method = "postRender", at = @At("HEAD"))
     public void beforePostRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                  CallbackInfo ci) {
-        SupportXaerosMinimap.setInWorldRenderer(false);
+        SupportXaeroMinimap.setInWorldRenderer(false);
     }
 }

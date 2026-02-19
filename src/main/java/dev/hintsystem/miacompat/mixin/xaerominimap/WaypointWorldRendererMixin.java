@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
+import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 
 import xaero.common.graphics.renderer.multitexture.MultiTextureRenderTypeRendererProvider;
 import xaero.common.minimap.waypoints.Waypoint;
@@ -44,14 +44,14 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
     @Inject(method = "preRender", at = @At("TAIL"))
     public void afterPreRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                 CallbackInfo ci) {
-        SupportXaerosMinimap.setInWorldRenderer(true);
+        SupportXaeroMinimap.setInWorldRenderer(true);
     }
 
     // Inject at the start of postRender - runs once per frame after all waypoints are rendered
     @Inject(method = "postRender", at = @At("HEAD"))
     public void beforePostRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                  CallbackInfo ci) {
-        SupportXaerosMinimap.setInWorldRenderer(false);
+        SupportXaeroMinimap.setInWorldRenderer(false);
     }
 
     @Inject(
@@ -72,6 +72,7 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
         MultiBufferSource.BufferSource vanillaBufferSource,
         CallbackInfoReturnable<Boolean> cir
     ) {
+        if (outOfBounds) { cir.cancel(); return; }
         if (MiACompat.config.maxWaypointRadius <= 0) return;
 
         double waypointPosDivider = renderInfo.backgroundCoordinateScale / this.context.dimCoordinateScale;
@@ -119,7 +120,7 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
         waypointBackgroundConsumer.addVertex(matrix, halfSize, 0.0F, 0.0F).setColor(r, g, b, a);
         waypointBackgroundConsumer.addVertex(matrix, halfSize, -size, 0.0F).setColor(r, g, b, a);
 
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(SupportXaerosMinimap.GUI_BONFIRE);
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(SupportXaeroMinimap.GUI_BONFIRE);
 
         vertexConsumer.addVertex(matrix, -halfSize, -size, 0.0F).setUv(0f, 0f).setColor(240, 240, 240, 255);
         vertexConsumer.addVertex(matrix, -halfSize,  0, 0.0F).setUv(0f, 1f).setColor(240, 240, 240, 255);

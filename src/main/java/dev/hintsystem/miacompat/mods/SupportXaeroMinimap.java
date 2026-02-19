@@ -19,7 +19,7 @@ import com.mojang.blaze3d.textures.GpuSampler;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
-public class SupportXaerosMinimap {
+public class SupportXaeroMinimap {
     private static final Identifier BONFIRE_ICON_TEXTURE = MiACompat.id("textures/gui/bonfire_icon.png");
 
     private static final Supplier<GpuSampler> NEAREST_NO_MIPMAPS = () -> RenderSystem.getDevice().createSampler(

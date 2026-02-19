@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
-import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
+import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
 
 import xaero.hud.minimap.player.tracker.PlayerTrackerMinimapElement;
@@ -26,7 +26,7 @@ public class PlayerTrackerMinimapElementMixin<P> {
     @Inject(method = "getX()D", at = @At("RETURN"), cancellable = true)
     private void modifyGetX(CallbackInfoReturnable<Double> cir) {
         LocalPlayer clientPlayer = Minecraft.getInstance().player;
-        if (!SupportXaerosMinimap.isInWorldRenderer() || clientPlayer == null) { return; }
+        if (!SupportXaeroMinimap.isInWorldRenderer() || clientPlayer == null) { return; }
 
         double trackedX = system.getReader().getX(player);
 
@@ -39,7 +39,7 @@ public class PlayerTrackerMinimapElementMixin<P> {
     @Inject(method = "getY()D", at = @At("RETURN"), cancellable = true)
     private void modifyGetY(CallbackInfoReturnable<Double> cir) {
         LocalPlayer clientPlayer = Minecraft.getInstance().player;
-        if (!SupportXaerosMinimap.isInWorldRenderer() || clientPlayer == null) { return; }
+        if (!SupportXaeroMinimap.isInWorldRenderer() || clientPlayer == null) { return; }
 
         double trackedX = system.getReader().getX(player);
         double trackedY = system.getReader().getY(player);

@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
-import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
+import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.hud.minimap.waypoint.WaypointCollector;
@@ -17,9 +17,9 @@ public class WaypointCollectorMixin {
 
     @Inject(method = "collect", at = @At("HEAD"))
     public void collect(List<Waypoint> destination, CallbackInfo ci) {
-        if (!SupportXaerosMinimap.shouldShowBonfireWaypoint()) return;
+        if (!SupportXaeroMinimap.shouldShowBonfireWaypoint()) return;
 
-        SupportXaerosMinimap.updateBonfireWaypoint();
-        destination.add(SupportXaerosMinimap.bonfireWaypoint);
+        SupportXaeroMinimap.updateBonfireWaypoint();
+        destination.add(SupportXaeroMinimap.bonfireWaypoint);
     }
 }

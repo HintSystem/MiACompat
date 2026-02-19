@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
-import dev.hintsystem.miacompat.mods.SupportXaerosMinimap;
+import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 
 import xaero.lib.XaeroLib;
 import xaero.common.graphics.CustomRenderTypes;
@@ -16,6 +16,6 @@ public class CustomRenderTypesMixin {
     private static void addBonfireLayer(CallbackInfo ci) {
         XaeroLib.INSTANCE.getClient()
             .getBufferProvider()
-            .addToFixedOrder(SupportXaerosMinimap.GUI_BONFIRE);
+            .addToFixedOrder(SupportXaeroMinimap.GUI_BONFIRE);
     }
 }
