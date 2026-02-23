@@ -20,9 +20,9 @@ observe:
   - ensure:
       mythicConditions:
       - hasaurastacks{n=reverberatingedgestack;s=10} true
-    onFail:
-    - sendActionBar:
-        text: <red>Sword is not charged
+      onFail:
+      - sendActionBar:
+          text: <red>Sword is not charged
   - cooldown:
       id: reverberating_edge
       length: 50s

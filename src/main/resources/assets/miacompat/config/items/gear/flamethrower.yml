@@ -51,8 +51,8 @@ observe:
     - flamethrower_torrent
   - consumeItem:
       type: mineinabyss:flamethrower_fuel
-    when:
-    - chance: 0.3
+      when:
+      - chance: 0.3
 passive:
 - match:
   - inHand
