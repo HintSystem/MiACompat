@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -69,13 +70,16 @@ public class MiACompat implements ClientModInitializer {
 	public void onInitializeClient() {
         if (FabricLoader.getInstance().isModLoaded("iris")) SupportIris.assignPipelines();
 
-        config.loadFromFile();
+        CooldownTracker.loadItemCooldownConfigs();
         InventoryTracker.loadFromFile();
+
+        config.loadFromFile();
         BonfireTracker.loadFromFile();
 
         Minecraft client = Minecraft.getInstance();
 
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
+            CooldownTracker.tick();
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
             hud.tick();
@@ -93,6 +97,13 @@ public class MiACompat implements ClientModInitializer {
             );
             if (bonfire != null) BonfireTracker.setTrackedBonfire(bonfire);
 
+            return InteractionResult.PASS;
+        });
+
+        UseItemCallback.EVENT.register((player, world, hand) -> {
+            if (!world.isClientSide()) return InteractionResult.PASS;
+
+            CooldownTracker.onItemRightClick(player.getItemInHand(hand));
             return InteractionResult.PASS;
         });
 

@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin;
 
-import dev.hintsystem.miacompat.InventoryTracker;
+import dev.hintsystem.miacompat.CooldownTracker;
 import dev.hintsystem.miacompat.MiACompat;
 
 import net.minecraft.client.gui.Gui;
@@ -12,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Objects;
-
 @Mixin(Gui.class)
 public class GuiMixin {
     @ModifyVariable(
@@ -22,11 +20,8 @@ public class GuiMixin {
         argsOnly = true
     )
     public Component miacompat$onOverlayMessage(Component message, @Cancellable CallbackInfo ci) {
-        Component editedText = MiACompat.ghostSeekTracker.onActionbarMessage(message);
-        if (editedText == null) editedText = InventoryTracker.onActionbarMessage(message);
+        if (!CooldownTracker.allowActionBarMessage(message)) { ci.cancel(); }
 
-        if (Objects.equals(editedText, Component.empty())) { ci.cancel(); }
-
-        return editedText != null ? editedText : message;
+        return MiACompat.ghostSeekTracker.modifyActionbarMessage(message);
     }
 }

@@ -95,18 +95,17 @@ public class GhostSeekTracker {
         if (cacheValidTicks > 0) cacheValidTicks--;
     }
 
-    @Nullable
-    public Component onActionbarMessage(Component message) {
+    public Component modifyActionbarMessage(Component message) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return null;
+        if (player == null) return message;
 
         String messageText = message.getString().trim().toLowerCase();
         int pingLength = parsePingLength(messageText);
 
-        if (pingLength == 0) return null;
+        if (pingLength == 0) return message;
 
         GhostSeekType type = getGhostSeekType();
-        if (type == null) return null;
+        if (type == null) return message;
 
         awaitingPingTicks = type.pingIntervalTicks;
         InclusiveRange<@NotNull Integer> pingRange = type.getPingRange(pingLength);
@@ -116,7 +115,7 @@ public class GhostSeekTracker {
         String range = "%d-%d blocks".formatted(pingRange.minInclusive(), pingRange.maxInclusive());
         MiACompat.LOGGER.info("Ghost seek ping: {}, range: {}", pingLength, range);
 
-        if (!MiACompat.config.ghostSeekDistanceHint && !MiACompat.config.pingColorMatchesBreadcrumb) return null;
+        if (!MiACompat.config.ghostSeekDistanceHint && !MiACompat.config.pingColorMatchesBreadcrumb) return message;
 
         MutableComponent editedMessage = message.copy();
         if (MiACompat.config.ghostSeekDistanceHint) {

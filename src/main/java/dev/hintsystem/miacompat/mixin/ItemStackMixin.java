@@ -42,21 +42,20 @@ public class ItemStackMixin {
             if (miacompat$cachedContainerTooltip == null) {
                 boolean showExactCoins = MiACompat.config.showContainerExactCoinWorth;
 
-                int coinWorth = InventoryTracker.getContainerCoinWorth(itemStack);
-                double exactCoinWorth = showExactCoins ? InventoryTracker.getContainerExactCoinWorth(itemStack) : 0;
+                InventoryTracker.CoinWorth coinWorth = InventoryTracker.getContainerCoinWorth(itemStack);
 
-                boolean skipNoValue = (showExactCoins && exactCoinWorth == 0) ||
-                    (!showExactCoins && coinWorth == 0);
+                boolean skipNoValue = (showExactCoins && coinWorth.total == 0) ||
+                    (!showExactCoins && coinWorth.whole == 0);
 
                 if (skipNoValue) {
                     miacompat$cachedContainerTooltip = Component.empty();
                     return;
                 }
 
-                MutableComponent containerTooltip = Component.literal("  " + coinWorth).withStyle(ChatFormatting.GOLD)
+                MutableComponent containerTooltip = Component.literal("  " + coinWorth.whole).withStyle(ChatFormatting.GOLD)
                     .append(Component.literal(" $").withStyle(MiACompat.getIconStyle()));
 
-                if (showExactCoins) containerTooltip.append(" (%.2f)".formatted(exactCoinWorth));
+                if (showExactCoins) containerTooltip.append(" (%.2f)".formatted(coinWorth.total));
 
                 miacompat$cachedContainerTooltip = containerTooltip;
             }

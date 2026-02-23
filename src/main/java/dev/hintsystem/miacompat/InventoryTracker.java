@@ -1,11 +1,7 @@
 package dev.hintsystem.miacompat;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -19,10 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.*;
 
 public class InventoryTracker {
     private static final Gson GSON = new Gson();
@@ -30,41 +23,6 @@ public class InventoryTracker {
     static final int[] PASSIVE_SLOTS = {9, 10};
 
     public static HashMap<String, Integer> orthTrades = new HashMap<>();
-
-    @Nullable
-    public static Component onActionbarMessage(Component message) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return null;
-
-        List<Component> siblings = message.getSiblings();
-        if (siblings.size() != 3) return null; // Cooldowns have 3 siblings
-
-        List<Component> cooldownSiblings = siblings.get(2).getSiblings();
-        if (cooldownSiblings.isEmpty()) return null;
-
-        if (cooldownSiblings.size() == 1 && cooldownSiblings.getFirst().getString().contains("✔")) {
-            return MiACompat.config.hideWeaponRelicCooldowns ? Component.empty() : null;
-        }
-
-        String cooldownText = cooldownSiblings.getLast().getString();
-        float cooldownSeconds;
-        try {
-            cooldownSeconds = Float.parseFloat(cooldownText.strip().replaceAll("[\\[\\]s]", ""));
-        } catch (NumberFormatException e) { return null; }
-
-        String itemName = siblings.getFirst().getString();
-
-        Stream.of(player.getMainHandItem(), player.getOffhandItem())
-            .filter(stack -> !stack.isEmpty() && stack.getItemName().getString().equals(itemName))
-            .findFirst()
-            .ifPresent(stack -> {
-                ItemCooldowns cooldowns = player.getCooldowns();
-
-                if (!cooldowns.isOnCooldown(stack)) cooldowns.addCooldown(stack, (int) (cooldownSeconds * 20));
-            });
-
-        return MiACompat.config.hideWeaponRelicCooldowns ? Component.empty() : null;
-    }
 
     /** Returns an iterable over the contents of a bundle or shulker box */
     @Nullable
@@ -78,48 +36,33 @@ public class InventoryTracker {
         return null;
     }
 
-    /** Returns the total coin worth of items in a container (whole coins only) */
-    public static int getContainerCoinWorth(ItemStack itemStack) {
-        Iterable<ItemStack> items = getContainerContents(itemStack);
-        if (items == null) return 0;
-
-        int coinSum = 0;
-        for (ItemStack stack : items) {
-            int nested = getContainerCoinWorth(stack);
-            if (nested > 0) {
-                coinSum += nested;
-                continue;
-            }
-
-            Integer itemsPerCoin = InventoryTracker.getItemsPerCoin(stack);
-            if (itemsPerCoin == null) continue;
-
-            coinSum += Math.floorDiv(stack.getCount(), itemsPerCoin);
-        }
-
-        return coinSum;
+    public static class CoinWorth {
+        public int whole = 0; // Amount you can sell for
+        public double total = 0; // Accumulated total value
     }
 
-    /** Returns the exact coin worth of items in a container (includes fractional coins) */
-    public static double getContainerExactCoinWorth(ItemStack itemStack) {
-        Iterable<ItemStack> items = getContainerContents(itemStack);
-        if (items == null) return 0;
+    public static CoinWorth getContainerCoinWorth(ItemStack itemStack) {
+        CoinWorth worth = new CoinWorth();
 
-        double coinSum = 0;
+        Iterable<ItemStack> items = getContainerContents(itemStack);
+        if (items == null) return worth;
+
         for (ItemStack stack : items) {
-            double nested = getContainerExactCoinWorth(stack);
-            if (nested > 0) {
-                coinSum += nested;
+            CoinWorth nested = getContainerCoinWorth(stack);
+            if (nested.whole > 0 || nested.total > 0) {
+                worth.whole += nested.whole;
+                worth.total += nested.total;
                 continue;
             }
 
             Integer itemsPerCoin = InventoryTracker.getItemsPerCoin(stack);
             if (itemsPerCoin == null) continue;
 
-            coinSum += (double) stack.getCount() / itemsPerCoin;
+            worth.whole += Math.floorDiv(stack.getCount(), itemsPerCoin);
+            worth.total += (double) stack.getCount() / itemsPerCoin;
         }
 
-        return coinSum;
+        return worth;
     }
 
     /** Returns how many of this item are needed to trade for one coin, or null if not tradeable */
@@ -129,6 +72,14 @@ public class InventoryTracker {
         if (modelName == null) return null;
 
         return orthTrades.get(modelName);
+    }
+
+    @Nullable
+    public static Identifier getMiAModelId(ItemStack itemStack) {
+        Identifier modelId = itemStack.get(DataComponents.ITEM_MODEL);
+        if (modelId == null || !Objects.equals(modelId.getNamespace(), MiACompat.getMiANamespace())) return null;
+
+        return modelId;
     }
 
     @Nullable
@@ -143,7 +94,7 @@ public class InventoryTracker {
         String path = modelId.getPath();
 
         int lastSlash = path.lastIndexOf('/');
-        return  (lastSlash >= 0) ? path.substring(lastSlash + 1) : path;
+        return (lastSlash >= 0) ? path.substring(lastSlash + 1) : path;
     }
 
     static void loadFromFile() {
@@ -151,9 +102,9 @@ public class InventoryTracker {
     }
 
     static HashMap<String, Integer> loadOrthTrades() {
-        try (InputStream stream = InventoryTracker.class.getResourceAsStream(
-            "/assets/" + MiACompat.MOD_ID + "/config/orth_mob_trades.json")) {
+        String orthTradesResource = "/assets/" + MiACompat.MOD_ID + "/config/orth_mob_trades.json";
 
+        try (InputStream stream = MiACompat.class.getResourceAsStream(orthTradesResource)) {
             if (stream == null) {
                 throw new RuntimeException("Could not find orth_mob_trades.json in resources!");
             }
