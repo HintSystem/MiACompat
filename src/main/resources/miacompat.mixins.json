@@ -11,6 +11,7 @@
         "GuiMixin",
         "ItemStackMixin",
         "LocalPlayerMixin",
+        "appleskin.TextureHelperMixin",
         "pingwheel.PingLocationS2CPacketMixin",
         "xaerominimap.AbstractWaypointRenderProviderMixin",
         "xaerominimap.CustomRenderTypesMixin",
@@ -20,8 +21,7 @@
         "xaerominimap.WaypointCollectorMixin",
         "xaerominimap.WaypointWorldRendererMixin",
         "xaeroworldmap.SupportXaeroMinimapMixin",
-        "xaeroworldmap.WaypointRenderProviderMixin",
-        "appleskin.TextureHelperMixin"
+        "xaeroworldmap.WaypointRenderProviderMixin"
     ],
     "injectors": {
         "defaultRequire": 1

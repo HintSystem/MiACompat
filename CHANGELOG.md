@@ -1,5 +1,1 @@
-* Added weapon relic cooldowns in item slots
-* Added config option:
-  * General
-    * `Hide Weapon Relic Cooldowns in Action Bar`
-* Fix rare bug where waypoints could flash across your screen
+* Fix [AppleSkin](https://modrinth.com/mod/appleskin) not showing food nutrition in tooltips
