@@ -69,6 +69,8 @@ dependencies {
     modImplementation 'maven.modrinth:xaeros-minimap:fabric-1.21.11-25.3.5'
     modImplementation 'maven.modrinth:xaeros-world-map:fabric-1.21.11-1.40.6'
 
+    modImplementation 'maven.modrinth:appleskin:59ti1rvg'
+
     xaeroLib 'maven.modrinth:xaeros-minimap:fabric-1.21.11-25.3.5'
 }
 

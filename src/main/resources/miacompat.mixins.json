@@ -20,7 +20,8 @@
         "xaerominimap.WaypointCollectorMixin",
         "xaerominimap.WaypointWorldRendererMixin",
         "xaeroworldmap.SupportXaeroMinimapMixin",
-        "xaeroworldmap.WaypointRenderProviderMixin"
+        "xaeroworldmap.WaypointRenderProviderMixin",
+        "appleskin.TextureHelperMixin"
     ],
     "injectors": {
         "defaultRequire": 1
