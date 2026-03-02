@@ -23,6 +23,7 @@ public class InventoryTracker {
     static final int[] PASSIVE_SLOTS = {9, 10};
 
     public static HashMap<String, Integer> orthTrades = new HashMap<>();
+    private static Map<String, FoodData> foodValues = new HashMap<>();
 
     /** Returns an iterable over the contents of a bundle or shulker box */
     @Nullable
@@ -40,6 +41,8 @@ public class InventoryTracker {
         public int whole = 0; // Amount you can sell for
         public double total = 0; // Accumulated total value
     }
+    
+    public static record FoodData(double saturation, double nutrition) {}
 
     public static CoinWorth getContainerCoinWorth(ItemStack itemStack) {
         CoinWorth worth = new CoinWorth();
@@ -74,6 +77,13 @@ public class InventoryTracker {
         return orthTrades.get(modelName);
     }
 
+    /** Returns FoodValue for this custom food, or null if not custom food */
+    @Nullable
+    public static FoodData getFoodValue(ItemStack itemStack) {
+        String modelName = getMiAModelName(itemStack);
+        return foodValues.get(modelName);
+    }
+    
     @Nullable
     public static Identifier getMiAModelId(ItemStack itemStack) {
         Identifier modelId = itemStack.get(DataComponents.ITEM_MODEL);
@@ -99,6 +109,7 @@ public class InventoryTracker {
 
     static void loadFromFile() {
         orthTrades = loadOrthTrades();
+        foodValues = loadFoodValues();
     }
 
     static HashMap<String, Integer> loadOrthTrades() {
@@ -119,4 +130,24 @@ public class InventoryTracker {
             throw new RuntimeException("Failed to load default prices", e);
         }
     }
+    
+    static HashMap<String, FoodData> loadFoodValues() {
+        String foodValuesResource = "/assets/" + MiACompat.MOD_ID + "/config/food_values.json";
+
+        try (InputStream stream = MiACompat.class.getResourceAsStream(foodValuesResource)) {
+            if (stream == null) {
+                throw new RuntimeException("Could not find food_values.json in resources!");
+            }
+
+            InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+
+            Type type = new TypeToken<HashMap<String, FoodData>>() {}.getType();
+
+            return GSON.fromJson(reader, type);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load food values", e);
+        }
+    }
+    
 }

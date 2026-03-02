@@ -1,0 +1,226 @@
+{
+  "cut_meat_cooked": {
+    "nutrition": 6,
+    "saturation": 12.8
+  },
+  "cut_meat_raw": {
+    "nutrition": 3,
+    "saturation": 1.8
+  },
+  "tosubachi": {
+    "nutrition": 10,
+    "saturation": 10
+  },
+  "ashimite_meat_cooked": {
+    "nutrition": 8,
+    "saturation": 12.8
+  },
+  "ashimite_meat_raw": {
+    "nutrition": 3,
+    "saturation": 1.8
+  },
+  "billabonk_leg_cooked": {
+    "nutrition": 5,
+    "saturation": 6
+  },
+  "billabonk_leg_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "chikyuoebi_cooked": {
+    "nutrition": 7,
+    "saturation": 9.6
+  },
+  "chikyuoebi_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "corpse_weeper_meat_cooked": {
+    "nutrition": 8,
+    "saturation": 12.8
+  },
+  "corpse_weeper_meat_raw": {
+    "nutrition": 3,
+    "saturation": 1.8
+  },
+  "cyatoria_drumstick_cooked": {
+    "nutrition": 6,
+    "saturation": 7.2
+  },
+  "cyatoria_drumstick_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "demonfish_cooked": {
+    "nutrition": 6,
+    "saturation": 9.6
+  },
+  "demonfish_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "dosetori_meat_cooked": {
+    "nutrition": 6,
+    "saturation": 7.2
+  },
+  "dosetori_meat_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "fuwagi_meat_cooked": {
+    "nutrition": 5,
+    "saturation": 6
+  },
+  "fuwagi_meat_raw": {
+    "nutrition": 3,
+    "saturation": 1.8
+  },
+  "hagamizukin_cooked": {
+    "nutrition": 6,
+    "saturation": 9.6
+  },
+  "hagamizukin_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "hamashirama_cooked": {
+    "nutrition": 6,
+    "saturation": 9.6
+  },
+  "hamashirama_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "hammerbeak_wing_cooked": {
+    "nutrition": 6,
+    "saturation": 7.2
+  },
+  "hammerbeak_wing_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "hashofu_tail_cooked": {
+    "nutrition": 5,
+    "saturation": 6
+  },
+  "hashofu_tail_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "ikenosuke_cooked": {
+    "nutrition": 4,
+    "saturation": 7
+  },
+  "ikenosuke_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "inbyo_meat_cooked": {
+    "nutrition": 8,
+    "saturation": 12.8
+  },
+  "inbyo_meat_raw": {
+    "nutrition": 3,
+    "saturation": 1.8
+  },
+  "kuongatari_abdomen_cooked": {
+    "nutrition": 1,
+    "saturation": 0.6
+  },
+  "kuongatari_abdomen": {
+    "nutrition": 1,
+    "saturation": 0.2
+  },
+  "neritantan_meat_cooked": {
+    "nutrition": 6,
+    "saturation": 9.6
+  },
+  "neritantan_meat_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "okibo_meat_cooked": {
+    "nutrition": 8,
+    "saturation": 12.8
+  },
+  "okibo_meat_raw": {
+    "nutrition": 3,
+    "saturation": 1.8
+  },
+  "onitsuchi_wing_cooked": {
+    "nutrition": 6,
+    "saturation": 7.2
+  },
+  "onitsuchi_wing_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "ottobas_meat_cooked": {
+    "nutrition": 8,
+    "saturation": 12.8
+  },
+  "ottobas_meat_raw": {
+    "nutrition": 3,
+    "saturation": 1.8
+  },
+  "shroombear_meat_cooked": {
+    "nutrition": 6,
+    "saturation": 9.6
+  },
+  "shroombear_meat_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "spiralsquid_cooked": {
+    "nutrition": 5,
+    "saturation": 6
+  },
+  "spiralsquid_raw": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "squidfly_brain_cooked": {
+    "nutrition": 5,
+    "saturation": 6
+  },
+  "squidfly_brain_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "tachikatana_leg": {
+    "nutrition": 5,
+    "saturation": 5
+  },
+  "tesuchi_scales": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "tesuchi_tail": {
+    "nutrition": 2,
+    "saturation": 0.4
+  },
+  "tesuchi_tail_cooked": {
+    "nutrition": 5,
+    "saturation": 6
+  },
+  "uibuta_meat_cooked": {
+    "nutrition": 6,
+    "saturation": 7.2
+  },
+  "uibuta_meat_raw": {
+    "nutrition": 2,
+    "saturation": 1.2
+  },
+  "yomotsubi_abdomen_cooked": {
+    "nutrition": 1,
+    "saturation": 0.6
+  },
+  "yomotsubi_abdomen_raw": {
+    "nutrition": 1,
+    "saturation": 0.2
+  },
+  "sporemanta_wing": {
+    "nutrition": 2,
+    "saturation": 0.8
+  }
+}

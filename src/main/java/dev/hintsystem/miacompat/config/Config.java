@@ -40,6 +40,7 @@ public class Config {
     public boolean showContainerExactCoinWorth = false;
     public boolean showItemSlotGearCooldowns = false;
     public boolean hideActionBarGearCooldowns = false;
+    public boolean showFoodSaturationValues = true;
 
     // Ghost Seek
     public boolean showGhostSeekCooldown = true;
@@ -147,6 +148,12 @@ public class Config {
                 .controller(TickBoxControllerBuilder::create)
                 .build())
 
+            .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Show Food Saturation and Nutrition"))
+                    .binding(DEFAULTS.showFoodSaturationValues, () -> showFoodSaturationValues, val -> showFoodSaturationValues = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+            
             .build();
 
         // Ghost Seek
