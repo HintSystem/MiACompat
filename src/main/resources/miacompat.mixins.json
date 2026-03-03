@@ -11,6 +11,7 @@
         "GuiMixin",
         "ItemStackMixin",
         "LocalPlayerMixin",
+        "appleskin.TextureHelperMixin",
         "pingwheel.PingLocationS2CPacketMixin",
         "xaerominimap.AbstractWaypointRenderProviderMixin",
         "xaerominimap.CustomRenderTypesMixin",

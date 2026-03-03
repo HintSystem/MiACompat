@@ -41,6 +41,7 @@ repositories {
 
     maven { url "https://maven.terraformersmc.com/" } // Mod menu
     maven { url "https://maven.isxander.dev/releases" } // YACL
+    maven { url "https://maven.ryanliptak.com/" } // AppleSkin
 
     mavenCentral()
 }
@@ -63,6 +64,10 @@ dependencies {
 
     modImplementation "dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric"
     modImplementation "com.terraformersmc:modmenu:17.0.0-beta.2"
+
+    modImplementation("squeek.appleskin:appleskin-fabric:mc1.21.11-3.0.8") {
+        exclude module: 'modmenu'
+    }
 
     modImplementation 'maven.modrinth:ping-wheel:1.12.1-fabric,1.21.11'
 
