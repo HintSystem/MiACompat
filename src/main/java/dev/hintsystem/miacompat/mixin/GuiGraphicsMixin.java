@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin;
 
-import dev.hintsystem.miacompat.gui.GearCooldown;
+import dev.hintsystem.miacompat.client.hud.GearCooldownOverlay;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class GuiGraphicsMixin {
     @Inject(method = "renderItemCooldown", at = @At("HEAD"), cancellable = true)
     public void miacompat$renderGearCooldown(ItemStack itemStack, int x, int y, CallbackInfo ci) {
-        if (GearCooldown.drawGearCooldown((GuiGraphics)(Object) this, itemStack, x, y)) ci.cancel();
+        if (GearCooldownOverlay.drawGearCooldown((GuiGraphics)(Object) this, itemStack, x, y)) ci.cancel();
     }
 }

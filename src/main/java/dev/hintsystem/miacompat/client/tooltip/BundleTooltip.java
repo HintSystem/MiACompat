@@ -14,7 +14,9 @@ import org.joml.Vector2i;
 
 import java.util.List;
 
-public abstract class BundleTooltip {
+public final class BundleTooltip {
+    private BundleTooltip() {}
+
     // Add lore to item tooltips drawn in bundles
     public static boolean onDrawItemTooltip(BundleContents contents, Font font, GuiGraphics graphics, int x, int y, int w) {
         if (!MiACompat.config.showItemLoreInBundles || !contents.hasSelectedItem()) return false;

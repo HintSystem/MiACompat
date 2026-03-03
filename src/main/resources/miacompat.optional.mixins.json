@@ -1,0 +1,22 @@
+{
+    "required": true,
+    "plugin": "dev.hintsystem.miacompat.MiACompatMixinPlugin",
+    "package": "dev.hintsystem.miacompat.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "client": [
+        "appleskin.TextureHelperMixin",
+        "pingwheel.PingLocationS2CPacketMixin",
+        "xaerominimap.AbstractWaypointRenderProviderMixin",
+        "xaerominimap.CustomRenderTypesMixin",
+        "xaerominimap.InfoDisplaysMixin",
+        "xaerominimap.PlayerTrackerMinimapElementMixin",
+        "xaerominimap.PlayerTrackerMinimapElementRendererMixin",
+        "xaerominimap.WaypointCollectorMixin",
+        "xaerominimap.WaypointWorldRendererMixin",
+        "xaeroworldmap.SupportXaeroMinimapMixin",
+        "xaeroworldmap.WaypointRenderProviderMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

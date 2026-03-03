@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.gui;
+package dev.hintsystem.miacompat.client.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.CooldownTracker;
@@ -7,7 +7,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
-public class GearCooldown {
+public final class GearCooldownOverlay {
+    private GearCooldownOverlay() {}
+
     public static boolean drawGearCooldown(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
         if (!MiACompat.config.showItemSlotGearCooldowns) return false;
 

@@ -10,9 +10,11 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public abstract class OrthWorthTooltip {
+public final class OrthWorthTooltip {
     private static ItemStack lastContainerStack = ItemStack.EMPTY;
     private static Component cachedContainerTooltip = null;
+
+    private OrthWorthTooltip() {}
 
     public static void modifyContainerTooltip(ItemStack itemStack, List<Component> tooltip) {
         if (!MiACompat.config.showContainerCoinWorth) return;

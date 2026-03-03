@@ -20,7 +20,8 @@
         ]
 	},
 	"mixins": [
-		"miacompat.mixins.json"
+		"miacompat.mixins.json",
+        "miacompat.optional.mixins.json"
 	],
 	"depends": {
 		"java": ">=21",
@@ -32,8 +33,5 @@
     "recommends": {
         "xaerominimap": "*",
         "xaeroworldmap": "*"
-    },
-    "suggests": {
-        "pingwheel": "~1.12.0"
     }
 }
