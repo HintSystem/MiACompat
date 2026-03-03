@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin;
 
-import dev.hintsystem.miacompat.CooldownTracker;
+import dev.hintsystem.miacompat.client.CooldownTracker;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;

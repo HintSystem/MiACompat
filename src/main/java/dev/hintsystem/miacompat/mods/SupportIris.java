@@ -2,7 +2,7 @@
 
 package dev.hintsystem.miacompat.mods;
 
-import dev.hintsystem.miacompat.GhostSeekRenderer;
+import dev.hintsystem.miacompat.client.GhostSeekRenderer;
 import dev.hintsystem.miacompat.MiACompat;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;

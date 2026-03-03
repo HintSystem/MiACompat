@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin;
 
-import dev.hintsystem.miacompat.BonfireTracker;
+import dev.hintsystem.miacompat.client.BonfireTracker;
 
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;

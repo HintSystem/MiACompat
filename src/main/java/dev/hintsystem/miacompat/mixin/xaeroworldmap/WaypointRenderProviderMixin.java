@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin.xaeroworldmap;
 
-import dev.hintsystem.miacompat.GhostSeekTracker;
+import dev.hintsystem.miacompat.client.GhostSeekTracker;
 import dev.hintsystem.miacompat.MiACompat;
 
 import xaero.map.element.render.ElementRenderLocation;

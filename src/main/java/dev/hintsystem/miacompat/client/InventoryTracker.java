@@ -1,4 +1,6 @@
-package dev.hintsystem.miacompat;
+package dev.hintsystem.miacompat.client;
+
+import dev.hintsystem.miacompat.MiACompat;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
@@ -97,7 +99,7 @@ public class InventoryTracker {
         return (lastSlash >= 0) ? path.substring(lastSlash + 1) : path;
     }
 
-    static void loadFromFile() {
+    public static void loadFromFile() {
         orthTrades = loadOrthTrades();
     }
 
@@ -114,7 +116,6 @@ public class InventoryTracker {
             Type type = new TypeToken<HashMap<String, Integer>>() {}.getType();
 
             return GSON.fromJson(reader, type);
-
         } catch (Exception e) {
             throw new RuntimeException("Failed to load default prices", e);
         }

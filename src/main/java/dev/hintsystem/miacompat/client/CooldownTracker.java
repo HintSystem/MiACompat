@@ -1,5 +1,6 @@
-package dev.hintsystem.miacompat;
+package dev.hintsystem.miacompat.client;
 
+import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.schema.ItemConfig;
 
 import net.minecraft.network.chat.Component;

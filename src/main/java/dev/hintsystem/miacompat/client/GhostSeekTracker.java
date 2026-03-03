@@ -1,4 +1,6 @@
-package dev.hintsystem.miacompat;
+package dev.hintsystem.miacompat.client;
+
+import dev.hintsystem.miacompat.MiACompat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

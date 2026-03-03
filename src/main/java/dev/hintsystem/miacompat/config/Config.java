@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.config;
 
-import dev.hintsystem.miacompat.GhostSeekRenderer;
+import dev.hintsystem.miacompat.client.GhostSeekRenderer;
 import dev.hintsystem.miacompat.MiACompat;
 
 import dev.isxander.yacl3.api.*;

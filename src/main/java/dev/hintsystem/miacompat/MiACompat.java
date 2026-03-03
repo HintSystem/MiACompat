@@ -1,5 +1,6 @@
 package dev.hintsystem.miacompat;
 
+import dev.hintsystem.miacompat.client.*;
 import dev.hintsystem.miacompat.config.Config;
 import dev.hintsystem.miacompat.gui.Hud;
 import dev.hintsystem.miacompat.mods.SupportIris;

@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin;
 
-import dev.hintsystem.miacompat.CooldownTracker;
+import dev.hintsystem.miacompat.client.CooldownTracker;
 import dev.hintsystem.miacompat.MiACompat;
 
 import net.minecraft.client.gui.Gui;

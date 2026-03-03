@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.gui;
 
-import dev.hintsystem.miacompat.GhostSeekTracker;
+import dev.hintsystem.miacompat.client.GhostSeekTracker;
 import dev.hintsystem.miacompat.MiACompat;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
