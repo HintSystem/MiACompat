@@ -22,8 +22,12 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.textures.GpuTextureView;
 
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import org.joml.Matrix4f;
@@ -34,14 +38,20 @@ import org.lwjgl.system.MemoryUtil;
 public class GhostSeekRenderer {
     private static final String RENDER_LABEL = MiACompat.MOD_ID + " ghost seek renderer";
 
-    public static final RenderPipeline QUADS_THROUGH_WALLS = RenderPipelines.register(
+    private static final ByteBufferBuilder allocator = new ByteBufferBuilder(RenderType.SMALL_BUFFER_SIZE);
+
+    private static final Vector4f COLOR_MODULATOR = new Vector4f(1f, 1f, 1f, 1f);
+    private static final Vector3f MODEL_OFFSET = new Vector3f();
+    private static final Matrix4f TEXTURE_MATRIX = new Matrix4f();
+
+    public static final RenderLayer QUADS_THROUGH_WALLS = new RenderLayer(RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(MiACompat.id("pipeline/quads_through_walls"))
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
             .build()
-    );
+    ));
 
-    public static final RenderPipeline LINES_THROUGH_WALLS = RenderPipelines.register(
+    public static final RenderLayer LINES_THROUGH_WALLS = new RenderLayer(RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
             .withLocation(MiACompat.id("pipeline/lines_through_walls"))
             .withVertexShader("core/rendertype_lines")
@@ -50,26 +60,18 @@ public class GhostSeekRenderer {
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
             .build()
-    );
+    ));
 
     public enum BreadcrumbRenderType {
         WIREFRAME_BOX(LINES_THROUGH_WALLS),
         FILLED_BOX(QUADS_THROUGH_WALLS);
 
-        public final RenderPipeline pipeline;
+        public final RenderLayer renderLayer;
 
-        BreadcrumbRenderType(RenderPipeline pipeline) {
-            this.pipeline = pipeline;
+        BreadcrumbRenderType(RenderLayer renderLayer) {
+            this.renderLayer = renderLayer;
         }
     }
-
-    private static final ByteBufferBuilder allocator = new ByteBufferBuilder(RenderType.SMALL_BUFFER_SIZE);
-    private BufferBuilder buffer;
-
-    private static final Vector4f COLOR_MODULATOR = new Vector4f(1f, 1f, 1f, 1f);
-    private static final Vector3f MODEL_OFFSET = new Vector3f();
-    private static final Matrix4f TEXTURE_MATRIX = new Matrix4f();
-    private MappableRingBuffer vertexBuffer;
 
     private final GhostSeekTracker ghostSeekTracker;
 
@@ -84,7 +86,8 @@ public class GhostSeekRenderer {
     }
 
     public boolean isOverlayEnabled() {
-        return overlayEnabled && ghostSeekTracker.breadcrumbsVisible();
+        return true;
+//        return overlayEnabled && ghostSeekTracker.breadcrumbsVisible();
     }
 
     public void render(WorldRenderContext context) {
@@ -96,26 +99,24 @@ public class GhostSeekRenderer {
         // Check if there's anything to render
         if (ghostSeekTracker.getMeasurements().isEmpty()) return;
 
-        // Extraction phase
-        BreadcrumbRenderType renderType = MiACompat.config.breadcrumbRenderType;
-        extractRenderData(context, renderType);
-
-        // Drawing phase
-        if (buffer != null) drawThroughWalls(client, renderType.pipeline);
-    }
-
-    private void extractRenderData(WorldRenderContext context, BreadcrumbRenderType renderType) {
         PoseStack matrices = context.matrices();
         Vec3 camera = context.worldState().cameraRenderState.pos;
 
         matrices.pushPose();
         matrices.translate(-camera.x, -camera.y, -camera.z);
 
-        if (buffer == null) {
-            buffer = new BufferBuilder(allocator, renderType.pipeline.getVertexFormatMode(), renderType.pipeline.getVertexFormat());
-        }
+        // Extraction phase
+        BreadcrumbRenderType breadcrumbType = MiACompat.config.breadcrumbRenderType;
+        submitBreadcrumbs(matrices, camera, breadcrumbType);
 
-        // Render breadcrumbs
+        matrices.popPose();
+
+        breadcrumbType.renderLayer.draw(client);
+    }
+
+    private void submitBreadcrumbs(PoseStack matrices, Vec3 camera, BreadcrumbRenderType breadcrumbType) {
+        BufferBuilder buffer = breadcrumbType.renderLayer.getBuffer(allocator);
+
         int maxDistance = ghostSeekTracker.getMaxRange();
         List<GhostSeekTracker.Measurement> measurements = ghostSeekTracker.getMeasurements();
         for (GhostSeekTracker.Measurement m : measurements) {
@@ -123,15 +124,15 @@ public class GhostSeekRenderer {
             float t = (float) Math.clamp(m.distance / maxDistance, 0.0, 1.0);
             float strength = (float) MiACompat.config.breadcrumbDistanceScale * 1.5f;
             float growthFactor = strength >= 0
-                ? t * strength           // farther = bigger
-                : (1.0f - t) * -strength; // closer = bigger
+                ? t * strength
+                : (1.0f - t) * -strength;
 
             float scale = 1.0f + growthFactor;
             float size = (MiACompat.config.breadcrumbSize * scale);
 
             int color = ARGB.color((float) MiACompat.config.breadcrumbOpacity, m.getColor(maxDistance));
 
-            switch (renderType) {
+            switch (breadcrumbType) {
                 case WIREFRAME_BOX -> {
                     float cameraDistance = (float) Math.max(camera.distanceTo(m.position) - size, 0);
                     float lineScale = Math.min(6 / cameraDistance, 1f);
@@ -142,8 +143,6 @@ public class GhostSeekRenderer {
                 case FILLED_BOX -> renderFilledBox(matrices, buffer, m.position, size, color);
             }
         }
-
-        matrices.popPose();
     }
 
     private static void renderOutlinedBox(PoseStack matrices, BufferBuilder buffer, Vec3 center, double size, int color, float lineWidth) {
@@ -200,82 +199,129 @@ public class GhostSeekRenderer {
         b.addVertex(pose, x4,y4,z4).setColor(color);
     }
 
-    private void drawThroughWalls(Minecraft client, RenderPipeline pipeline) {
-        MeshData builtBuffer = buffer.buildOrThrow();
-        MeshData.DrawState drawParameters = builtBuffer.drawState();
-        VertexFormat format = drawParameters.format();
-
-        GpuBuffer vertices = upload(drawParameters, format, builtBuffer);
-        draw(client, pipeline, builtBuffer, drawParameters, vertices, format);
-
-        // Rotate the vertex buffer so we are less likely to use buffers that the GPU is using
-        if (vertexBuffer != null) vertexBuffer.rotate();
-        buffer = null;
-    }
-
-    private GpuBuffer upload(MeshData.DrawState drawParameters, VertexFormat format, MeshData builtBuffer) {
-        int vertexBufferSize = drawParameters.vertexCount() * format.getVertexSize();
-
-        if (vertexBuffer == null || vertexBuffer.size() < vertexBufferSize) {
-            if (vertexBuffer != null) vertexBuffer.close();
-
-            vertexBuffer = new MappableRingBuffer(() -> RENDER_LABEL,
-                GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_MAP_WRITE, vertexBufferSize);
-        }
-
-        CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
-        try (GpuBuffer.MappedView mappedView = commandEncoder.mapBuffer(vertexBuffer.currentBuffer().slice(0, builtBuffer.vertexBuffer().remaining()), false, true)) {
-            MemoryUtil.memCopy(builtBuffer.vertexBuffer(), mappedView.data());
-        }
-
-        return vertexBuffer.currentBuffer();
-    }
-
-    private void draw(Minecraft client, RenderPipeline pipeline, MeshData builtBuffer, MeshData.DrawState drawParameters,
-                      GpuBuffer vertices, VertexFormat format) {
-        GpuBuffer indices;
-        VertexFormat.IndexType indexType;
-
-        if (pipeline.getVertexFormatMode() == VertexFormat.Mode.QUADS) {
-            // Sort the quads if there is translucency
-            builtBuffer.sortQuads(allocator, RenderSystem.getProjectionType().vertexSorting());
-            // Upload the index buffer
-            indices = pipeline.getVertexFormat().uploadImmediateIndexBuffer(builtBuffer.indexBuffer());
-            indexType = builtBuffer.drawState().indexType();
-        } else {
-            // Use the general shape index buffer for non-quad draw modes
-            RenderSystem.AutoStorageIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getVertexFormatMode());
-            indices = shapeIndexBuffer.getBuffer(drawParameters.indexCount());
-            indexType = shapeIndexBuffer.type();
-        }
-
-        // Actually execute the draw
-        GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-            .writeTransform(RenderSystem.getModelViewMatrix(), COLOR_MODULATOR, MODEL_OFFSET, TEXTURE_MATRIX);
-        try (RenderPass renderPass = RenderSystem.getDevice()
-            .createCommandEncoder()
-            .createRenderPass(() -> RENDER_LABEL, client.getMainRenderTarget().getColorTextureView(), OptionalInt.empty(), client.getMainRenderTarget().getDepthTextureView(), OptionalDouble.empty())) {
-            renderPass.setPipeline(pipeline);
-
-            RenderSystem.bindDefaultUniforms(renderPass);
-            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-
-            renderPass.setVertexBuffer(0, vertices);
-            renderPass.setIndexBuffer(indices, indexType);
-
-            // The base vertex is the starting index when we copied the data into the vertex buffer divided by vertex size
-            //noinspection ConstantValue
-            renderPass.drawIndexed(0 / format.getVertexSize(), 0, drawParameters.indexCount(), 1);
-        }
-
-        builtBuffer.close();
-    }
-
     public void close() {
         allocator.close();
-        if (vertexBuffer != null) {
-            vertexBuffer.close();
-            vertexBuffer = null;
+        QUADS_THROUGH_WALLS.close();
+        LINES_THROUGH_WALLS.close();
+    }
+
+    public static class RenderLayer {
+        public final RenderPipeline pipeline;
+
+        private BufferBuilder buffer;
+        private MappableRingBuffer vertexBuffer;
+
+        public RenderLayer(RenderPipeline pipeline) {
+            this.pipeline = pipeline;
+        }
+
+        public BufferBuilder getBuffer(ByteBufferBuilder allocator) {
+            if (buffer == null) {
+                buffer = new BufferBuilder(allocator,
+                    pipeline.getVertexFormatMode(),
+                    pipeline.getVertexFormat());
+            }
+            return buffer;
+        }
+
+        public void draw(Minecraft client) {
+            if (buffer == null) return;
+
+            MeshData builtBuffer = buffer.build();
+            if (builtBuffer == null) {
+                buffer = null;
+                return;
+            }
+
+            MeshData.DrawState drawParameters = builtBuffer.drawState();
+            VertexFormat format = drawParameters.format();
+
+            GpuBuffer vertices = upload(drawParameters, format, builtBuffer);
+            drawInternal(client, pipeline, builtBuffer, drawParameters, vertices, format);
+
+            // Rotate the vertex buffer so we are less likely to use buffers that the GPU is using
+            if (vertexBuffer != null) vertexBuffer.rotate();
+            buffer = null;
+        }
+
+        protected void prepareUniforms() {}
+
+        protected void setupUniforms(RenderPass renderPass, GpuBufferSlice dynamicTransforms) {
+            RenderSystem.bindDefaultUniforms(renderPass);
+            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
+        }
+
+        private GpuBuffer upload(MeshData.DrawState drawParameters, VertexFormat format, MeshData builtBuffer) {
+            int dataSize = builtBuffer.vertexBuffer().remaining();
+            int vertexBufferSize = drawParameters.vertexCount() * format.getVertexSize();
+
+            if (vertexBuffer == null || vertexBuffer.size() < dataSize) {
+                if (vertexBuffer != null) vertexBuffer.close();
+
+                vertexBuffer = new MappableRingBuffer(() -> RENDER_LABEL,
+                    GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_MAP_WRITE, dataSize);
+            }
+
+            CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
+            try (GpuBuffer.MappedView mappedView = commandEncoder.mapBuffer(vertexBuffer.currentBuffer().slice(0, dataSize), false, true)) {
+                MemoryUtil.memCopy(builtBuffer.vertexBuffer(), mappedView.data());
+            }
+
+            return vertexBuffer.currentBuffer();
+        }
+
+        private void drawInternal(Minecraft client, RenderPipeline pipeline, MeshData builtBuffer, MeshData.DrawState drawParameters,
+                                  GpuBuffer vertices, VertexFormat format) {
+            GpuBuffer indices;
+            VertexFormat.IndexType indexType;
+
+            if (pipeline.getVertexFormatMode() == VertexFormat.Mode.QUADS) {
+                // Sort the quads if there is translucency
+                builtBuffer.sortQuads(allocator, RenderSystem.getProjectionType().vertexSorting());
+                // Upload the index buffer
+                ByteBuffer indexBuffer = builtBuffer.indexBuffer();
+                Objects.requireNonNull(indexBuffer, "QUADS mode should always have an index buffer");
+                indices = pipeline.getVertexFormat().uploadImmediateIndexBuffer(indexBuffer);
+                indexType = builtBuffer.drawState().indexType();
+            } else {
+                // Use the general shape index buffer for non-quad draw modes
+                RenderSystem.AutoStorageIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getVertexFormatMode());
+                indices = shapeIndexBuffer.getBuffer(drawParameters.indexCount());
+                indexType = shapeIndexBuffer.type();
+            }
+
+            RenderTarget mainTarget = client.getMainRenderTarget();
+            GpuTextureView colorView = mainTarget.getColorTextureView();
+            GpuTextureView depthView = mainTarget.useDepth ? mainTarget.getDepthTextureView() : null;
+
+            prepareUniforms();
+
+            // Actually execute the draw
+            GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
+                .writeTransform(RenderSystem.getModelViewMatrix(), COLOR_MODULATOR, MODEL_OFFSET, TEXTURE_MATRIX);
+            try (RenderPass renderPass = RenderSystem.getDevice()
+                .createCommandEncoder()
+                .createRenderPass(() -> RENDER_LABEL, Objects.requireNonNull(colorView), OptionalInt.empty(), depthView, OptionalDouble.empty())) {
+                renderPass.setPipeline(pipeline);
+
+                setupUniforms(renderPass, dynamicTransforms);
+
+                renderPass.setVertexBuffer(0, vertices);
+                renderPass.setIndexBuffer(indices, indexType);
+
+                // The base vertex is the starting index when we copied the data into the vertex buffer divided by vertex size
+                // noinspection ConstantValue
+                renderPass.drawIndexed(0 / format.getVertexSize(), 0, drawParameters.indexCount(), 1);
+            }
+
+            builtBuffer.close();
+        }
+
+        public void close() {
+            if (vertexBuffer != null) {
+                vertexBuffer.close();
+                vertexBuffer = null;
+            }
         }
     }
 }

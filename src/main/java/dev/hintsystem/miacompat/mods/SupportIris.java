@@ -20,8 +20,8 @@ public class SupportIris {
     private static final MethodHandle GET_IRIS_PROGRAM = getIrisProgramHandle();
 
     public static void assignPipelines() {
-        assignPipeline(GhostSeekRenderer.LINES_THROUGH_WALLS, "LINES");
-        assignPipeline(GhostSeekRenderer.QUADS_THROUGH_WALLS, "BASIC");
+        assignPipeline(GhostSeekRenderer.LINES_THROUGH_WALLS.pipeline, "LINES");
+        assignPipeline(GhostSeekRenderer.QUADS_THROUGH_WALLS.pipeline, "BASIC");
     }
 
     private static void assignPipeline(RenderPipeline pipeline, String irisProgramName) {
