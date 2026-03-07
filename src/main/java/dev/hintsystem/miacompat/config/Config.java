@@ -40,6 +40,7 @@ public class Config {
     public boolean showContainerExactCoinWorth = false;
     public boolean showItemSlotGearCooldowns = false;
     public boolean hideActionBarGearCooldowns = false;
+    public boolean hideActionBarGearAbilityFail = false;
 
     // Ghost Seek
     public boolean showGhostSeekCooldown = true;
@@ -144,6 +145,22 @@ public class Config {
             .option(Option.<Boolean>createBuilder()
                 .name(Component.literal("Hide Gear Cooldowns in Action Bar"))
                 .binding(DEFAULTS.hideActionBarGearCooldowns, () -> hideActionBarGearCooldowns, val -> hideActionBarGearCooldowns = val)
+                .controller(TickBoxControllerBuilder::create)
+                .build())
+
+            .option(Option.<Boolean>createBuilder()
+                .name(Component.literal("Hide Gear Ability Fails in Action Bar"))
+                .description(OptionDescription.of(Component.literal(
+                    """
+                    Hides the action bar message that appears when a gear ability fails
+                    
+                    Examples:
+                    Out of Food
+                    Out of Experience / Out of Charge
+                    Lacks Charge
+                    """
+                )))
+                .binding(DEFAULTS.hideActionBarGearAbilityFail, () -> hideActionBarGearAbilityFail, val -> hideActionBarGearAbilityFail = val)
                 .controller(TickBoxControllerBuilder::create)
                 .build())
 

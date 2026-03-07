@@ -147,20 +147,25 @@ public class CooldownTracker {
     }
 
     public static boolean allowActionBarMessage(Component message) {
-        if (!MiACompat.config.hideActionBarGearCooldowns) return true;
-
         String msg = message.getString();
 
-        if (msg.contains("■■■■■")) return false; // Cooldown bar characters
+        // Cooldown bar characters
+        if (msg.contains("■■■■■")) return !MiACompat.config.hideActionBarGearCooldowns;
 
+        // Cancel cooldowns on fail and hide message
+        boolean isAbilityFailMessage = false;
         for (GearCooldown gearCooldown : itemCooldownConfigs.values()) {
             for (ActionCooldown action : new ActionCooldown[]{gearCooldown.leftClick, gearCooldown.rightClick}) {
-                if (action != null && action.isActive() && msg.equals(action.failMessage)) {
-                    action.cancel();
-                    return false;
+                if (action == null) continue;
+
+                if (msg.equals(action.failMessage)) {
+                    isAbilityFailMessage = true;
+                    if (action.isActive()) action.cancel();
                 }
             }
         }
+
+        if (isAbilityFailMessage && MiACompat.config.hideActionBarGearAbilityFail) return false;
 
         return true;
     }
