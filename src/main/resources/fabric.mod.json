@@ -3,7 +3,7 @@
 	"id": "miacompat",
 	"version": "${version}",
 	"name": "MiACompat",
-	"description": "Adds Xaeros minimap / map mod support to the Mine in Abyss minecraft server",
+	"description": "Enhances the Mine in Abyss server experience",
 	"authors": ["HintSystem"],
 	"contact": {
 		"sources": "https://github.com/HintSystem/MiACompat"
