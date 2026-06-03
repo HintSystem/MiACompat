@@ -26,6 +26,7 @@ public class LayerAdjustedWaypoint extends Waypoint {
 
         this.setX((int) relativePosition.x);
         this.setY((int) relativePosition.y);
+        this.setZ(original.getZ());
     }
 
     public static LayerAdjustedWaypoint of(Waypoint waypoint, Vec3 cameraPos) {
