@@ -3,6 +3,7 @@
     "package": "dev.hintsystem.miacompat.mixin",
     "compatibilityLevel": "JAVA_21",
     "client": [
+        "AbstractContainerScreenMixin",
         "ChatListenerMixin",
         "ClientBundleTooltipMixin",
         "GameRendererMixin",
@@ -10,7 +11,8 @@
         "GuiGraphicsMixin",
         "GuiMixin",
         "ItemStackMixin",
-        "LocalPlayerMixin"
+        "LocalPlayerMixin",
+        "ShulkerBoxMenuAccessor"
     ],
     "injectors": {
         "defaultRequire": 1

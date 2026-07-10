@@ -36,8 +36,9 @@ public class Config {
     public boolean showBonfireWaypoint = true;
     public boolean showCurseMeter = true;
     public boolean showItemLoreInBundles = true;
-    public boolean showContainerCoinWorth = true;
-    public boolean showContainerExactCoinWorth = false;
+    public boolean showPreciseCoinWorth = false;
+    public boolean showCoinWorthInContainers = true;
+    public boolean showCoinWorthInTooltips = true;
     public boolean showItemSlotGearCooldowns = false;
     public boolean hideActionBarGearCooldowns = false;
     public boolean hideActionBarGearAbilityFail = false;
@@ -64,19 +65,6 @@ public class Config {
 
     public Screen createScreen(Screen parent) {
         // General
-
-        Option<Boolean> showContainerExactCoinWorthOption = Option.<Boolean>createBuilder()
-            .name(Component.literal("Show Precise Container Orth Coin Worth"))
-            .description(OptionDescription.of(Component.literal(
-                """
-                Additionally displays the exact Orth coin value with decimals.
-                
-                Useful for tracking partial coin values when you don't have enough items to complete a full trade.
-                """
-            )))
-            .binding(DEFAULTS.showContainerExactCoinWorth, () -> showContainerExactCoinWorth, val -> showContainerExactCoinWorth = val)
-            .controller(TickBoxControllerBuilder::create)
-            .build();
 
         ConfigCategory generalCategory = ConfigCategory.createBuilder()
             .name(Component.literal("General"))
@@ -118,23 +106,53 @@ public class Config {
                 .controller(TickBoxControllerBuilder::create)
                 .build())
 
-            .option(Option.<Boolean>createBuilder()
-                .name(Component.literal("Show Container Orth Coin Worth"))
-                .description(OptionDescription.of(Component.literal(
-                    """
-                    Shows the total Orth coin value in bundle and shulker box tooltips.
-                    
-                    This displays how many whole coins you'd get by selling all items inside the container at the current trade rates.
-                    """
-                )))
-                .addListener((option, event) -> {
-                    showContainerExactCoinWorthOption.setAvailable(option.pendingValue());
-                })
-                .binding(DEFAULTS.showContainerCoinWorth, () -> showContainerCoinWorth, val -> showContainerCoinWorth = val)
-                .controller(TickBoxControllerBuilder::create)
+
+            .group(OptionGroup.createBuilder()
+                .name(Component.literal("Orth Coins"))
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Show Precise Coin Worth"))
+                    .description(OptionDescription.of(Component.literal(
+                        """
+                        Additionally displays the exact Orth coin value with decimals.
+                        
+                        Useful for tracking partial coin values when you don't have enough items to complete a full trade.
+                        """
+                    )))
+                    .binding(DEFAULTS.showPreciseCoinWorth, () -> showPreciseCoinWorth, val -> showPreciseCoinWorth = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Show Coin Worth in Containers"))
+                    .description(OptionDescription.of(Component.literal(
+                        """
+                        Shows the total Orth coin value in chest and shulker box containers.
+                        
+                        This displays how many whole coins you'd get by selling all items inside the container at the current trade rates.
+                        """
+                    )))
+
+                    .binding(DEFAULTS.showCoinWorthInContainers, () -> showCoinWorthInContainers, val -> showCoinWorthInContainers = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Show Coin Worth in Tooltips"))
+                    .description(OptionDescription.of(Component.literal(
+                        """
+                        Shows the total Orth coin value in bundle and shulker box tooltips.
+                        
+                        This displays how many whole coins you'd get by selling all items inside the container at the current trade rates.
+                        """
+                    )))
+
+                    .binding(DEFAULTS.showCoinWorthInTooltips, () -> showCoinWorthInTooltips, val -> showCoinWorthInTooltips = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
                 .build())
 
-            .option(showContainerExactCoinWorthOption)
 
             .option(Option.<Boolean>createBuilder()
                 .name(Component.literal("Show Gear Cooldowns in Item Slots"))

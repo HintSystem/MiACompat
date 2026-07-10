@@ -14,42 +14,21 @@ public final class OrthWorthTooltip {
     private static ItemStack lastContainerStack = ItemStack.EMPTY;
     private static Component cachedContainerTooltip = null;
 
-    private OrthWorthTooltip() {}
-
     public static void modifyContainerTooltip(ItemStack itemStack, List<Component> tooltip) {
-        if (!MiACompat.config.showContainerCoinWorth) return;
+        if (!MiACompat.config.showCoinWorthInTooltips) return;
 
         if (!ItemStack.matches(lastContainerStack, itemStack)) {
             lastContainerStack = itemStack.copy();
-            cachedContainerTooltip = null;
-        }
-
-        if (cachedContainerTooltip == null) {
-            boolean showExactCoins = MiACompat.config.showContainerExactCoinWorth;
-
-            InventoryTracker.CoinWorth coinWorth = InventoryTracker.getContainerCoinWorth(itemStack);
-
-            boolean skipNoValue = (showExactCoins && coinWorth.total == 0) ||
-                (!showExactCoins && coinWorth.whole == 0);
-
-            if (skipNoValue) {
-                cachedContainerTooltip = Component.empty();
-                return;
-            }
-
-            MutableComponent containerTooltip = Component.literal("  " + coinWorth.whole).withStyle(ChatFormatting.GOLD)
-                .append(Component.literal(" $").withStyle(MiACompat.getIconStyle()));
-
-            if (showExactCoins) containerTooltip.append(" (%.2f)".formatted(coinWorth.total));
-
-            cachedContainerTooltip = containerTooltip;
+            cachedContainerTooltip = InventoryTracker.getContainerCoinWorthLabel(itemStack);
         }
 
         if (cachedContainerTooltip.equals(Component.empty())) return;
 
         Component titleLine = tooltip.getFirst();
         if (titleLine != null) {
-            tooltip.set(0, titleLine.copy().append(cachedContainerTooltip));
+            tooltip.set(0, titleLine.copy()
+                .append(Component.literal("  "))
+                .append(cachedContainerTooltip));
         }
     }
 
@@ -69,7 +48,6 @@ public final class OrthWorthTooltip {
             firstLoreLine = Component.literal(
                 firstLoreLine.getString().replace(":cosmetic_orth_coin:", "")
             ).setStyle(firstLoreLine.getStyle());
-
         }
 
         tooltip.set(1, firstLoreLine.append(

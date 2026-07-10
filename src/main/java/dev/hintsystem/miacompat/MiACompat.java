@@ -199,10 +199,10 @@ public class MiACompat implements ClientModInitializer {
                             : Component.literal("You have no linked bonfire\n").setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED));
 
                         MutableComponent feedback = Component.empty().append(bonfireSetMessage)
-                            .append(Component.literal("Last position: ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
-                            .append(Component.literal(pos).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)))
-                            .append(Component.literal("\nLast linked: ").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
-                            .append(Component.literal(timeDisplay).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)));
+                            .append(Component.literal("Last position: ").withStyle(ChatFormatting.AQUA))
+                            .append(Component.literal(pos).withStyle(ChatFormatting.WHITE))
+                            .append(Component.literal("\nLast linked: ").withStyle(ChatFormatting.AQUA))
+                            .append(Component.literal(timeDisplay).withStyle(ChatFormatting.WHITE));
 
                         context.getSource().sendFeedback(feedback);
                         return 1;
