@@ -8,9 +8,6 @@ import xaero.hud.minimap.waypoint.render.AbstractWaypointRenderContext;
 import xaero.hud.minimap.waypoint.render.AbstractWaypointRenderProvider;
 import xaero.hud.minimap.waypoint.render.world.WaypointWorldRenderProvider;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.phys.Vec3;
-
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,16 +26,15 @@ public abstract class AbstractWaypointRenderProviderMixin<C extends AbstractWayp
         at = @At("RETURN")
     )
     @SuppressWarnings("ConstantConditions")
-    private Waypoint wrapGetNext(Waypoint w, MinimapElementRenderLocation location, C context) {
+    private Waypoint miacompat$wrapGetNext(Waypoint w, MinimapElementRenderLocation location, C context) {
         if (!((Object) this instanceof WaypointWorldRenderProvider)) return w;
 
-        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().position();
         LayerAdjustedWaypoint layerWaypoint = waypointCache.get(w);
         if (layerWaypoint == null) {
-            layerWaypoint = LayerAdjustedWaypoint.of(w, cameraPos);
+            layerWaypoint = new LayerAdjustedWaypoint(w);
             waypointCache.put(w, layerWaypoint);
         } else {
-            layerWaypoint.update(cameraPos);
+            layerWaypoint.updateForCamera();
         }
 
         return layerWaypoint;

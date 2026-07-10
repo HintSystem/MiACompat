@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(CustomRenderTypes.class)
 public class CustomRenderTypesMixin {
     @Inject(method = "applyFixedOrder", at = @At("HEAD"))
-    private static void addBonfireLayer(CallbackInfo ci) {
+    private static void miacompat$addBonfireLayer(CallbackInfo ci) {
         XaeroLib.INSTANCE.getClient()
             .getBufferProvider()
             .addToFixedOrder(SupportXaeroMinimap.GUI_BONFIRE);

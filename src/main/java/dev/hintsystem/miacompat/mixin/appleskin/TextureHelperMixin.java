@@ -22,7 +22,7 @@ public class TextureHelperMixin {
 	private static final @Unique Identifier miacompat$FOOD_FULL_TEXTURE = MiACompat.id("hud/food_full");
 	
     @Inject(method = "getFoodTexture", at = @At("HEAD"), cancellable = true)
-    private static void overwriteGetFoodTexture(boolean isRotten, FoodType type, CallbackInfoReturnable<Identifier> cir) {
+    private static void miacompat$overwriteGetFoodTexture(boolean isRotten, FoodType type, CallbackInfoReturnable<Identifier> cir) {
     	cir.setReturnValue(
             switch (type) {
                 case EMPTY -> miacompat$FOOD_EMPTY_TEXTURE;

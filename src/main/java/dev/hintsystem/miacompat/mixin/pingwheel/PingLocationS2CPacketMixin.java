@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class PingLocationS2CPacketMixin {
 
     @Inject(method = "pos", at = @At("RETURN"), cancellable = true)
-    private void modifyPos(CallbackInfoReturnable<Vec3> cir) {
+    private void miacompat$modifyPos(CallbackInfoReturnable<Vec3> cir) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) { return; }
 

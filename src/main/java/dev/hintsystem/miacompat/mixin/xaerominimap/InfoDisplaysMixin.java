@@ -32,7 +32,7 @@ public class InfoDisplaysMixin {
             target = "Lxaero/hud/minimap/info/BuiltInInfoDisplays;forEach(Ljava/util/function/Consumer;)V"
         )
     )
-    private void onConstructed(CallbackInfo ci) {
+    private void miacompat$onConstructed(CallbackInfo ci) {
         manager.add(
             InfoDisplay.Builder.<Boolean>begin()
                 .setId("mia_layer").setName(Component.literal("MiA Layer"))

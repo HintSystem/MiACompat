@@ -1,5 +1,6 @@
 package dev.hintsystem.miacompat.utils;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
@@ -115,6 +116,13 @@ public class MiaDeeperWorld {
             unwrapX(target.x(), layerDelta),
             unwrapY(target.y(), layerDelta),
             target.z()
+        );
+    }
+
+    public static Vec3 relativeToCamera(Vec3 target) {
+        return relativizeWrapped(
+            Minecraft.getInstance().gameRenderer.getMainCamera().position(),
+            target
         );
     }
 }

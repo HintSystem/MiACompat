@@ -73,7 +73,7 @@ public class BonfireTracker {
 
             // Unlink bonfire if it can't be found within tick limit
             if (++lostBonfireTicks >= MAX_LOST_BONFIRE_TICKS) {
-                setBonfireStatus(false);
+                updateBonfireStatus(false);
             }
             return;
         }
@@ -88,7 +88,7 @@ public class BonfireTracker {
 
         if (msg.contains("respawn point has been removed")
             || msg.contains("respawn point was unset")) {
-            setBonfireStatus(false);
+            updateBonfireStatus(false);
         }
     }
 
@@ -109,11 +109,11 @@ public class BonfireTracker {
         boolean isBonfireSet = modelData != null && modelData.flags().size() >= 2 && modelData.flags().get(1);
         bonfireData.setPos(trackedBonfireEntity.blockPosition());
 
-        setBonfireStatus(isBonfireSet);
+        updateBonfireStatus(isBonfireSet);
         return true;
     }
 
-    public static void setBonfireStatus(boolean isBonfireSet) {
+    public static void updateBonfireStatus(boolean isBonfireSet) {
         if (bonfireData.isBonfireSet != isBonfireSet) {
             if (isBonfireSet) bonfireData.lastSetTimestamp = Util.getEpochMillis();
             bonfireData.isBonfireSet = isBonfireSet;
@@ -126,7 +126,7 @@ public class BonfireTracker {
     }
 
     public static boolean isBonfireId(Identifier modelId) {
-        return modelId.getNamespace().equals("mineinabyss")
+        return modelId.getNamespace().equals(MiACompat.getMiANamespace())
             && modelId.getPath().contains("bonfire");
     }
 

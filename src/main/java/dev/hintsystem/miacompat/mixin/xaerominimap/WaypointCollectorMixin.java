@@ -16,7 +16,7 @@ import java.util.*;
 public class WaypointCollectorMixin {
 
     @Inject(method = "collect", at = @At("HEAD"))
-    public void collect(List<Waypoint> destination, CallbackInfo ci) {
+    public void miacompat$collect(List<Waypoint> destination, CallbackInfo ci) {
         if (!SupportXaeroMinimap.shouldShowBonfireWaypoint()) return;
 
         SupportXaeroMinimap.updateBonfireWaypoint();

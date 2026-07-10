@@ -19,7 +19,7 @@ public abstract class SupportXaeroMinimapMixin {
     public abstract Waypoint convertWaypoint(xaero.common.minimap.waypoints.Waypoint w, boolean editable, String setName, double dimDiv);
 
     @Inject(method = "getWaypoints", at = @At("RETURN"), cancellable = true)
-    public void getWaypoints(CallbackInfoReturnable<ArrayList<Waypoint>> cir) {
+    public void miacompat$getWaypoints(CallbackInfoReturnable<ArrayList<Waypoint>> cir) {
         if (!SupportXaeroMinimap.shouldShowBonfireWaypoint()) return;
 
         SupportXaeroMinimap.updateBonfireWaypoint();

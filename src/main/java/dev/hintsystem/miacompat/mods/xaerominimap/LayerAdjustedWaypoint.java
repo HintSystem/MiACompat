@@ -3,25 +3,29 @@ package dev.hintsystem.miacompat.mods.xaerominimap;
 import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
 
 import xaero.common.minimap.waypoints.Waypoint;
+import xaero.hud.minimap.waypoint.WaypointColor;
+import xaero.hud.minimap.waypoint.WaypointPurpose;
+import xaero.hud.minimap.waypoint.WaypointVisibilityType;
 
 import net.minecraft.world.phys.Vec3;
 
 public class LayerAdjustedWaypoint extends Waypoint {
     private final Waypoint original;
 
-    private LayerAdjustedWaypoint(Vec3 pos, Waypoint waypoint) {
+    public LayerAdjustedWaypoint(Waypoint waypoint) {
         super(
-            (int) pos.x(), (int) pos.y(), (int) pos.z(),
+            waypoint.getX(), waypoint.getY(), waypoint.getZ(),
             waypoint.getName(), waypoint.getInitials(), waypoint.getWaypointColor(), waypoint.getPurpose(),
             waypoint.isTemporary(), true
         );
 
         this.original = waypoint;
+        updateForCamera();
     }
 
-    public void update(Vec3 cameraPos) {
-        Vec3 relativePosition = MiaDeeperWorld.relativizeWrapped(
-            cameraPos, new Vec3(original.getX(), original.getY(), original.getZ())
+    public void updateForCamera() {
+        Vec3 relativePosition = MiaDeeperWorld.relativeToCamera(
+            new Vec3(original.getX(), original.getY(), original.getZ())
         );
 
         this.setX((int) relativePosition.x);
@@ -29,11 +33,36 @@ public class LayerAdjustedWaypoint extends Waypoint {
         this.setZ(original.getZ());
     }
 
-    public static LayerAdjustedWaypoint of(Waypoint waypoint, Vec3 cameraPos) {
-        Vec3 relativePosition = MiaDeeperWorld.relativizeWrapped(
-            cameraPos, new Vec3(waypoint.getX(), waypoint.getY(), waypoint.getZ())
-        );
+    @Override
+    public int getYaw() { return original.getYaw(); }
 
-        return new LayerAdjustedWaypoint(relativePosition, waypoint);
-    }
+    @Override
+    public String getName() { return original.getName(); }
+
+    @Override
+    public String getLocalizedName() { return original.getLocalizedName(); }
+
+    @Override
+    public String getInitials() { return original.getInitials(); }
+
+    @Override
+    public WaypointColor getWaypointColor() { return original.getWaypointColor(); }
+
+    @Override
+    public WaypointVisibilityType getVisibility() { return original.getVisibility(); }
+
+    @Override
+    public Boolean getDisabled() { return original.getDisabled(); }
+
+    @Override
+    public WaypointPurpose getPurpose() { return original.getPurpose(); }
+
+    @Override
+    public boolean isRotation() { return original.isRotation(); }
+
+    @Override
+    public boolean isTemporary() { return original.isTemporary(); }
+
+    @Override
+    public long getCreatedAt() { return original.getCreatedAt(); }
 }

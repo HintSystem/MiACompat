@@ -86,8 +86,7 @@ public class GhostSeekRenderer {
     }
 
     public boolean isOverlayEnabled() {
-        return true;
-//        return overlayEnabled && ghostSeekTracker.breadcrumbsVisible();
+        return overlayEnabled && ghostSeekTracker.breadcrumbsVisible();
     }
 
     public void render(WorldRenderContext context) {

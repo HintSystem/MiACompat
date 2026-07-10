@@ -42,14 +42,13 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
 
     // Inject at the end of preRender - runs once per frame before all waypoints are rendered
     @Inject(method = "preRender", at = @At("TAIL"))
-    public void afterPreRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
-                                CallbackInfo ci) {
+    public void miacompat$afterPreRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers, CallbackInfo ci) {
         SupportXaeroMinimap.setInWorldRenderer(true);
     }
 
     // Inject at the start of postRender - runs once per frame after all waypoints are rendered
     @Inject(method = "postRender", at = @At("HEAD"))
-    public void beforePostRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
+    public void miacompat$beforePostRender(MinimapElementRenderInfo renderInfo, MultiBufferSource.BufferSource vanillaBufferSource, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers,
                                  CallbackInfo ci) {
         SupportXaeroMinimap.setInWorldRenderer(false);
     }
@@ -59,7 +58,7 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
         at = @At("HEAD"),
         cancellable = true
     )
-    public void render(
+    public void miacompat$render(
         Waypoint w,
         boolean highlighted,
         boolean outOfBounds,
@@ -97,7 +96,7 @@ public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<
     }
 
     @Inject(method = "renderIcon", at = @At("HEAD"), cancellable = true)
-    private void renderBonfireIcon(
+    private void miacompat$renderBonfireIcon(
         Waypoint w, boolean highlight, PoseStack matrixStack, Font fontRenderer, XaeroBufferProvider bufferSource, CallbackInfo ci
     ) {
         if (!"Bonfire".equals(w.getName())) return;
