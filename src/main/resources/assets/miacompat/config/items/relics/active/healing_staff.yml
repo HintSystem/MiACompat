@@ -3,7 +3,7 @@ set.item:
   itemName: <#f7e7ce>Symbiotic Water-shrooms
   itemModel: mineinabyss:relics/healing_staff
   lore:
-  - ':layer_4: Grade III Relic'
+  - '<emojy:layer_4> Grade III Relic'
   - <#d7c9b3>Doctors have failed to reach an agreement on the safety of fungi
   - <#d7c9b3>like these as medicine. Their efficacy, however, is beyond doubt.
   - <font:small_text><gray><shadow:#00000000>Active ability. Heals user and surroundings on right click.

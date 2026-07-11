@@ -3,7 +3,7 @@ set.item:
   type: minecraft:clock
   itemModel: mineinabyss:relics/relic_boots
   lore:
-  - ':layer_3: Grade III Relic'
+  - '<emojy:layer_3> Grade III Relic'
   - <#d7c9b3>Researchers speculate that this Relic’s purpose was never to send
   - <#d7c9b3>oneself flying, but that never stopped anyone from using it that way.
   - <font:small_text><gray><shadow:#00000000>Active ability. Propels the user upward on

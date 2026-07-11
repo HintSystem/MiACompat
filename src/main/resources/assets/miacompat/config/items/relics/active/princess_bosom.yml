@@ -3,7 +3,7 @@ set.item:
   type: minecraft:clock
   itemModel: mineinabyss:relics/princess_bosom
   lore:
-  - ':layer_2: Grade III Relic'
+  - '<emojy:layer_2> Grade III Relic'
   - <#d7c9b3>After decades of speculation, the Princess
   - <#d7c9b3>Bosom’s purpose has finally been found!
   - <font:small_text><gray><shadow:#00000000>Active ability. Grants absorption to the user

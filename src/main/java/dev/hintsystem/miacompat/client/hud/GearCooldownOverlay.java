@@ -3,6 +3,7 @@ package dev.hintsystem.miacompat.client.hud;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.CooldownTracker;
 import dev.hintsystem.miacompat.client.InventoryTracker;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +20,7 @@ public final class GearCooldownOverlay {
         CooldownTracker.GearCooldown gearCooldown = CooldownTracker.getGearCooldown(modelId);
         if (gearCooldown == null) return false;
 
-        float leftPercent  = gearCooldown.leftClick != null ? gearCooldown.leftClick.getPercent() : 0f;
+        float leftPercent = gearCooldown.leftClick != null ? gearCooldown.leftClick.getPercent() : 0f;
         float rightPercent = gearCooldown.rightClick != null ? gearCooldown.rightClick.getPercent() : 0f;
 
         if (leftPercent > 0f && rightPercent > 0f) {

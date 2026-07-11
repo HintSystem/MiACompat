@@ -3,11 +3,11 @@ set.item:
   itemModel: mineinabyss:relics/reverberating_edge
   itemName: <#232423><b>Reverberating Edge
   lore:
-  - ':layer_4: Grade I Relic'
+  - '<emojy:layer_4> Grade I Relic'
   - <#393C39>The innate abilities carried by this dagger might make its use
   - <#393C39>look effortless, but it’s actually taxing on the wielder.
   - <font:small_text><gray><shadow:#00000000>Active ability. Each hit creates charges and deals additional
-  - <font:small_text><gray><shadow:#00000000>damage at 7 charges. Takes 10 charges to stun surroundings on right click.
+  - <font:small_text><gray><shadow:#00000000>damage at 7 charges. Takes 10 charges to stun surroundings on sneak / right click.
   unbreakable: {}
   enchantmentGlintOverride: false
 observe:
@@ -18,6 +18,8 @@ observe:
   itemRightClick:
   - become: parent
   - ensure:
+      player:
+        sneaking: true
       mythicConditions:
       - hasaurastacks{n=reverberatingedgestack;s=10} true
       onFail:

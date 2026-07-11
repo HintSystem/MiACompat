@@ -13,7 +13,7 @@ observe:
   - become: parent
   - cooldown:
       id: gambit_incense
-      length: 28s
+      length: 20s
       display: <gold>Gambit Incense
   - mythicSkills:
     - gambit_incense

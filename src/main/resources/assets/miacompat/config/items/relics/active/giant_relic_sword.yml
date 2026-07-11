@@ -3,7 +3,7 @@ set.item:
   itemModel: mineinabyss:relics/crescent_blade
   itemName: <#15ABC2><b>Crescent Hatchet
   lore:
-  - ':layer_3: Grade I Relic'
+  - '<emojy:layer_3> Grade I Relic'
   - <#249C9C>This Relic easily and effectively slices through the air, and even the
   - <#249C9C>Abyss itself, using its surroundings’ mysterious nature to its advantage.
   - <font:small_text><gray><shadow:#00000000>Active ability. Creates charges on right click.Takes increasing amounts

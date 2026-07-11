@@ -33,6 +33,7 @@ observe:
   - ensure:
       mythicConditions:
       - hasaurastacks{n=gapplehookcharge} true
+      - hasaura{n=reliceffectcancel} false
       onFail:
       - sendActionBar:
           text: <red>Out of Charge

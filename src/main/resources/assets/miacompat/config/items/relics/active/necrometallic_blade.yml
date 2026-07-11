@@ -3,7 +3,7 @@ set.item:
   type: minecraft:netherite_sword
   itemModel: mineinabyss:relics/necrometallic_blade
   lore:
-  - ':layer_2: Grade I Relic'
+  - '<emojy:layer_2> Grade I Relic'
   - <#575757>Researchers of the bacteria that inhabit this Relic advice
   - <#575757>wielders not to touch its blade under any circumstances. 
   - <font:small_text><gray><shadow:#00000000>Active ability. Builds poison stacks on target on
