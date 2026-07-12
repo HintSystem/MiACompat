@@ -39,12 +39,12 @@ repositories {
         url = 'https://maven.parchmentmc.org'
     }
 
-    maven { url "https://maven.terraformersmc.com/" } // Mod menu
-    maven { url "https://maven.isxander.dev/releases" } // YACL
-    maven { url "https://maven.ryanliptak.com/" } // AppleSkin
+    maven { url = "https://maven.terraformersmc.com/" } // Mod menu
+    maven { url = "https://maven.isxander.dev/releases" } // YACL
+    maven { url = "https://maven.ryanliptak.com/" } // AppleSkin
     maven {
-        url "https://chocolateminecraft.com/maven"
-        name "Xaero's Maven"
+        name = "Xaero's Maven"
+        url = "https://chocolateminecraft.com/maven"
     }
 
     mavenCentral()

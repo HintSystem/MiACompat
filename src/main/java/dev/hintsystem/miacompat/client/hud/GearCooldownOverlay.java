@@ -2,10 +2,8 @@ package dev.hintsystem.miacompat.client.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.CooldownTracker;
-import dev.hintsystem.miacompat.client.InventoryTracker;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 public final class GearCooldownOverlay {
@@ -14,14 +12,11 @@ public final class GearCooldownOverlay {
     public static boolean drawGearCooldown(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
         if (!MiACompat.config.showItemSlotGearCooldowns) return false;
 
-        Identifier modelId = InventoryTracker.getMiAModelId(itemStack);
-        if (modelId == null) return false;
+        CooldownTracker.GearCooldowns gearCooldowns = CooldownTracker.getGearCooldowns(itemStack);
+        if (gearCooldowns == null) return false;
 
-        CooldownTracker.GearCooldown gearCooldown = CooldownTracker.getGearCooldown(modelId);
-        if (gearCooldown == null) return false;
-
-        float leftPercent = gearCooldown.leftClick != null ? gearCooldown.leftClick.getPercent() : 0f;
-        float rightPercent = gearCooldown.rightClick != null ? gearCooldown.rightClick.getPercent() : 0f;
+        float leftPercent = gearCooldowns.leftClick != null ? gearCooldowns.leftClick.getPercent() : 0f;
+        float rightPercent = gearCooldowns.rightClick != null ? gearCooldowns.rightClick.getPercent() : 0f;
 
         if (leftPercent > 0f && rightPercent > 0f) {
             drawBar(guiGraphics, x, y, 8, leftPercent);
