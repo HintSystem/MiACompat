@@ -10,7 +10,7 @@ public final class GearCooldownOverlay {
     private GearCooldownOverlay() {}
 
     public static boolean drawGearCooldown(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
-        if (!MiACompat.config.showItemSlotGearCooldowns) return false;
+        if (!MiACompat.config.showGearCooldownsInItemSlots) return false;
 
         CooldownTracker.GearCooldowns gearCooldowns = CooldownTracker.getGearCooldowns(itemStack);
         if (gearCooldowns == null) return false;

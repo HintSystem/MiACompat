@@ -194,12 +194,12 @@ public class CooldownTracker {
     public static boolean allowActionBarMessage(Component message) {
         String msg = message.getString();
 
-        if (MiACompat.config.hideActionBarGearAbilityFail && actionFailMessages.contains(msg))
+        if (MiACompat.config.hideAbilityFailsInActionBar && actionFailMessages.contains(msg))
             return false;
 
         if (isCooldownMessage(msg)) {
             Minecraft.getInstance().execute(() -> onCooldownMessage(msg));
-            return !MiACompat.config.hideActionBarGearCooldowns;
+            return !MiACompat.config.hideGearCooldownsInActionBar;
         }
 
         return true;

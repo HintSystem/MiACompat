@@ -6,6 +6,7 @@ import dev.hintsystem.miacompat.MiACompat;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -36,24 +37,28 @@ public class Config {
     public boolean showBonfireWaypoint = true;
     public boolean showCurseMeter = true;
     public boolean showItemLoreInBundles = true;
+
     public boolean showPreciseCoinWorth = false;
     public boolean showCoinWorthInContainers = true;
     public boolean showCoinWorthInTooltips = true;
-    public boolean showItemSlotGearCooldowns = false;
-    public boolean hideActionBarGearCooldowns = false;
-    public boolean hideActionBarGearAbilityFail = false;
+
+    public boolean showGearCooldownsInItemSlots = true;
+    public boolean hideGearCooldownsInActionBar = false;
+    public boolean hideAbilityFailsInActionBar = false;
 
     // Ghost Seek
     public boolean showGhostSeekCooldown = true;
     public boolean ghostSeekDistanceHint = true;
     public boolean clearBreadcrumbsOnFind = true;
+
+    public boolean showBreadcrumbsOnMap = false;
     public int breadcrumbDuration = 300;
     public GhostSeekRenderer.BreadcrumbRenderType breadcrumbRenderType = GhostSeekRenderer.BreadcrumbRenderType.FILLED_BOX;
     public float breadcrumbLineWidth = 8f;
     public float breadcrumbSize = 0.8f;
     public double breadcrumbDistanceScale = 0.5f;
     public double breadcrumbOpacity = 0.75f;
-    public boolean showBreadcrumbsOnMap = false;
+
     public boolean pingColorMatchesBreadcrumb = true;
     public List<Color> breadcrumbColors = List.of(
         Color.decode("#A2453F"),
@@ -73,12 +78,12 @@ public class Config {
                 .name(Component.literal("Max Waypoint Distance"))
                 .description(OptionDescription.of(Component.literal(
                     """
-                    Defines the maximum distance (in meters) at which waypoints are visible.
+                    Defines the maximum distance (in meters) at which waypoints are visible
                     
                     Unlike Xaero’s Minimap "Max WP Render Distance" setting, this limit also considers the waypoint’s
-                    vertical distance from the player.
+                    vertical distance from the player
                 
-                    Set to 0 to display all waypoints.
+                    Set to 0 to display all waypoints
                     """
                 )))
                 .binding(DEFAULTS.maxWaypointRadius, () -> maxWaypointRadius, val -> maxWaypointRadius = val)
@@ -114,9 +119,9 @@ public class Config {
                     .name(Component.literal("Show Precise Coin Worth"))
                     .description(OptionDescription.of(Component.literal(
                         """
-                        Additionally displays the exact Orth coin value with decimals.
+                        Additionally displays the exact Orth coin value with decimals
                         
-                        Useful for tracking partial coin values when you don't have enough items to complete a full trade.
+                        Useful for tracking partial coin values when you don't have enough items to complete a full trade
                         """
                     )))
                     .binding(DEFAULTS.showPreciseCoinWorth, () -> showPreciseCoinWorth, val -> showPreciseCoinWorth = val)
@@ -127,9 +132,9 @@ public class Config {
                     .name(Component.literal("Show Coin Worth in Containers"))
                     .description(OptionDescription.of(Component.literal(
                         """
-                        Shows the total Orth coin value in chest and shulker box containers.
+                        Shows the total Orth coin value in chest and shulker box containers
                         
-                        This displays how many whole coins you'd get by selling all items inside the container at the current trade rates.
+                        This displays how many whole coins you'd get by selling all items inside the container at the current trade rates
                         """
                     )))
 
@@ -141,9 +146,9 @@ public class Config {
                     .name(Component.literal("Show Coin Worth in Tooltips"))
                     .description(OptionDescription.of(Component.literal(
                         """
-                        Shows the total Orth coin value in bundle and shulker box tooltips.
+                        Shows the total Orth coin value in bundle and shulker box tooltips
                         
-                        This displays how many whole coins you'd get by selling all items inside the container at the current trade rates.
+                        This displays how many whole coins you'd get by selling all items inside the container at the current trade rates
                         """
                     )))
 
@@ -154,33 +159,42 @@ public class Config {
                 .build())
 
 
-            .option(Option.<Boolean>createBuilder()
-                .name(Component.literal("Show Gear Cooldowns in Item Slots"))
-                .binding(DEFAULTS.showItemSlotGearCooldowns, () -> showItemSlotGearCooldowns, val -> showItemSlotGearCooldowns = val)
-                .controller(TickBoxControllerBuilder::create)
+            .group(OptionGroup.createBuilder()
+                .name(Component.literal("Gear Abilities"))
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Show Cooldowns in Item Slots"))
+                    .binding(DEFAULTS.showGearCooldownsInItemSlots, () -> showGearCooldownsInItemSlots, val -> showGearCooldownsInItemSlots = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Hide Cooldowns in Action Bar"))
+                    .binding(DEFAULTS.hideGearCooldownsInActionBar, () -> hideGearCooldownsInActionBar, val -> hideGearCooldownsInActionBar = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Hide Ability Fails in Action Bar"))
+                    .description(OptionDescription.of(Component.literal(
+                        """
+                        Hides the action bar message that appears when a gear ability fails
+                        
+                        Examples:
+                        """)
+                        .append(Component.literal(
+                        """
+                        Out of Food
+                        Out of Experience / Out of Charge
+                        Lacks Charge
+                        """).withStyle(ChatFormatting.RED))
+                    ))
+                    .binding(DEFAULTS.hideAbilityFailsInActionBar, () -> hideAbilityFailsInActionBar, val -> hideAbilityFailsInActionBar = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
                 .build())
 
-            .option(Option.<Boolean>createBuilder()
-                .name(Component.literal("Hide Gear Cooldowns in Action Bar"))
-                .binding(DEFAULTS.hideActionBarGearCooldowns, () -> hideActionBarGearCooldowns, val -> hideActionBarGearCooldowns = val)
-                .controller(TickBoxControllerBuilder::create)
-                .build())
-
-            .option(Option.<Boolean>createBuilder()
-                .name(Component.literal("Hide Gear Ability Fails in Action Bar"))
-                .description(OptionDescription.of(Component.literal(
-                    """
-                    Hides the action bar message that appears when a gear ability fails
-                    
-                    Examples:
-                    Out of Food
-                    Out of Experience / Out of Charge
-                    Lacks Charge
-                    """
-                )))
-                .binding(DEFAULTS.hideActionBarGearAbilityFail, () -> hideActionBarGearAbilityFail, val -> hideActionBarGearAbilityFail = val)
-                .controller(TickBoxControllerBuilder::create)
-                .build())
 
             .build();
 
@@ -194,18 +208,17 @@ public class Config {
             .build();
 
         OptionGroup.Builder breadcrumbColorsGroup = OptionGroup.createBuilder()
-            .name(Component.literal("Breadcrumb Colors"));
-
-        breadcrumbColorsGroup.option(Option.<Boolean>createBuilder()
-            .name(Component.literal("Match With Action Bar Pings"))
-            .description(OptionDescription.of(Component.literal(
-                """
-                If enabled, the action bar message you get after a ghost seek ping will be edited so its color matches the breadcrumb colors
-                """
-            )))
-            .binding(DEFAULTS.pingColorMatchesBreadcrumb, () -> pingColorMatchesBreadcrumb, val -> pingColorMatchesBreadcrumb = val)
-            .controller(TickBoxControllerBuilder::create)
-            .build());
+            .name(Component.literal("Breadcrumb Colors"))
+            .option(Option.<Boolean>createBuilder()
+                .name(Component.literal("Match With Action Bar Pings"))
+                .description(OptionDescription.of(Component.literal(
+                    """
+                    If enabled, the action bar message you get after a ghost seek ping will be edited so its color matches the breadcrumb colors
+                    """
+                )))
+                .binding(DEFAULTS.pingColorMatchesBreadcrumb, () -> pingColorMatchesBreadcrumb, val -> pingColorMatchesBreadcrumb = val)
+                .controller(TickBoxControllerBuilder::create)
+                .build());
 
         for (int i = 0; i < DEFAULTS.breadcrumbColors.size(); i++) {
             final int index = i; // Capture for lambda
@@ -247,85 +260,89 @@ public class Config {
                 .name(Component.literal("Clear Breadcrumbs On Find"))
                 .description(OptionDescription.of(Component.literal(
                     """
-                    If enabled, breadcrumbs will be cleared when hitting a praying skeleton
+                    If enabled, breadcrumbs will be cleared after hitting a praying skeleton
                     """
                 )))
                 .binding(DEFAULTS.clearBreadcrumbsOnFind, () -> clearBreadcrumbsOnFind, val -> clearBreadcrumbsOnFind = val)
                 .controller(TickBoxControllerBuilder::create)
                 .build())
 
-            .option(Option.<Integer>createBuilder()
-                .name(Component.literal("Breadcrumb Duration"))
-                .description(OptionDescription.of(Component.literal(
-                    """
-                    How long ghost seek breadcrumbs remain visible before disappearing.
-                    
-                    Set to 0 to disable ghost seek breadcrumbs.
-                    """
-                )))
-                .binding(DEFAULTS.breadcrumbDuration, () -> breadcrumbDuration, val -> breadcrumbDuration = val)
-                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
-                    .formatValue(val -> Component.literal(String.format("%ds", val)))
-                    .step(5)
-                    .range(0, 3_600))
+
+            .group(OptionGroup.createBuilder()
+                .name(Component.literal("Breadcrumb Visuals"))
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Breadcrumbs On World Map"))
+                    .binding(DEFAULTS.showBreadcrumbsOnMap, () -> showBreadcrumbsOnMap, val -> showBreadcrumbsOnMap = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
+                .option(Option.<Integer>createBuilder()
+                    .name(Component.literal("Breadcrumb Duration"))
+                    .description(OptionDescription.of(Component.literal(
+                        """
+                        How long ghost seek breadcrumbs remain visible before disappearing
+                        
+                        Set to 0 to disable ghost seek breadcrumbs
+                        """
+                    )))
+                    .binding(DEFAULTS.breadcrumbDuration, () -> breadcrumbDuration, val -> breadcrumbDuration = val)
+                    .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                        .formatValue(val -> Component.literal(String.format("%ds", val)))
+                        .step(5)
+                        .range(0, 3_600))
+                    .build())
+
+                .option(Option.<GhostSeekRenderer.BreadcrumbRenderType>createBuilder()
+                    .name(Component.literal("Breadcrumb Visual Type"))
+                    .description(OptionDescription.of(Component.literal("Adjusts how breadcrumbs are rendered ")))
+                    .addListener((option, event) -> {
+                        breadcrumbLineWidthOption.setAvailable(option.pendingValue() == GhostSeekRenderer.BreadcrumbRenderType.WIREFRAME_BOX);
+                    })
+                    .binding(DEFAULTS.breadcrumbRenderType, () -> breadcrumbRenderType, val -> breadcrumbRenderType = val)
+                    .controller(opt -> EnumControllerBuilder.create(opt)
+                        .enumClass(GhostSeekRenderer.BreadcrumbRenderType.class))
+                    .build())
+
+                .option(breadcrumbLineWidthOption)
+
+                .option(Option.<Float>createBuilder()
+                    .name(Component.literal("Breadcrumb Size"))
+                    .binding(DEFAULTS.breadcrumbSize, () -> breadcrumbSize, val -> breadcrumbSize = val)
+                    .controller(opt -> FloatFieldControllerBuilder.create(opt)
+                        .range(0.1f, 10f))
+                    .build())
+
+                .option(Option.<Double>createBuilder()
+                    .name(Component.literal("Breadcrumb Distance Scale"))
+                    .description(OptionDescription.of(Component.literal(
+                        """
+                        Scales breadcrumb size based on distance to the praying skeleton
+                        
+                        0 = no scaling
+                        + = bigger when further away
+                        - = bigger when closer
+                        """
+                    )))
+                    .binding(DEFAULTS.breadcrumbDistanceScale, () -> breadcrumbDistanceScale, val -> breadcrumbDistanceScale = val)
+                    .controller(opt -> DoubleSliderControllerBuilder.create(opt)
+                        .range(-2d, 2d)
+                        .step(0.05d))
+                    .build())
+
+                .option(Option.<Double>createBuilder()
+                    .name(Component.literal("Breadcrumb Opacity"))
+                    .binding(DEFAULTS.breadcrumbOpacity, () -> breadcrumbOpacity, val -> breadcrumbOpacity = val)
+                    .controller(opt -> DoubleSliderControllerBuilder.create(opt)
+                        .range(0d, 1d)
+                        .step(0.05d))
+                    .build())
+
                 .build())
 
-            .option(Option.<GhostSeekRenderer.BreadcrumbRenderType>createBuilder()
-                .name(Component.literal("Breadcrumb Visual Type"))
-                .description(OptionDescription.of(Component.literal(
-                    """
-                    Adjusts how breadcrumbs are rendered.
-                    """
-                )))
-                .addListener((option, event) -> {
-                    breadcrumbLineWidthOption.setAvailable(option.pendingValue() == GhostSeekRenderer.BreadcrumbRenderType.WIREFRAME_BOX);
-                })
-                .binding(DEFAULTS.breadcrumbRenderType, () -> breadcrumbRenderType, val -> breadcrumbRenderType = val)
-                .controller(opt -> EnumControllerBuilder.create(opt)
-                    .enumClass(GhostSeekRenderer.BreadcrumbRenderType.class))
-                .build())
-
-            .option(breadcrumbLineWidthOption)
-
-            .option(Option.<Float>createBuilder()
-                .name(Component.literal("Breadcrumb Size"))
-                .binding(DEFAULTS.breadcrumbSize, () -> breadcrumbSize, val -> breadcrumbSize = val)
-                .controller(opt -> FloatFieldControllerBuilder.create(opt)
-                    .range(0.1f, 10f))
-                .build())
-
-            .option(Option.<Double>createBuilder()
-                .name(Component.literal("Breadcrumb Distance Scale"))
-                .description(OptionDescription.of(Component.literal(
-                    """
-                    Scales breadcrumb size based on distance to the praying skeleton.
-                    
-                    0 = no scaling
-                    + = bigger when further away
-                    - = bigger when closer
-                    """
-                )))
-                .binding(DEFAULTS.breadcrumbDistanceScale, () -> breadcrumbDistanceScale, val -> breadcrumbDistanceScale = val)
-                .controller(opt -> DoubleSliderControllerBuilder.create(opt)
-                    .range(-2d, 2d)
-                    .step(0.05d))
-                .build())
-
-            .option(Option.<Double>createBuilder()
-                .name(Component.literal("Breadcrumb Opacity"))
-                .binding(DEFAULTS.breadcrumbOpacity, () -> breadcrumbOpacity, val -> breadcrumbOpacity = val)
-                .controller(opt -> DoubleSliderControllerBuilder.create(opt)
-                    .range(0d, 1d)
-                    .step(0.05d))
-                .build())
-
-            .option(Option.<Boolean>createBuilder()
-                .name(Component.literal("Breadcrumbs On World Map"))
-                .binding(DEFAULTS.showBreadcrumbsOnMap, () -> showBreadcrumbsOnMap, val -> showBreadcrumbsOnMap = val)
-                .controller(TickBoxControllerBuilder::create)
-                .build())
 
             .group(breadcrumbColorsGroup.build())
+
 
             .build();
 
