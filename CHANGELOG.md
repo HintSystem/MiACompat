@@ -1,1 +1,7 @@
-- Fix waypoints not updating z coordinate
+- Add Orth coin worth label to containers
+- Validate gear cooldowns through action bar
+  - This should make gear cooldowns more reliable
+- Reorganize config screen
+  - Some settings might get reset because of this
+- Update item / relic configs
+- Fix waypoint properties not updating *(name, initials, type, ...)*
