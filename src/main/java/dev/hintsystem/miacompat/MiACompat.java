@@ -1,9 +1,11 @@
 package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.client.*;
+import dev.hintsystem.miacompat.client.screens.RelicCompendium;
 import dev.hintsystem.miacompat.config.Config;
 import dev.hintsystem.miacompat.gui.Hud;
 import dev.hintsystem.miacompat.mods.SupportIris;
+import dev.hintsystem.miacompat.server.ConfigResourceReloader;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -13,6 +15,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -26,6 +29,7 @@ import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Display;
@@ -71,11 +75,12 @@ public class MiACompat implements ClientModInitializer {
 	public void onInitializeClient() {
         if (FabricLoader.getInstance().isModLoaded("iris")) SupportIris.assignPipelines();
 
-        CooldownTracker.loadItemCooldownConfigs();
-        InventoryTracker.loadFromFile();
+        ResourceLoader resourceLoader = ResourceLoader.get(PackType.CLIENT_RESOURCES);
+        resourceLoader.registerReloader(id("server_configs"), new ConfigResourceReloader());
 
-        config.loadFromFile();
+        InventoryTracker.loadFromFile();
         BonfireTracker.loadFromFile();
+        config.loadFromFile();
 
         Minecraft client = Minecraft.getInstance();
 
@@ -127,7 +132,13 @@ public class MiACompat implements ClientModInitializer {
 
                 .then(ClientCommandManager.literal("config")
                     .executes(context -> {
-                        client.schedule(() -> client.setScreen(config.createScreen(null)));
+                        client.execute(() -> client.setScreen(config.createScreen(null)));
+                        return 1;
+                    }))
+
+                .then(ClientCommandManager.literal("compendium")
+                    .executes(context -> {
+                        client.execute(() -> client.setScreen(new RelicCompendium()));
                         return 1;
                     }))
 

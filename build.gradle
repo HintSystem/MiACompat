@@ -61,6 +61,12 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
     implementation include("org.yaml:snakeyaml:2.6") // For reading item config files
+    implementation include("net.kyori:adventure-api:5.2.0")
+    implementation include("net.kyori:adventure-key:5.2.0")
+    implementation include("net.kyori:adventure-text-minimessage:5.2.0")
+    implementation include("net.kyori:option:1.1.0")
+    implementation include("net.kyori:adventure-text-serializer-json:5.2.0")
+    implementation include("net.kyori:adventure-text-serializer-gson:5.2.0")
 
     modImplementation "dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric"
     modImplementation "com.terraformersmc:modmenu:17.0.0-beta.2"

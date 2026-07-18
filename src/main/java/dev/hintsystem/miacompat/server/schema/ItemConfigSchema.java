@@ -7,7 +7,7 @@ import org.yaml.snakeyaml.introspector.PropertyUtils;
 
 import java.util.List;
 
-public class ItemConfig {
+public class ItemConfigSchema {
     private Item setItem;
     public Observe observe;
 
@@ -54,7 +54,7 @@ public class ItemConfig {
         PropertyUtils propertyUtils = new PropertyUtils();
         propertyUtils.setSkipMissingProperties(true);
 
-        Constructor constructor = new Constructor(ItemConfig.class, loaderOptions);
+        Constructor constructor = new Constructor(ItemConfigSchema.class, loaderOptions);
         constructor.setPropertyUtils(propertyUtils);
         constructor.addTypeDescription(typeDescription());
 
@@ -62,7 +62,7 @@ public class ItemConfig {
     }
 
     public static TypeDescription typeDescription() {
-        TypeDescription itemDescription = new TypeDescription(ItemConfig.class);
+        TypeDescription itemDescription = new TypeDescription(ItemConfigSchema.class);
         itemDescription.substituteProperty("set.item", Item.class, "getItem", "setItem");
 
         return itemDescription;

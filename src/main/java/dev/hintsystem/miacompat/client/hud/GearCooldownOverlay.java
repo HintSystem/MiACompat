@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.client.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.server.ServerItemRegistry;
 import dev.hintsystem.miacompat.client.CooldownTracker;
 
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,11 +13,12 @@ public final class GearCooldownOverlay {
     public static boolean drawGearCooldown(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
         if (!MiACompat.config.showGearCooldownsInItemSlots) return false;
 
-        CooldownTracker.GearCooldowns gearCooldowns = CooldownTracker.getGearCooldowns(itemStack);
-        if (gearCooldowns == null) return false;
+        ServerItemRegistry.ItemConfig itemConfig = ServerItemRegistry.getItem(itemStack);
+        if (itemConfig == null || itemConfig.gearCooldowns == null) return false;
 
-        float leftPercent = gearCooldowns.leftClick != null ? gearCooldowns.leftClick.getPercent() : 0f;
-        float rightPercent = gearCooldowns.rightClick != null ? gearCooldowns.rightClick.getPercent() : 0f;
+        CooldownTracker.GearCooldowns cooldowns = itemConfig.gearCooldowns;
+        float leftPercent = cooldowns.leftClick != null ? cooldowns.leftClick.getPercent() : 0f;
+        float rightPercent = cooldowns.rightClick != null ? cooldowns.rightClick.getPercent() : 0f;
 
         if (leftPercent > 0f && rightPercent > 0f) {
             drawBar(guiGraphics, x, y, 8, leftPercent);
