@@ -9,6 +9,7 @@ import dev.hintsystem.miacompat.server.ConfigResourceReloader;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
@@ -84,7 +85,11 @@ public class MiACompat implements ClientModInitializer {
 
         Minecraft client = Minecraft.getInstance();
 
+        KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_RELIC_COMPENDIUM);
+        KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_CONFIG);
+
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
+            KeyBindings.tickKeybinds(c);
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
             hud.tick();
