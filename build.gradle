@@ -89,6 +89,40 @@ processResources {
 	}
 }
 
+tasks.register("updateServerConfigs", Copy) {
+    group = "build setup"
+    description = "Copies Mine in Abyss server configs into the mod resources"
+
+    def repo = project.server_config_repo
+    def output = file("src/main/resources/assets/miacompat/config/server")
+
+    doFirst {
+        delete(output.listFiles())
+    }
+
+    into(output)
+
+    // Include gear with ability cooldowns and potential relics
+    from("${repo}/servers_shared/survwild/plugins/Geary/prefabs/mineinabyss") {
+        include "items/gear/*.yml"
+        include "items/gear/utility/**"
+
+        exclude "items/gear/utility/ghost_seek/ghost_seek_4.yml" // God Seek
+
+        include "items/relics/active/**"
+        include "items/relics/passive/**"
+        include "items/relics/sun_spheres/**"
+
+        exclude "items/relics/active/arcstaff.yml"
+    }
+
+    // Include only praying skeletons for now TODO create mob compendium
+    from("${repo}/servers_shared/survwild/plugins/MythicMobs/packs/survwild_prayingskels") {
+        include "DropTables/**"
+        include "mobs/**"
+    }
+}
+
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 21
 }

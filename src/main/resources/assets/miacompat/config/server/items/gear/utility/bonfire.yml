@@ -1,0 +1,41 @@
+set.item:
+  itemName: <#FF9D26>Bonfire
+  type: minecraft:paper
+  itemModel: mineinabyss:gear/utility/bonfire
+  maxStackSize: 16
+set.recipes:
+  discoverRecipes: true
+  recipes:
+    - type: shaped
+      items:
+        S:
+          type: minecraft:stick
+        C:
+          type: minecraft:campfire
+        F:
+          type: minecraft:flint_and_steel
+      configuration: |-
+        |SSS|
+        |SFS|
+        |SCS|
+blocky:furniture:
+  interactionHitbox:
+    - width: 1.0
+      height: 1.6
+      offset: 0,-0.5,0
+  properties:
+    translation: 0,0.5,0
+blocky:preventItemstackUpdate:
+  forceWhenDifferentMaterial: true
+blocky:placableOn:
+  floor: true
+  ceiling: false
+  wall: false
+blocky:drops:
+  drops:
+    - item: mineinabyss:bonfire
+      silkTouchedDrop:
+        prefab: mineinabyss:bonfire
+copyToInstances:
+  persisting:
+    bonfire:bonfire: { }

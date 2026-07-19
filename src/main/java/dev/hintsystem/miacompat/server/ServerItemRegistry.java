@@ -153,7 +153,7 @@ public class ServerItemRegistry {
 
         Yaml yaml = new Yaml(ItemConfigSchema.constructor(new LoaderOptions()));
 
-        String itemConfigPath = "config/items";
+        String itemConfigPath = "config/server/items";
         resourceManager.listResources(
             itemConfigPath,
             id -> id.getNamespace().equals(MiACompat.MOD_ID)
