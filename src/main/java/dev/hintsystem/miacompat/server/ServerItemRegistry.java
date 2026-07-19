@@ -6,14 +6,13 @@ import dev.hintsystem.miacompat.client.CooldownTracker.GearCooldowns;
 import dev.hintsystem.miacompat.client.InventoryTracker;
 import dev.hintsystem.miacompat.server.schema.ItemConfigSchema;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -42,10 +41,10 @@ public class ServerItemRegistry {
     public static ItemConfig getItem(Identifier modelId) { return itemConfigByItemModel.get(modelId); }
 
     public enum RelicGrade {
-        I(Component.literal("Grade I").withStyle(ChatFormatting.WHITE)),
-        II(Component.literal("Grade II").withStyle(ChatFormatting.AQUA)),
-        III(Component.literal("Grade III").withStyle(ChatFormatting.GREEN)),
-        IV(Component.literal("Grade IV").withStyle(ChatFormatting.LIGHT_PURPLE));
+        I(Component.literal("Grade I").withColor(0xFFE5663D)),
+        II(Component.literal("Grade II").withColor(0xFF43583C)),
+        III(Component.literal("Grade III").withColor(0xFFD7C9B3)),
+        IV(Component.literal("Grade IV").withColor(0xFFBB9672));
 
         public final Component displayName;
 
@@ -61,7 +60,7 @@ public class ServerItemRegistry {
         public final RelicGrade grade;
 
         private RelicConfig(RelicGrade grade, ItemConfig itemConfig) {
-            super(itemConfig.type, itemConfig.name, itemConfig.modelId, itemConfig.lore, itemConfig.gearCooldowns);
+            super(itemConfig.original, itemConfig.type, itemConfig.name, itemConfig.modelId, itemConfig.lore, itemConfig.gearCooldowns);
             this.grade = grade;
         }
 
@@ -81,27 +80,25 @@ public class ServerItemRegistry {
             String infoLine = itemConfig.getItem().lore.getFirst();
             RelicGrade grade = extractGrade(infoLine);
 
-            return grade != null ? parse(grade, infoLine, itemConfig) : null;
+            return grade != null
+                ? new RelicConfig(grade, ItemConfig.parse(itemConfig))
+                : null;
         }
 
         public static RelicConfig parse(ItemConfigSchema itemConfig) throws Exception {
             String infoLine = itemConfig.getItem().lore.getFirst();
             RelicGrade grade = extractGrade(infoLine);
 
-            if (grade == null) throw new IllegalStateException("Invalid relic grade: " + infoLine);
+            if (grade == null)
+                throw new IllegalStateException("Invalid relic grade: " + infoLine);
 
-            return parse(grade, infoLine, itemConfig);
-        }
-
-        private static RelicConfig parse(RelicGrade grade, String infoLine, ItemConfigSchema itemConfig) throws Exception {
-            ItemConfig item = ItemConfig.parse(itemConfig);
-            item.lore.set(0, MiniMessageParser.parse(infoLine, true));
-
-            return new RelicConfig(grade, item);
+            return new RelicConfig(grade, ItemConfig.parse(itemConfig));
         }
     }
 
     public static class ItemConfig {
+        private final ItemConfigSchema original;
+
         public final Item type;
         public final Component name;
         public final Identifier modelId;
@@ -109,13 +106,19 @@ public class ServerItemRegistry {
 
         @Nullable public final GearCooldowns gearCooldowns;
 
-        private ItemConfig(Item type, Component name, Identifier modelId, List<Component> lore, @Nullable GearCooldowns gearCooldowns) {
+        private ItemConfig(
+            ItemConfigSchema original,
+            Item type, Component name, Identifier modelId, List<Component> lore, @Nullable GearCooldowns gearCooldowns
+        ) {
+            this.original = original;
             this.type = type;
             this.name = name;
             this.modelId = modelId;
             this.lore = lore;
             this.gearCooldowns = gearCooldowns;
         }
+
+        public ItemConfigSchema getOriginal() { return original; }
 
         private static ItemConfig parse(ItemConfigSchema itemConfig) throws Exception {
             ItemConfigSchema.Item item = itemConfig.getItem();
@@ -131,7 +134,10 @@ public class ServerItemRegistry {
                 lore.add(MiniMessageParser.parse(line));
             }
 
-            return new ItemConfig(type, MiniMessageParser.parse(item.itemName), itemModel, lore, GearCooldowns.fromItemConfig(itemConfig));
+            return new ItemConfig(
+                itemConfig,
+                type, MiniMessageParser.parse(item.itemName), itemModel, lore, GearCooldowns.fromItemConfig(itemConfig)
+            );
         }
 
         private void register() {
