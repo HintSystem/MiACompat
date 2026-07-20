@@ -1,12 +1,14 @@
 package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.utils.GearyData;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -14,7 +16,6 @@ import net.minecraft.world.item.component.ItemContainerContents;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,7 +28,7 @@ public class InventoryTracker {
 
     static final int[] PASSIVE_SLOTS = {9, 10};
 
-    public static HashMap<String, Integer> orthTrades = new HashMap<>();
+    public static Map<Identifier, Integer> orthTrades = new HashMap<>();
 
     public static MutableComponent getContainerCoinWorthLabel(ItemStack itemStack) {
         return getContainerCoinWorthLabel(getContainerContents(itemStack));
@@ -95,54 +96,35 @@ public class InventoryTracker {
     /** Returns how many of this item are needed to trade for one coin, or null if not tradeable */
     @Nullable
     public static Integer getItemsPerCoin(ItemStack itemStack) {
-        String modelName = getMiAModelName(itemStack);
-        if (modelName == null) return null;
+        Identifier prefabId = GearyData.getFirstPrefabId(itemStack);
+        if (prefabId == null) return null;
 
-        return orthTrades.get(modelName);
+        return orthTrades.get(prefabId);
     }
 
-    @Nullable
-    public static Identifier getMiAModelId(ItemStack itemStack) {
-        Identifier modelId = itemStack.get(DataComponents.ITEM_MODEL);
-        if (modelId == null || !Objects.equals(modelId.getNamespace(), MiACompat.getMiANamespace())) return null;
-
-        return modelId;
+    public static void loadFromResources(ResourceManager resourceManager) {
+        orthTrades = loadOrthTrades(resourceManager);
     }
 
-    @Nullable
-    public static String getMiAModelName(ItemStack itemStack) {
-        Identifier modelId = itemStack.get(DataComponents.ITEM_MODEL);
-        if (modelId == null || !Objects.equals(modelId.getNamespace(), MiACompat.getMiANamespace())) return null;
+    private static Map<Identifier, Integer> loadOrthTrades(ResourceManager resourceManager) {
+        Identifier id = MiACompat.id("config/orth_mob_trades.json");
 
-        return getModelName(modelId);
-    }
-
-    public static String getModelName(@NotNull Identifier modelId) {
-        String path = modelId.getPath();
-
-        int lastSlash = path.lastIndexOf('/');
-        return (lastSlash >= 0) ? path.substring(lastSlash + 1) : path;
-    }
-
-    public static void loadFromFile() {
-        orthTrades = loadOrthTrades();
-    }
-
-    static HashMap<String, Integer> loadOrthTrades() {
-        String orthTradesResource = "/assets/" + MiACompat.MOD_ID + "/config/orth_mob_trades.json";
-
-        try (InputStream stream = MiACompat.class.getResourceAsStream(orthTradesResource)) {
-            if (stream == null) {
-                throw new RuntimeException("Could not find orth_mob_trades.json in resources!");
-            }
-
+        try (InputStream stream = resourceManager.getResourceOrThrow(id).open()) {
             InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
 
-            Type type = new TypeToken<HashMap<String, Integer>>() {}.getType();
+            Type type = new TypeToken<LinkedHashMap<String, Integer>>() {}.getType();
+            Map<String, Integer> raw = GSON.fromJson(reader, type);
 
-            return GSON.fromJson(reader, type);
+            Map<Identifier, Integer> result = new LinkedHashMap<>();
+            for (var entry : raw.entrySet()) {
+                result.put(Identifier.parse(entry.getKey()), entry.getValue());
+            }
+
+            MiACompat.LOGGER.info("Loaded {} orth mob drop trades", result.size());
+
+            return result;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load default prices", e);
+            throw new RuntimeException("Failed to load " + id, e);
         }
     }
 }

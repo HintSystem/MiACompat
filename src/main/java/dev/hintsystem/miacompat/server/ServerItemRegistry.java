@@ -3,8 +3,9 @@ package dev.hintsystem.miacompat.server;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.CooldownTracker;
 import dev.hintsystem.miacompat.client.CooldownTracker.GearCooldowns;
-import dev.hintsystem.miacompat.client.InventoryTracker;
 import dev.hintsystem.miacompat.server.schema.ItemConfigSchema;
+import dev.hintsystem.miacompat.utils.GearyData;
+import dev.hintsystem.miacompat.utils.ItemUtils;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -23,22 +24,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ServerItemRegistry {
-    private static final Map<Identifier, ItemConfig> itemConfigByItemModel = new HashMap<>();
+    private static final Map<Identifier, ItemConfig> itemConfigByPrefabId = new HashMap<>();
 
     public static Map<Identifier, ItemConfig> getAllItems() {
-        return Collections.unmodifiableMap(itemConfigByItemModel);
+        return Collections.unmodifiableMap(itemConfigByPrefabId);
     }
 
     @Nullable
     public static ItemConfig getItem(ItemStack item) {
-        Identifier modelId = InventoryTracker.getMiAModelId(item);
-        if (modelId == null) return null;
+        Set<Identifier> prefabs = GearyData.getPrefabIds(item);
+        if (prefabs.isEmpty()) return null;
 
-        return getItem(modelId);
+        if (prefabs.size() > 1)
+            MiACompat.LOGGER.warn("Item {} has multiple prefabs: {}", ItemUtils.itemDescriptor(item), prefabs);
+
+        return getItem(prefabs.iterator().next());
     }
 
     @Nullable
-    public static ItemConfig getItem(Identifier modelId) { return itemConfigByItemModel.get(modelId); }
+    public static ItemConfig getItem(Identifier prefabId) { return itemConfigByPrefabId.get(prefabId); }
 
     public enum RelicGrade {
         I(Component.literal("Grade I").withColor(0xFFE5663D)),
@@ -60,7 +64,7 @@ public class ServerItemRegistry {
         public final RelicGrade grade;
 
         private RelicConfig(RelicGrade grade, ItemConfig itemConfig) {
-            super(itemConfig.original, itemConfig.type, itemConfig.name, itemConfig.modelId, itemConfig.lore, itemConfig.gearCooldowns);
+            super(itemConfig.original, itemConfig.prefabId, itemConfig.type, itemConfig.name, itemConfig.modelId, itemConfig.lore, itemConfig.gearCooldowns);
             this.grade = grade;
         }
 
@@ -76,29 +80,31 @@ public class ServerItemRegistry {
 
         /** @return null, if item is not a relic */
         @Nullable
-        public static RelicConfig tryParse(ItemConfigSchema itemConfig) throws Exception {
-            String infoLine = itemConfig.getItem().lore.getFirst();
+        public static RelicConfig tryParse(ItemConfig item) {
+            ItemConfigSchema.Item originalItem = item.getOriginal().getItem();
+            if (originalItem.lore == null) return null;
+
+            String infoLine = originalItem.lore.getFirst();
             RelicGrade grade = extractGrade(infoLine);
 
-            return grade != null
-                ? new RelicConfig(grade, ItemConfig.parse(itemConfig))
-                : null;
+            return grade != null ? new RelicConfig(grade, item) : null;
         }
 
-        public static RelicConfig parse(ItemConfigSchema itemConfig) throws Exception {
-            String infoLine = itemConfig.getItem().lore.getFirst();
+        public static RelicConfig parse(ItemConfig item) {
+            String infoLine = item.getOriginal().getItem().lore.getFirst();
             RelicGrade grade = extractGrade(infoLine);
 
             if (grade == null)
                 throw new IllegalStateException("Invalid relic grade: " + infoLine);
 
-            return new RelicConfig(grade, ItemConfig.parse(itemConfig));
+            return new RelicConfig(grade, item);
         }
     }
 
     public static class ItemConfig {
         private final ItemConfigSchema original;
 
+        public final Identifier prefabId;
         public final Item type;
         public final Component name;
         public final Identifier modelId;
@@ -107,10 +113,11 @@ public class ServerItemRegistry {
         @Nullable public final GearCooldowns gearCooldowns;
 
         private ItemConfig(
-            ItemConfigSchema original,
+            ItemConfigSchema original, Identifier prefabId,
             Item type, Component name, Identifier modelId, List<Component> lore, @Nullable GearCooldowns gearCooldowns
         ) {
             this.original = original;
+            this.prefabId = prefabId;
             this.type = type;
             this.name = name;
             this.modelId = modelId;
@@ -120,7 +127,7 @@ public class ServerItemRegistry {
 
         public ItemConfigSchema getOriginal() { return original; }
 
-        private static ItemConfig parse(ItemConfigSchema itemConfig) throws Exception {
+        private static ItemConfig parse(Identifier prefabId, ItemConfigSchema itemConfig) throws Exception {
             ItemConfigSchema.Item item = itemConfig.getItem();
 
             Identifier itemModel = Identifier.tryParse(item.itemModel);
@@ -130,26 +137,30 @@ public class ServerItemRegistry {
                 .orElseThrow(() -> new IllegalStateException("Not a valid item type")).value();
 
             List<Component> lore = new ArrayList<>();
-            for (String line : item.lore) {
-                lore.add(MiniMessageParser.parse(line));
+            if (item.lore != null) {
+                for (String line : item.lore) {
+                    lore.add(MiniMessageParser.parse(line));
+                }
             }
 
             return new ItemConfig(
-                itemConfig,
+                itemConfig, prefabId,
                 type, MiniMessageParser.parse(item.itemName), itemModel, lore, GearCooldowns.fromItemConfig(itemConfig)
             );
         }
 
         private void register() {
-            itemConfigByItemModel.put(modelId, this);
+            ItemConfig prev = itemConfigByPrefabId.putIfAbsent(prefabId, this);
+            if (prev != null)
+                MiACompat.LOGGER.warn("Item '{}' with model '{}' is already registered with prefab id '{}'",
+                    original.getItem().itemName, modelId, prefabId);
+
             if (gearCooldowns != null) CooldownTracker.registerGearCooldowns(gearCooldowns);
         }
     }
 
     public static void loadFromResources(ResourceManager resourceManager) {
-        long start = System.nanoTime();
-
-        itemConfigByItemModel.clear();
+        itemConfigByPrefabId.clear();
 
         Yaml yaml = new Yaml(ItemConfigSchema.constructor(new LoaderOptions()));
 
@@ -166,12 +177,17 @@ public class ServerItemRegistry {
                     Path.of(id.getPath())
                 );
 
-                ItemConfig item = RelicConfig.isRelic(relative)
-                    ? RelicConfig.parse(itemConfig)
-                    : RelicConfig.tryParse(itemConfig);
+                String filename = relative.getFileName().toString();
+                String prefabName = filename.substring(0, filename.length() - ".yml".length());
+                Identifier prefabId = Identifier.fromNamespaceAndPath(MiACompat.getMiANamespace(), prefabName);
 
-                if (item == null) {
-                    item = ItemConfig.parse(itemConfig);
+                ItemConfig item = ItemConfig.parse(prefabId, itemConfig);
+
+                if (RelicConfig.isRelic(relative)) {
+                    item = RelicConfig.parse(item);
+                } else {
+                    ItemConfig parsed = RelicConfig.tryParse(item);
+                    if (parsed != null) item = parsed;
                 }
 
                 item.register();
@@ -180,11 +196,6 @@ public class ServerItemRegistry {
             }
         });
 
-        long elapsed = System.nanoTime() - start;
-        MiACompat.LOGGER.info(
-            "Loaded {} Mine in Abyss item configs in {} ms",
-            itemConfigByItemModel.size(),
-            elapsed / 1_000_000.0
-        );
+        MiACompat.LOGGER.info("Loaded {} item configs", itemConfigByPrefabId.size());
     }
 }

@@ -1,0 +1,49 @@
+set.item:
+  type: minecraft:clock
+  itemName: <#0047AB>Black Flask
+  itemModel: mineinabyss:relics/black_flask
+  lore:
+  - Grade IV relic
+  - <#3d59ab>A fleshy bottle filled with a black, oily substance.
+  - <#3d59ab>Drinking it causes a strange reaction within the body.
+  - <font:small_text><gray><shadow:#00000000>Consumable. Grants effects when drunk.
+  consumable:
+      animation: DRINK
+      duration: 1.6s
+      sound: item.honey_bottle.drink
+      particles: false
+set.recipes:
+  result:
+    prefab: mineinabyss:black_flask
+    amount: 1
+  discoverRecipes: true
+  group: mineinabyss:black_flask
+  recipes:
+  - type: shaped
+    items:
+      H:
+        prefab: mineinabyss:hashofu_body
+      C:
+        prefab: mineinabyss:charcoal_sand_ingot
+      Y:
+        prefab: mineinabyss:yomotsubi_abdomen_cooked
+      S:
+        prefab: mineinabyss:stingerhead_eye
+    configuration: |-
+      | H |
+      |YSY|
+      |YCY|
+observe:
+  itemConsumed:
+  - become: parent
+  - applyPotionEffects:
+    - type: minecraft:speed
+      duration: 2s
+      amplifier: 10
+    - type: minecraft:instant_damage
+      duration: 1s
+resourcepack:
+  model: mineinabyss:relics/black_flask
+  textures:
+    layers:
+      - mineinabyss:relics/black_flask

@@ -79,7 +79,6 @@ public class MiACompat implements ClientModInitializer {
         ResourceLoader resourceLoader = ResourceLoader.get(PackType.CLIENT_RESOURCES);
         resourceLoader.registerReloader(id("server_configs"), new ConfigResourceReloader());
 
-        InventoryTracker.loadFromFile();
         BonfireTracker.loadFromFile();
         config.loadFromFile();
 
@@ -93,6 +92,14 @@ public class MiACompat implements ClientModInitializer {
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
             hud.tick();
+
+//            if(!InputConstants.isKeyDown(c.getWindow(), InputConstants.KEY_V)) return;
+//
+//            if (client.screen instanceof AbstractContainerScreen<?> containerScreen) {
+//                if (containerScreen.getMenu() instanceof MerchantMenu merchantMenu) {
+//                    TradesConfigWriter.onMerchantMenu(merchantMenu);
+//                }
+//            }
         });
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.HELD_ITEM_TOOLTIP, id("miacompat_hud"), hud);

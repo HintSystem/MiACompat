@@ -104,6 +104,8 @@ tasks.register("updateServerConfigs", Copy) {
 
     // Include gear with ability cooldowns and potential relics
     from("${repo}/servers_shared/survwild/plugins/Geary/prefabs/mineinabyss") {
+        include "items/materials/black_flask.yml"
+
         include "items/gear/*.yml"
         include "items/gear/utility/**"
 
