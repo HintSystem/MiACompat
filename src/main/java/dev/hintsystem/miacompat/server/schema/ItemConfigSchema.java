@@ -54,17 +54,13 @@ public class ItemConfigSchema {
         PropertyUtils propertyUtils = new PropertyUtils();
         propertyUtils.setSkipMissingProperties(true);
 
-        Constructor constructor = new Constructor(ItemConfigSchema.class, loaderOptions);
-        constructor.setPropertyUtils(propertyUtils);
-        constructor.addTypeDescription(typeDescription());
-
-        return constructor;
-    }
-
-    public static TypeDescription typeDescription() {
         TypeDescription itemDescription = new TypeDescription(ItemConfigSchema.class);
         itemDescription.substituteProperty("set.item", Item.class, "getItem", "setItem");
 
-        return itemDescription;
+        Constructor constructor = new Constructor(ItemConfigSchema.class, loaderOptions);
+        constructor.setPropertyUtils(propertyUtils);
+        constructor.addTypeDescription(itemDescription);
+
+        return constructor;
     }
 }

@@ -148,15 +148,15 @@ public class ServerItemRegistry {
                 type, MiniMessageParser.parse(item.itemName), itemModel, lore, GearCooldowns.fromItemConfig(itemConfig)
             );
         }
+    }
 
-        private void register() {
-            ItemConfig prev = itemConfigByPrefabId.putIfAbsent(prefabId, this);
-            if (prev != null)
-                MiACompat.LOGGER.warn("Item '{}' with model '{}' is already registered with prefab id '{}'",
-                    original.getItem().itemName, modelId, prefabId);
+    private static void registerItem(ItemConfig item) {
+        ItemConfig prev = itemConfigByPrefabId.putIfAbsent(item.prefabId, item);
+        if (prev != null)
+            MiACompat.LOGGER.warn("Item {} already registered with prefab id '{}'",
+                ItemUtils.itemDescriptor(item), item.prefabId);
 
-            if (gearCooldowns != null) CooldownTracker.registerGearCooldowns(gearCooldowns);
-        }
+        if (item.gearCooldowns != null) CooldownTracker.registerGearCooldowns(item.gearCooldowns);
     }
 
     public static void loadFromResources(ResourceManager resourceManager) {
@@ -165,37 +165,34 @@ public class ServerItemRegistry {
         Yaml yaml = new Yaml(ItemConfigSchema.constructor(new LoaderOptions()));
 
         String itemConfigPath = "config/server/items";
-        resourceManager.listResources(
-            itemConfigPath,
-            id -> id.getNamespace().equals(MiACompat.MOD_ID)
-                && id.getPath().endsWith(".yml")
-        ).forEach((id, resource) -> {
-            try (InputStream is = resource.open()) {
-                ItemConfigSchema itemConfig = yaml.load(is);
+        resourceManager.listResources(itemConfigPath, ConfigResourceReloader::isYamlResource)
+            .forEach((id, resource) -> {
+                try (InputStream is = resource.open()) {
+                    ItemConfigSchema itemConfig = yaml.load(is);
 
-                Path relative = Path.of(itemConfigPath).relativize(
-                    Path.of(id.getPath())
-                );
+                    Path relative = Path.of(itemConfigPath).relativize(
+                        Path.of(id.getPath())
+                    );
 
-                String filename = relative.getFileName().toString();
-                String prefabName = filename.substring(0, filename.length() - ".yml".length());
-                Identifier prefabId = Identifier.fromNamespaceAndPath(MiACompat.getMiANamespace(), prefabName);
+                    String filename = relative.getFileName().toString();
+                    String prefabName = filename.substring(0, filename.length() - ".yml".length());
+                    Identifier prefabId = Identifier.fromNamespaceAndPath(MiACompat.getMiANamespace(), prefabName);
 
-                ItemConfig item = ItemConfig.parse(prefabId, itemConfig);
+                    ItemConfig item = ItemConfig.parse(prefabId, itemConfig);
 
-                if (RelicConfig.isRelic(relative)) {
-                    item = RelicConfig.parse(item);
-                } else {
-                    ItemConfig parsed = RelicConfig.tryParse(item);
-                    if (parsed != null) item = parsed;
+                    if (RelicConfig.isRelic(relative)) {
+                        item = RelicConfig.parse(item);
+                    } else {
+                        ItemConfig parsed = RelicConfig.tryParse(item);
+                        if (parsed != null) item = parsed;
+                    }
+
+                    registerItem(item);
+                } catch (Exception e) {
+                    MiACompat.LOGGER.error("Failed to load item config '{}'", id, e);
                 }
+            });
 
-                item.register();
-            } catch (Exception e) {
-                MiACompat.LOGGER.error("Failed to load item config '{}'", id, e);
-            }
-        });
-
-        MiACompat.LOGGER.info("Loaded {} item configs", itemConfigByPrefabId.size());
+        MiACompat.LOGGER.info("Loaded {} items", itemConfigByPrefabId.size());
     }
 }

@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -84,7 +86,7 @@ public class BonfireTracker {
     public static void onServerMessage(Component message) {
         if (trackedBonfireEntity != null) return;
 
-        String msg = message.getString().toLowerCase();
+        String msg = message.getString().toLowerCase(Locale.ROOT);
 
         if (msg.contains("respawn point has been removed")
             || msg.contains("respawn point was unset")) {

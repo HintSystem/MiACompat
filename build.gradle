@@ -97,7 +97,7 @@ tasks.register("updateServerConfigs", Copy) {
     def output = file("src/main/resources/assets/miacompat/config/server")
 
     doFirst {
-        delete(output.listFiles())
+        delete(output)
     }
 
     into(output)
@@ -122,6 +122,27 @@ tasks.register("updateServerConfigs", Copy) {
     from("${repo}/servers_shared/survwild/plugins/MythicMobs/packs/survwild_prayingskels") {
         include "DropTables/**"
         include "mobs/**"
+    }
+
+    // Minecraft resources have to be lowercase
+    // Rename files
+    eachFile { details ->
+        details.path = details.path.toLowerCase()
+    }
+
+    // Rename folders
+    doLast {
+        List<File> dirs = []
+        file(output).eachDirRecurse { dirs << it }
+
+        dirs.sort { -it.absolutePath.length() } // deepest first
+        dirs.each { dir ->
+            def lower = dir.name.toLowerCase()
+            if (dir.name != lower) {
+                def target = new File(dir.parentFile, lower)
+                dir.renameTo(target)
+            }
+        }
     }
 }
 

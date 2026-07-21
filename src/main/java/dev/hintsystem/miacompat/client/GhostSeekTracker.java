@@ -23,6 +23,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class GhostSeekTracker {
     private static final double MIN_MEASUREMENT_DISTANCE = 6.0;
@@ -101,7 +102,7 @@ public class GhostSeekTracker {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return message;
 
-        String messageText = message.getString().trim().toLowerCase();
+        String messageText = message.getString().trim().toLowerCase(Locale.ROOT);
         int pingLength = parsePingLength(messageText);
 
         if (pingLength == 0) return message;
@@ -226,7 +227,7 @@ public class GhostSeekTracker {
             Component itemName = stack.get(DataComponents.ITEM_NAME);
             if (itemName == null) return MAKESHIFT;
 
-            String name = itemName.getString().toLowerCase();
+            String name = itemName.getString().toLowerCase(Locale.ROOT);
 
             for (GhostSeekType type : GhostSeekType.values()) {
                 if (name.contains(type.itemName)) {
