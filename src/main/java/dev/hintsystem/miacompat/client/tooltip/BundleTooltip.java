@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.client.tooltip;
 
 import dev.hintsystem.miacompat.MiACompat;
+
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -10,9 +11,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.BundleContents;
-import org.joml.Vector2i;
 
 import java.util.List;
+
+import org.joml.Vector2i;
 
 public final class BundleTooltip {
     // Add lore to item tooltips drawn in bundles

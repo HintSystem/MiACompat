@@ -1,8 +1,8 @@
 package dev.hintsystem.miacompat.client.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.server.ServerItemRegistry;
 import dev.hintsystem.miacompat.client.CooldownTracker;
+import dev.hintsystem.miacompat.server.ServerItemRegistry;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;

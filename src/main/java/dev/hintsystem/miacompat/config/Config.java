@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.config;
 
-import dev.hintsystem.miacompat.client.GhostSeekRenderer;
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.client.GhostSeekRenderer;
 
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
@@ -10,13 +10,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.awt.Color;
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;

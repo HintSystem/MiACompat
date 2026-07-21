@@ -1,9 +1,9 @@
 package dev.hintsystem.miacompat.config;
 
-import com.google.gson.*;
-
 import java.awt.*;
 import java.lang.reflect.Type;
+
+import com.google.gson.*;
 
 public class ColorTypeAdapter implements JsonSerializer<Color>, JsonDeserializer<Color> {
     @Override

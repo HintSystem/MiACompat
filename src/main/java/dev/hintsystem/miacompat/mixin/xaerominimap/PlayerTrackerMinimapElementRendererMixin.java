@@ -8,10 +8,10 @@ import xaero.hud.minimap.player.tracker.PlayerTrackerMinimapElementRenderer;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = PlayerTrackerMinimapElementRenderer.class, remap = false)
 public class PlayerTrackerMinimapElementRendererMixin {

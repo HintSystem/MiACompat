@@ -5,12 +5,12 @@ import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.hud.minimap.waypoint.WaypointCollector;
 
+import java.util.List;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.*;
 
 @Mixin(value = WaypointCollector.class, remap = false)
 public class WaypointCollectorMixin {

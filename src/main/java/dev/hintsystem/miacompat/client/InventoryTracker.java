@@ -13,15 +13,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.jetbrains.annotations.Nullable;
 
 public class InventoryTracker {
     private static final Gson GSON = new Gson();

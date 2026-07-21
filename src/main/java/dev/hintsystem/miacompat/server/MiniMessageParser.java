@@ -2,6 +2,12 @@ package dev.hintsystem.miacompat.server;
 
 import dev.hintsystem.miacompat.MiACompat;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import com.mojang.serialization.JsonOps;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
@@ -11,14 +17,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.object.SpriteObjectContents;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-
-
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 
 public class MiniMessageParser {
     private static final Gson GSON = new Gson();

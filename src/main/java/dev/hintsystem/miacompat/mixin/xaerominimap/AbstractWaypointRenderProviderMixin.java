@@ -8,13 +8,13 @@ import xaero.hud.minimap.waypoint.render.AbstractWaypointRenderContext;
 import xaero.hud.minimap.waypoint.render.AbstractWaypointRenderProvider;
 import xaero.hud.minimap.waypoint.render.world.WaypointWorldRenderProvider;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-
 import java.util.Map;
 import java.util.WeakHashMap;
+
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = AbstractWaypointRenderProvider.class, remap = false)
 public abstract class AbstractWaypointRenderProviderMixin<C extends AbstractWaypointRenderContext> {

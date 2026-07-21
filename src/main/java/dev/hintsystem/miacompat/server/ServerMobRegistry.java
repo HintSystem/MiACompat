@@ -12,13 +12,13 @@ import dev.hintsystem.miacompat.server.schema.MobConfigSchema;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
 
 public class ServerMobRegistry {
     private static final Map<String, DropTableConfig> dropTableConfigById = new HashMap<>();

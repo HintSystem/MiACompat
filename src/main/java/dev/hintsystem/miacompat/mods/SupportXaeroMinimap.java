@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.mods;
 
-import dev.hintsystem.miacompat.client.BonfireTracker;
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.client.BonfireTracker;
 
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.hud.minimap.waypoint.WaypointColor;

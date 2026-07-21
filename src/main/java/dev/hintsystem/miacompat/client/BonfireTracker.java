@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.phys.AABB;
 
-import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.jetbrains.annotations.Nullable;
 
 public class BonfireTracker {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

@@ -15,21 +15,22 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.vertex.*;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;

@@ -2,20 +2,20 @@ package dev.hintsystem.miacompat.mixin.xaerominimap;
 
 import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-
-import net.minecraft.network.chat.Style;
-import org.spongepowered.asm.mixin.Final;
 import xaero.hud.minimap.info.InfoDisplay;
 import xaero.hud.minimap.info.InfoDisplayManager;
 import xaero.hud.minimap.info.InfoDisplays;
 import xaero.hud.minimap.info.widget.InfoDisplayCommonWidgetFactories;
 import xaero.lib.common.config.option.value.io.serialization.BuiltInConfigValueIOCodecs;
 
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;

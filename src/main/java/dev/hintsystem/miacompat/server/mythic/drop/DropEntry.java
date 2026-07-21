@@ -6,8 +6,9 @@ import dev.hintsystem.miacompat.server.mythic.MythicParser;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 
-import org.jetbrains.annotations.Nullable;
 import java.util.*;
+
+import org.jetbrains.annotations.Nullable;
 
 public sealed interface DropEntry permits ItemDrop, DropTableReference, ExperienceDrop {
     static List<DropEntry> parseList(@Nullable List<String> drops) {

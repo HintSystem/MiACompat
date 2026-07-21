@@ -7,9 +7,10 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Objects;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.Objects;
 
 public class ItemUtils {
     public static Identifier getMiAModelId(ItemStack itemStack) {

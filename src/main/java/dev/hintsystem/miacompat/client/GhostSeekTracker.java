@@ -16,14 +16,14 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class GhostSeekTracker {
     private static final double MIN_MEASUREMENT_DISTANCE = 6.0;

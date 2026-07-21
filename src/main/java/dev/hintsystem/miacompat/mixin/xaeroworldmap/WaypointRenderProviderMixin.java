@@ -1,9 +1,9 @@
 package dev.hintsystem.miacompat.mixin.xaeroworldmap;
 
-import dev.hintsystem.miacompat.client.GhostSeekTracker;
 import dev.hintsystem.miacompat.MiACompat;
-
+import dev.hintsystem.miacompat.client.GhostSeekTracker;
 import dev.hintsystem.miacompat.mods.xaeroworldmap.CustomColorWaypoint;
+
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.hud.minimap.waypoint.WaypointColor;
 import xaero.map.element.render.ElementRenderLocation;

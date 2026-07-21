@@ -1,11 +1,11 @@
 package dev.hintsystem.miacompat.server.schema;
 
+import java.util.List;
+
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
-
-import java.util.List;
 
 public class ItemConfigSchema {
     private Item setItem;

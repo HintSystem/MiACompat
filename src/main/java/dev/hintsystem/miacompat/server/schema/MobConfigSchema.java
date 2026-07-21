@@ -1,11 +1,11 @@
 package dev.hintsystem.miacompat.server.schema;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
-
-import java.util.LinkedHashMap;
-import java.util.List;
 
 public class MobConfigSchema extends LinkedHashMap<String, MobConfigSchema.MobDefinition> {
     public static class MobDefinition {

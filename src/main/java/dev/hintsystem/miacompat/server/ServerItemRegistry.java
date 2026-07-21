@@ -14,14 +14,15 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import org.jetbrains.annotations.Nullable;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jetbrains.annotations.Nullable;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
 
 public class ServerItemRegistry {
     private static final Map<Identifier, ItemConfig> itemConfigByPrefabId = new HashMap<>();

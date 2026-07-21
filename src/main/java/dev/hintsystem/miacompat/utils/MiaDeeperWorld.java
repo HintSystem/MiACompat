@@ -7,9 +7,9 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.Vec3;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
 
 public class MiaDeeperWorld {
     public static final int LAYER_HEIGHT = 480;

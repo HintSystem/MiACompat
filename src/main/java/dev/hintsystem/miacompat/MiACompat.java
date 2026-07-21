@@ -1,26 +1,26 @@
 package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.client.*;
+import dev.hintsystem.miacompat.client.hud.Hud;
 import dev.hintsystem.miacompat.client.screens.RelicCompendium;
 import dev.hintsystem.miacompat.config.Config;
-import dev.hintsystem.miacompat.gui.Hud;
 import dev.hintsystem.miacompat.mods.SupportIris;
 import dev.hintsystem.miacompat.server.ConfigResourceReloader;
 
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.api.ClientModInitializer;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -38,14 +38,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Interaction;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MiACompat implements ClientModInitializer {
 	public static final String MOD_ID = "miacompat";

@@ -8,9 +8,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
-import org.jetbrains.annotations.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import org.jetbrains.annotations.Nullable;
 
 public class GearyData {
     // Sometimes data stores are retrieved every frame, this cache is here to prevent decoding prefabs each time

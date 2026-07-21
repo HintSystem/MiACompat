@@ -3,9 +3,10 @@ package dev.hintsystem.miacompat.client;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.screens.RelicCompendium;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+
+import com.mojang.blaze3d.platform.InputConstants;
 
 public class KeyBindings {
     public static final KeyMapping.Category CATEGORY_GENERAL = KeyMapping.Category.register(MiACompat.id("general"));

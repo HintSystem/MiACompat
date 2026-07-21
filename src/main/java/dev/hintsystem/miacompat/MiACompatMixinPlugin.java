@@ -2,12 +2,12 @@ package dev.hintsystem.miacompat;
 
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.util.List;
+import java.util.Set;
+
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-
-import java.util.List;
-import java.util.Set;
 
 public class MiACompatMixinPlugin implements IMixinConfigPlugin {
     private static final String[] OPTIONAL_MOD_IDS = {

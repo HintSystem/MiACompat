@@ -8,14 +8,15 @@ import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class TradesConfigWriter {
     private static final Path DATA_FILE = MiACompat.CONFIG_DIR.resolve("orth_mob_trades.json");

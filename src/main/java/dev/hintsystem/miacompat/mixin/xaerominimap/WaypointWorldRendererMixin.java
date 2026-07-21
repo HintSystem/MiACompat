@@ -13,17 +13,16 @@ import xaero.lib.client.graphics.XaeroBufferProvider;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import org.joml.Matrix4f;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = WaypointWorldRenderer.class, remap = false)
 public abstract class WaypointWorldRendererMixin extends MinimapElementRenderer<Waypoint, WaypointWorldRenderContext> {

@@ -1,10 +1,10 @@
 package dev.hintsystem.miacompat.server.schema;
 
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.constructor.Constructor;
-
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 public class DropTableConfigSchema extends LinkedHashMap<String, DropTableConfigSchema.DropTableDefinition> {
     public static class DropTableDefinition {

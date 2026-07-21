@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.gui;
+package dev.hintsystem.miacompat.client.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.mixin.GuiGraphicsAccessor;
@@ -24,8 +24,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
-
 import net.minecraft.world.effect.MobEffect;
+
 import org.jetbrains.annotations.NotNull;
 
 public class CurseMeter implements HudElement {

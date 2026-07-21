@@ -2,13 +2,13 @@ package dev.hintsystem.miacompat.mixin.xaerominimap;
 
 import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
 
-import xaero.lib.XaeroLib;
 import xaero.common.graphics.CustomRenderTypes;
+import xaero.lib.XaeroLib;
 
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(CustomRenderTypes.class)
 public class CustomRenderTypesMixin {

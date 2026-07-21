@@ -1,9 +1,9 @@
 package dev.hintsystem.miacompat.mixin;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 

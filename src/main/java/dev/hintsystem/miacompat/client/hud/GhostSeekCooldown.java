@@ -1,7 +1,7 @@
-package dev.hintsystem.miacompat.gui;
+package dev.hintsystem.miacompat.client.hud;
 
-import dev.hintsystem.miacompat.client.GhostSeekTracker;
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.client.GhostSeekTracker;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 
@@ -11,9 +11,9 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
 
 public class GhostSeekCooldown implements HudElement {
     private static final Identifier BAR_BACKGROUND = MiACompat.id("textures/gui/cooldown_bar.png");
