@@ -39,7 +39,7 @@ repositories {
         url = 'https://maven.parchmentmc.org'
     }
 
-//    maven { url = "https://maven.terraformersmc.com/" } // Mod menu
+    maven { url = "https://maven.terraformersmc.com/releases" } // Mod menu
     maven { url = "https://maven.isxander.dev/releases" } // YACL
     maven { url = "https://maven.ryanliptak.com/" } // AppleSkin
     maven {
