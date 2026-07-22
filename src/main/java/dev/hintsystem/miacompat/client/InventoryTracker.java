@@ -2,24 +2,28 @@ package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.GearyData;
+import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
+import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
+import dev.hintsystem.miacompat.utils.ItemUtils;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.component.DataComponents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BundleContents;
-import net.minecraft.world.item.component.ItemContainerContents;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -27,13 +31,38 @@ import org.jetbrains.annotations.Nullable;
 
 public class InventoryTracker {
     private static final Gson GSON = new Gson();
+    private static final Path SAVE_PATH = MiACompat.CONFIG_FOLDER.resolve("compendium.json");
 
-    static final int[] PASSIVE_SLOTS = {9, 10};
+    public static final int CHECK_UNLOCKED_RELICS_TICKS = 24;
+    public static final int[] PASSIVE_RELIC_SLOTS = {9, 10};
 
     public static Map<Identifier, Integer> orthTrades = new HashMap<>();
+    public static CompendiumUnlocks compendium = new CompendiumUnlocks();
+
+    public static int relicTicks = 0;
+
+    public static class CompendiumUnlocks {
+        public Set<String> relics = new HashSet<>();
+        public Map<String, Integer> mobs = new HashMap<>();
+    }
+
+    public static void tick(Minecraft client) {
+        relicTicks = (relicTicks + 1) % CHECK_UNLOCKED_RELICS_TICKS;
+
+        LocalPlayer player = client.player;
+        if (player == null || relicTicks != 0) return;
+
+        for (ItemStack itemStack : ItemUtils.iterateContainedItems(player.getInventory())) {
+            ItemConfig item = ServerItemRegistry.getItem(itemStack);
+            if (!(item instanceof RelicConfig relic)) continue;
+
+            if (compendium.relics.add(relic.prefabId.toString()))
+                saveCompendium();
+        }
+    }
 
     public static MutableComponent getContainerCoinWorthLabel(ItemStack itemStack) {
-        return getContainerCoinWorthLabel(getContainerContents(itemStack));
+        return getContainerCoinWorthLabel(ItemUtils.getContainerContents(itemStack));
     }
 
     /** @return Component with coin worth info, otherwise empty component if nothing to display */
@@ -62,17 +91,7 @@ public class InventoryTracker {
         CoinWorth worth = new CoinWorth();
         if (items == null) return worth;
 
-        for (ItemStack stack : items) {
-            CoinWorth nested = getContainerCoinWorth(
-                getContainerContents(stack)
-            );
-
-            if (nested.whole > 0 || nested.total > 0) {
-                worth.whole += nested.whole;
-                worth.total += nested.total;
-                continue;
-            }
-
+        for (ItemStack stack : ItemUtils.iterateContainedItems(items)) {
             Integer itemsPerCoin = InventoryTracker.getItemsPerCoin(stack);
             if (itemsPerCoin == null) continue;
 
@@ -83,18 +102,6 @@ public class InventoryTracker {
         return worth;
     }
 
-    /** Returns an iterable over the contents of a bundle or shulker box */
-    @Nullable
-    public static Iterable<ItemStack> getContainerContents(ItemStack itemStack) {
-        BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
-        if (bundleContents != null) return bundleContents.items();
-
-        ItemContainerContents contents = itemStack.get(DataComponents.CONTAINER);
-        if (contents != null) return contents.nonEmptyItems();
-
-        return null;
-    }
-
     /** Returns how many of this item are needed to trade for one coin, or null if not tradeable */
     @Nullable
     public static Integer getItemsPerCoin(ItemStack itemStack) {
@@ -102,6 +109,27 @@ public class InventoryTracker {
         if (prefabId == null) return null;
 
         return orthTrades.get(prefabId);
+    }
+
+    public static void saveCompendium() {
+        try {
+            Files.createDirectories(SAVE_PATH.getParent());
+            Files.writeString(SAVE_PATH, GSON.toJson(compendium));
+        } catch (IOException e) {
+            MiACompat.LOGGER.error("Failed to save compendium", e);
+        }
+    }
+
+    public static void loadCompendium() {
+        if (!Files.isRegularFile(SAVE_PATH)) return;
+
+        try {
+            CompendiumUnlocks data = GSON.fromJson(Files.readString(SAVE_PATH), CompendiumUnlocks.class);
+
+            if (data != null) compendium = data;
+        } catch (IOException e) {
+            MiACompat.LOGGER.error("Failed to load compendium", e);
+        }
     }
 
     public static void loadFromResources(ResourceManager resourceManager) {

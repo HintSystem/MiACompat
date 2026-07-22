@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -19,7 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class TradesConfigWriter {
-    private static final Path DATA_FILE = MiACompat.CONFIG_DIR.resolve("orth_mob_trades.json");
+    private static final Path DATA_FILE = MiACompat.CONFIG_FOLDER.resolve("orth_mob_trades.json");
     private static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .create();
@@ -43,9 +42,7 @@ public class TradesConfigWriter {
     public static void save() {
         try {
             Files.createDirectories(DATA_FILE.getParent());
-            try (Writer writer = Files.newBufferedWriter(DATA_FILE)) {
-                GSON.toJson(orthTrades, writer);
-            }
+            Files.writeString(DATA_FILE, GSON.toJson(orthTrades));
         } catch (IOException e) {
             MiACompat.LOGGER.error("Failed to save trades", e);
         }

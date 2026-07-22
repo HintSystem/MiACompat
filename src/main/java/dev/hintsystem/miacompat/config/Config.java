@@ -21,11 +21,10 @@ import java.util.Objects;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 public class Config {
-    private static final Path SAVE_PATH = MiACompat.CONFIG_DIR.resolve(MiACompat.MOD_ID + ".json");
+    private static final Path SAVE_PATH = MiACompat.GLOBAL_CONFIG_DIR.resolve(MiACompat.MOD_ID + ".json");
     private static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .registerTypeAdapter(Color.class, new ColorTypeAdapter())
@@ -46,6 +45,8 @@ public class Config {
     public boolean showGearCooldownsInItemSlots = true;
     public boolean hideGearCooldownsInActionBar = false;
     public boolean hideAbilityFailsInActionBar = false;
+
+    public boolean showUndiscoveredRelics = false;
 
     // Ghost Seek
     public boolean showGhostSeekCooldown = true;
@@ -191,6 +192,19 @@ public class Config {
                         """).withStyle(ChatFormatting.RED))
                     ))
                     .binding(DEFAULTS.hideAbilityFailsInActionBar, () -> hideAbilityFailsInActionBar, val -> hideAbilityFailsInActionBar = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
+                .build())
+
+
+            .group(OptionGroup.createBuilder()
+                .name(Component.literal("Compendium"))
+                .collapsed(true)
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Show Undiscovered Relics"))
+                    .binding(DEFAULTS.showUndiscoveredRelics, () -> showUndiscoveredRelics, val -> showUndiscoveredRelics = val)
                     .controller(TickBoxControllerBuilder::create)
                     .build())
 
@@ -397,14 +411,14 @@ public class Config {
     }
 
     public void loadFromFile() {
-        if (!Files.exists(SAVE_PATH)) {
+        if (!Files.isRegularFile(SAVE_PATH)) {
             MiACompat.LOGGER.info("Config file not found at {}, using default", SAVE_PATH);
             saveToFile();
             return;
         }
 
         try {
-            JsonObject root = JsonParser.parseString(Files.readString(SAVE_PATH)).getAsJsonObject();
+            JsonObject root = GSON.fromJson(Files.readString(SAVE_PATH), JsonObject.class);
 
             for (Field f : this.getClass().getFields()) {
                 if (!Modifier.isStatic(f.getModifiers()) && root.has(f.getName())) {

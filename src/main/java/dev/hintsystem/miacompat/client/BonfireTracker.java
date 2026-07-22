@@ -23,13 +23,11 @@ import java.util.Locale;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.jetbrains.annotations.Nullable;
 
 public class BonfireTracker {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path SAVE_PATH = MiACompat.CONFIG_DIR.resolve(MiACompat.MOD_ID + "-bonfire.json");
+    private static final Path SAVE_PATH = MiACompat.CONFIG_FOLDER.resolve("bonfire.json");
 
     public static Display.ItemDisplay trackedBonfireEntity;
     public static BonfireData bonfireData = new BonfireData();
@@ -148,24 +146,26 @@ public class BonfireTracker {
 
     public static void saveToFile() {
         try {
+            Files.createDirectories(SAVE_PATH.getParent());
             Files.writeString(SAVE_PATH, GSON.toJson(bonfireData));
         } catch (IOException e) {
-            MiACompat.LOGGER.error("[MiACompat] Failed to save bonfire data!", e);
+            MiACompat.LOGGER.error("Failed to save Mine in Abyss bonfire data!", e);
         }
     }
 
     public static void loadFromFile() {
-        if (!Files.exists(SAVE_PATH)) return;
+        if (!Files.isRegularFile(SAVE_PATH)) return;
 
         try {
-            JsonObject root = JsonParser.parseString(Files.readString(SAVE_PATH)).getAsJsonObject();
-            BonfireData data = GSON.fromJson(root, BonfireData.class);
+            BonfireData data = GSON.fromJson(Files.readString(SAVE_PATH), BonfireData.class);
+
             if (data != null) {
                 bonfireData = data;
-                MiACompat.LOGGER.info("[MiACompat] Loaded last bonfire at {} (set={})", bonfireData.getBlockPos(), bonfireData.isBonfireSet);
+                MiACompat.LOGGER.info("Loaded last bonfire at {} (set={})",
+                    bonfireData.getBlockPos(), bonfireData.isBonfireSet);
             }
         } catch (IOException e) {
-            MiACompat.LOGGER.error("[MiACompat] Failed to load bonfire data!", e);
+            MiACompat.LOGGER.error("Failed to load Mine in Abyss bonfire data!", e);
         }
     }
 }

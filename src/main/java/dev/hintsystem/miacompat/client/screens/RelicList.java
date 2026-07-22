@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractScrollArea;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -41,6 +42,7 @@ public class RelicList extends AbstractScrollArea {
     private final Map<RelicGrade, List<RelicCompendium.Relic>> relicsByGrade;
 
     private int contentHeight;
+    public RelicCompendium.Relic hoveredRelic;
 
     public RelicList(
         Minecraft minecraft, Font font, Map<RelicGrade, List<RelicCompendium.Relic>> relicsByGrade,
@@ -73,6 +75,12 @@ public class RelicList extends AbstractScrollArea {
     }
 
     @Override
+    public void onClick(MouseButtonEvent event, boolean isDoubleClick) {
+        if (hoveredRelic == null)
+            updateScrolling(event);
+    }
+
+    @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         guiGraphics.enableScissor(this.getX(), this.getY(), this.getRight(), this.getBottom());
         renderElements(guiGraphics,
@@ -85,6 +93,8 @@ public class RelicList extends AbstractScrollArea {
     }
 
     private void renderElements(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
+        RelicCompendium.Relic hoveredRelic = null;
+
         int itemX = x;
         int itemY = y;
         for (RelicGrade grade : RelicGrade.values()) {
@@ -97,9 +107,12 @@ public class RelicList extends AbstractScrollArea {
                 RelicCompendium.Relic relic = it.next();
 
                 boolean hovered = isItemHovered(itemX, itemY, mouseX, mouseY);
+                if (hovered && hoveredRelic == null) {
+                    hoveredRelic = relic;
+                    renderSlotTooltip(guiGraphics, relic, mouseX, mouseY);
+                }
 
                 renderSlot(guiGraphics, relic, itemX, itemY, hovered);
-                if (hovered) renderSlotTooltip(guiGraphics, relic, mouseX, mouseY);
 
                 if (!it.hasNext()) continue;
 
@@ -115,6 +128,7 @@ public class RelicList extends AbstractScrollArea {
         }
 
         this.contentHeight = itemY - y;
+        this.hoveredRelic = hoveredRelic;
     }
 
     public void renderSlotTooltip(GuiGraphics guiGraphics, RelicCompendium.Relic relic, int mouseX, int mouseY) {

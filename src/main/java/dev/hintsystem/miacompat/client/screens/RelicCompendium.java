@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.client.screens;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.client.InventoryTracker;
 import dev.hintsystem.miacompat.client.KeyBindings;
 import dev.hintsystem.miacompat.client.MiaIcons;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
@@ -155,9 +156,15 @@ public class RelicCompendium extends Screen {
             item.set(DataComponents.LORE, new ItemLore(lore));
         }
 
-        public boolean isUnlocked() { return false; }
+        public boolean isUnlocked() {
+            return InventoryTracker.compendium.relics
+                .contains(config.prefabId.toString());
+        }
 
-        public boolean isHidden() { return false && !drops.isEmpty(); }
+        public boolean isHidden() {
+            return (!isUnlocked() && !MiACompat.config.showUndiscoveredRelics)
+                && !drops.isEmpty();
+        }
 
         private int layerOrder() {
             if (drops.isEmpty()) return Integer.MIN_VALUE;

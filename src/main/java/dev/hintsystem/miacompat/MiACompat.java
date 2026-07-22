@@ -50,8 +50,10 @@ import org.slf4j.LoggerFactory;
 
 public class MiACompat implements ClientModInitializer {
 	public static final String MOD_ID = "miacompat";
-    public static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    public static final Path GLOBAL_CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
+    public static final Path CONFIG_FOLDER = GLOBAL_CONFIG_DIR.resolve(MOD_ID);
 
     public static Config config = new Config();
 
@@ -80,6 +82,7 @@ public class MiACompat implements ClientModInitializer {
         ResourceLoader resourceLoader = ResourceLoader.get(PackType.CLIENT_RESOURCES);
         resourceLoader.registerReloader(id("server_configs"), new ConfigResourceReloader());
 
+        InventoryTracker.loadCompendium();
         BonfireTracker.loadFromFile();
         config.loadFromFile();
 
@@ -90,6 +93,8 @@ public class MiACompat implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
             KeyBindings.tickKeybinds(c);
+
+            InventoryTracker.tick(c);
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
             hud.tick();
