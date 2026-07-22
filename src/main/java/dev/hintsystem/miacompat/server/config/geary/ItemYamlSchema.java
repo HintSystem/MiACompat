@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.server.schema;
+package dev.hintsystem.miacompat.server.config.geary;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
 
-public class ItemConfigSchema {
+public class ItemYamlSchema {
     private Item setItem;
     public Observe observe;
 
@@ -54,10 +54,10 @@ public class ItemConfigSchema {
         PropertyUtils propertyUtils = new PropertyUtils();
         propertyUtils.setSkipMissingProperties(true);
 
-        TypeDescription itemDescription = new TypeDescription(ItemConfigSchema.class);
+        TypeDescription itemDescription = new TypeDescription(ItemYamlSchema.class);
         itemDescription.substituteProperty("set.item", Item.class, "getItem", "setItem");
 
-        Constructor constructor = new Constructor(ItemConfigSchema.class, loaderOptions);
+        Constructor constructor = new Constructor(ItemYamlSchema.class, loaderOptions);
         constructor.setPropertyUtils(propertyUtils);
         constructor.addTypeDescription(itemDescription);
 

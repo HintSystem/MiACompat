@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.utils.GearyData;
+import dev.hintsystem.miacompat.server.GearyData;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;

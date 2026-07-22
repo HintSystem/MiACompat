@@ -1,6 +1,5 @@
-package dev.hintsystem.miacompat.server.mythic.drop;
+package dev.hintsystem.miacompat.server.config.mythic.drop;
 
-import dev.hintsystem.miacompat.server.ServerMobRegistry;
 import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
 
 import java.util.Arrays;
@@ -32,8 +31,8 @@ public enum RelicLayer {
                 Function.identity()
             ));
 
-    public static Optional<RelicLayer> fromMobDrop(ServerMobRegistry.MobDrop<?> drop) {
-        return fromMobId(drop.mobId());
+    public static Optional<RelicLayer> fromMobDrop(MobDrop<?> drop) {
+        return fromMobId(drop.mob().id);
     }
 
     public static Optional<RelicLayer> fromMobId(String id) {

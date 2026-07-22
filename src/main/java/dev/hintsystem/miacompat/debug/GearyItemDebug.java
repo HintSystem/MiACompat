@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.debug;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.utils.GearyData;
+import dev.hintsystem.miacompat.server.GearyData;
 import dev.hintsystem.miacompat.utils.ItemUtils;
 
 import net.minecraft.core.component.DataComponents;
@@ -24,7 +24,7 @@ public class GearyItemDebug {
     public static void logItemInfo(ItemStack itemStack) {
         StringBuilder itemInfo = new StringBuilder();
 
-        GearyData.DataStore dataStore = GearyData.getDataStore(itemStack);
+        GearyData.DataStore dataStore = GearyData.get(itemStack);
 
         if (dataStore != null) {
             itemInfo.append("\ndataStore:\n");

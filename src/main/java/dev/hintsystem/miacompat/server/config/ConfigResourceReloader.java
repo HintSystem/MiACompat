@@ -1,7 +1,9 @@
-package dev.hintsystem.miacompat.server;
+package dev.hintsystem.miacompat.server.config;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.InventoryTracker;
+import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.ServerMobRegistry;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;

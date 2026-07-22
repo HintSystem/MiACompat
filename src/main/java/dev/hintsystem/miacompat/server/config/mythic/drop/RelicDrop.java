@@ -1,7 +1,7 @@
-package dev.hintsystem.miacompat.server.mythic.drop;
+package dev.hintsystem.miacompat.server.config.mythic.drop;
 
-import dev.hintsystem.miacompat.server.mythic.MythicParser;
-import dev.hintsystem.miacompat.server.mythic.SkillEntry;
+import dev.hintsystem.miacompat.server.config.mythic.MythicParser;
+import dev.hintsystem.miacompat.server.config.mythic.SkillEntry;
 
 import net.minecraft.resources.Identifier;
 

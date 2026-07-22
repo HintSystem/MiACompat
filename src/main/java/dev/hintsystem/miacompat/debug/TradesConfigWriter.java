@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.debug;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.utils.GearyData;
+import dev.hintsystem.miacompat.server.GearyData;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.MerchantMenu;

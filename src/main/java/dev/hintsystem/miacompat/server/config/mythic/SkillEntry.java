@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.server.mythic;
+package dev.hintsystem.miacompat.server.config.mythic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,18 +21,18 @@ public record SkillEntry(
         return isCustomSkill() ? mechanic.arguments().get("s") : null;
     }
 
-    public static List<dev.hintsystem.miacompat.server.mythic.SkillEntry> parseList(@Nullable List<String> skills) {
+    public static List<dev.hintsystem.miacompat.server.config.mythic.SkillEntry> parseList(@Nullable List<String> skills) {
         if (skills == null) return List.of();
 
-        List<dev.hintsystem.miacompat.server.mythic.SkillEntry> skillEntries = new ArrayList<>();
+        List<dev.hintsystem.miacompat.server.config.mythic.SkillEntry> skillEntries = new ArrayList<>();
         for (String line : skills) {
             if (line.isBlank()) continue;
-            skillEntries.add(dev.hintsystem.miacompat.server.mythic.SkillEntry.parse(line));
+            skillEntries.add(dev.hintsystem.miacompat.server.config.mythic.SkillEntry.parse(line));
         }
         return skillEntries;
     }
 
-    public static dev.hintsystem.miacompat.server.mythic.SkillEntry parse(String line) {
+    public static dev.hintsystem.miacompat.server.config.mythic.SkillEntry parse(String line) {
         List<String> tokens = MythicParser.tokenize(line, ' ');
 
         MythicParser.Invocation mechanic = MythicParser.Invocation.parse(tokens.getFirst());
@@ -56,6 +56,6 @@ public record SkillEntry(
             }
         }
 
-        return new dev.hintsystem.miacompat.server.mythic.SkillEntry(mechanic, targeter, trigger, chance);
+        return new dev.hintsystem.miacompat.server.config.mythic.SkillEntry(mechanic, targeter, trigger, chance);
     }
 }

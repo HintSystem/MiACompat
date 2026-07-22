@@ -3,11 +3,14 @@ package dev.hintsystem.miacompat.client.screens;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.MiaIcons;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
-import dev.hintsystem.miacompat.server.ServerItemRegistry.RelicGrade;
 import dev.hintsystem.miacompat.server.ServerMobRegistry;
-import dev.hintsystem.miacompat.server.ServerMobRegistry.MobDrop;
-import dev.hintsystem.miacompat.server.mythic.drop.ItemDrop;
-import dev.hintsystem.miacompat.server.mythic.drop.RelicLayer;
+import dev.hintsystem.miacompat.server.config.mythic.drop.MobDrop;
+import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
+import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
+import dev.hintsystem.miacompat.server.config.geary.item.RelicGrade;
+import dev.hintsystem.miacompat.server.config.mythic.drop.ItemDrop;
+import dev.hintsystem.miacompat.server.config.mythic.drop.RelicLayer;
+import dev.hintsystem.miacompat.server.config.mythic.mob.MobConfig;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -62,7 +65,7 @@ public class RelicCompendium extends Screen {
         relicsByGrade.clear();
 
         for (RelicLayer relicLayer : RelicLayer.values()) {
-            ServerMobRegistry.MobConfig relicDropMob = ServerMobRegistry.getMob(relicLayer.mobId);
+            MobConfig relicDropMob = ServerMobRegistry.getMob(relicLayer.mobId);
             if (relicDropMob == null) {
                 MiACompat.LOGGER.warn("Relic drop mob id '{}' not registered", relicLayer.mobId);
                 continue;
@@ -80,8 +83,8 @@ public class RelicCompendium extends Screen {
             }
         }
 
-        for (ServerItemRegistry.ItemConfig itemConfig : ServerItemRegistry.getAllItems().values()) {
-            if (!(itemConfig instanceof ServerItemRegistry.RelicConfig relicConfig)) continue;
+        for (ItemConfig itemConfig : ServerItemRegistry.getAllItems().values()) {
+            if (!(itemConfig instanceof RelicConfig relicConfig)) continue;
 
             var drops = relicDropByPrefabId.get(relicConfig.prefabId);
 
@@ -101,13 +104,13 @@ public class RelicCompendium extends Screen {
     }
 
     public static class Relic {
-        public final ServerItemRegistry.RelicConfig config;
+        public final RelicConfig config;
         public final List<MobDrop<ItemDrop>> drops;
         public final ItemStack item;
 
         public final int borderColor;
 
-        public Relic(ServerItemRegistry.RelicConfig config, @Nullable List<MobDrop<ItemDrop>> drops) {
+        public Relic(RelicConfig config, @Nullable List<MobDrop<ItemDrop>> drops) {
             this.config = config;
             this.drops = drops != null ? drops : List.of();
             this.item = new ItemStack(config.type);

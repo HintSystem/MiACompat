@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.utils;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
@@ -40,7 +40,7 @@ public class ItemUtils {
     }
 
     /** Describes an item without relying on its type, so custom items can be differentiated */
-    public static String itemDescriptor(ServerItemRegistry.ItemConfig item) {
+    public static String itemDescriptor(ItemConfig item) {
         return String.format("'%s' with model '%s'", item.getOriginal().getItem().itemName, item.modelId);
     }
 }

@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.client.screens;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.config.geary.item.RelicGrade;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -38,12 +38,12 @@ public class RelicList extends AbstractScrollArea {
 
     private final Minecraft minecraft;
     private final Font font;
-    private final Map<ServerItemRegistry.RelicGrade, List<RelicCompendium.Relic>> relicsByGrade;
+    private final Map<RelicGrade, List<RelicCompendium.Relic>> relicsByGrade;
 
     private int contentHeight;
 
     public RelicList(
-        Minecraft minecraft, Font font, Map<ServerItemRegistry.RelicGrade, List<RelicCompendium.Relic>> relicsByGrade,
+        Minecraft minecraft, Font font, Map<RelicGrade, List<RelicCompendium.Relic>> relicsByGrade,
         int x, int y, int width, int height
     ) {
         super(x, y, width, height, Component.literal("Relic List"));
@@ -87,7 +87,7 @@ public class RelicList extends AbstractScrollArea {
     private void renderElements(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
         int itemX = x;
         int itemY = y;
-        for (ServerItemRegistry.RelicGrade grade : ServerItemRegistry.RelicGrade.values()) {
+        for (RelicGrade grade : RelicGrade.values()) {
             itemY += GRADE_HEADER_HEIGHT;
             guiGraphics.drawString(this.font, grade.displayName,
                 itemX + SLOT_ITEM_PADDING, itemY - this.font.lineHeight - GRADE_HEADER_PADDING, -1);

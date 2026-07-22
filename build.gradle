@@ -86,7 +86,7 @@ processResources {
 
 tasks.register("updateServerConfigs", Copy) {
     group = "build setup"
-    description = "Copies Mine in Abyss server configs into the mod resources"
+    description = "Copies Mine in Abyss server configs into mod resources"
 
     def repo = project.server_config_repo
     def output = file("src/main/resources/assets/miacompat/config/server")
@@ -98,7 +98,7 @@ tasks.register("updateServerConfigs", Copy) {
     into(output)
 
     // Include gear with ability cooldowns and potential relics
-    from("${repo}/servers_shared/survwild/plugins/Geary/prefabs/mineinabyss") {
+    from("${repo}/servers_shared/survwild/plugins/Geary/prefabs/mineinabyss/") {
         include "items/materials/black_flask.yml"
 
         include "items/gear/*.yml"
@@ -111,12 +111,16 @@ tasks.register("updateServerConfigs", Copy) {
         include "items/relics/sun_spheres/**"
 
         exclude "items/relics/active/arcstaff.yml"
+
+        into "geary/prefabs/mineinabyss/"
     }
 
     // Include only praying skeletons for now TODO create mob compendium
     from("${repo}/servers_shared/survwild/plugins/MythicMobs/packs/survwild_prayingskels") {
         include "DropTables/**"
         include "mobs/**"
+
+        into "mythicmobs"
     }
 
     // Minecraft resources have to be lowercase
@@ -143,7 +147,7 @@ tasks.register("updateServerConfigs", Copy) {
 
 tasks.register("updateServerTextures", Copy) {
     group = "build setup"
-    description = "Copies Mine in Abyss server textures into the mod resources"
+    description = "Copies Mine in Abyss server textures into mod resources"
 
     def repo = project.server_config_repo
     def output = file("src/main/resources/assets/miacompat/textures/gui/sprites/mia_icons")

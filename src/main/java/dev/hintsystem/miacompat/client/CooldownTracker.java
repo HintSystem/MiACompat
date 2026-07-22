@@ -2,7 +2,8 @@ package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
-import dev.hintsystem.miacompat.server.schema.ItemConfigSchema;
+import dev.hintsystem.miacompat.server.config.geary.ItemYamlSchema;
+import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -24,7 +25,7 @@ public class CooldownTracker {
     public static void onItemRightClick(ItemStack item) { onItemClick(item, false); }
 
     public static void onItemClick(ItemStack item, boolean isLeftClick) {
-        ServerItemRegistry.ItemConfig itemConfig = ServerItemRegistry.getItem(item);
+        ItemConfig itemConfig = ServerItemRegistry.getItem(item);
         if (itemConfig == null || itemConfig.gearCooldowns == null) return;
 
         ActionCooldown action = isLeftClick ? itemConfig.gearCooldowns.leftClick : itemConfig.gearCooldowns.rightClick;
@@ -134,8 +135,8 @@ public class CooldownTracker {
         }
 
         @Nullable
-        public static GearCooldowns fromItemConfig(ItemConfigSchema itemConfig) {
-            ItemConfigSchema.Observe observe = itemConfig.observe;
+        public static GearCooldowns fromItemConfig(ItemYamlSchema itemConfig) {
+            ItemYamlSchema.Observe observe = itemConfig.observe;
             if (observe == null) return null;
 
             ActionCooldown leftClick = ActionCooldown.fromActionsConfig(observe.itemLeftClick);
@@ -169,19 +170,19 @@ public class CooldownTracker {
         }
 
         @Nullable
-        private static CooldownTracker.ActionCooldown fromActionsConfig(@Nullable List<ItemConfigSchema.Action> actions) {
+        private static CooldownTracker.ActionCooldown fromActionsConfig(@Nullable List<ItemYamlSchema.Action> actions) {
             if (actions == null) return null;
 
             String length = null;
             String cooldownDisplay = null;
             String failMessage = null;
 
-            for (ItemConfigSchema.Action action : actions) {
+            for (ItemYamlSchema.Action action : actions) {
                 if (action.cooldown != null) {
                     length = action.cooldown.length;
                     cooldownDisplay = stripTags(action.cooldown.display);
                 } else if (action.ensure != null && action.ensure.onFail != null && !action.ensure.onFail.isEmpty()) {
-                    ItemConfigSchema.FailAction fail = action.ensure.onFail.getFirst();
+                    ItemYamlSchema.FailAction fail = action.ensure.onFail.getFirst();
                     if (fail.sendActionBar != null) {
                         failMessage = stripTags(fail.sendActionBar.text);
                     }

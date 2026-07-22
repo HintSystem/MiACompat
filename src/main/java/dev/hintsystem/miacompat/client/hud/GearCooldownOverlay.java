@@ -3,6 +3,7 @@ package dev.hintsystem.miacompat.client.hud;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.CooldownTracker;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -13,7 +14,7 @@ public final class GearCooldownOverlay {
     public static boolean drawGearCooldown(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
         if (!MiACompat.config.showGearCooldownsInItemSlots) return false;
 
-        ServerItemRegistry.ItemConfig itemConfig = ServerItemRegistry.getItem(itemStack);
+        ItemConfig itemConfig = ServerItemRegistry.getItem(itemStack);
         if (itemConfig == null || itemConfig.gearCooldowns == null) return false;
 
         CooldownTracker.GearCooldowns cooldowns = itemConfig.gearCooldowns;

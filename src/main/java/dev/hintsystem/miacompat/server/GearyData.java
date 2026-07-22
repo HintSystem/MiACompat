@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.utils;
+package dev.hintsystem.miacompat.server;
 
 import dev.hintsystem.miacompat.MiACompat;
 
@@ -18,18 +18,18 @@ public class GearyData {
     private static final Map<CustomData, DataStore> DATA_STORE_CACHE = new WeakHashMap<>();
 
     @Nullable
-    public static DataStore getDataStore(CustomData customDataComponent) {
+    public static DataStore get(CustomData customDataComponent) {
         if (customDataComponent == null) return null;
         return DATA_STORE_CACHE.computeIfAbsent(customDataComponent, DataStore::new);
     }
 
     @Nullable
-    public static DataStore getDataStore(ItemStack itemStack) {
-        return getDataStore(itemStack.get(DataComponents.CUSTOM_DATA));
+    public static DataStore get(ItemStack itemStack) {
+        return get(itemStack.get(DataComponents.CUSTOM_DATA));
     }
 
     public static Set<Identifier> getPrefabIds(ItemStack item) {
-        DataStore dataStore = getDataStore(item);
+        DataStore dataStore = get(item);
         return dataStore != null ? dataStore.getPrefabs() : Set.of();
     }
 

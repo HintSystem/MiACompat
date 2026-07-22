@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.server.schema;
+package dev.hintsystem.miacompat.server.config;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -10,8 +10,8 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 
-public class RootMapConstructor<R extends Map<String, V>, V> extends Constructor {
-    public RootMapConstructor(
+public class RootMapYamlConstructor<R extends Map<String, V>, V> extends Constructor {
+    public RootMapYamlConstructor(
         Supplier<R> rootFactory,
         Class<R> rootType,
         Class<V> valueType,

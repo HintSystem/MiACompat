@@ -1,21 +1,18 @@
 package dev.hintsystem.miacompat.server;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.server.mythic.SkillEntry;
-import dev.hintsystem.miacompat.server.mythic.drop.DropEntry;
-import dev.hintsystem.miacompat.server.mythic.drop.DropTableReference;
-import dev.hintsystem.miacompat.server.mythic.drop.ItemDrop;
-import dev.hintsystem.miacompat.server.mythic.drop.RelicDrop;
-import dev.hintsystem.miacompat.server.schema.DropTableConfigSchema;
-import dev.hintsystem.miacompat.server.schema.MobConfigSchema;
+import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
+import dev.hintsystem.miacompat.server.config.mythic.DropTableConfig;
+import dev.hintsystem.miacompat.server.config.mythic.DropTableYamlSchema;
+import dev.hintsystem.miacompat.server.config.mythic.MobYamlSchema;
+import dev.hintsystem.miacompat.server.config.mythic.SkillEntry;
+import dev.hintsystem.miacompat.server.config.mythic.drop.*;
+import dev.hintsystem.miacompat.server.config.mythic.mob.MobConfig;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -47,10 +44,10 @@ public class ServerMobRegistry {
         for (DropEntry entry : mobConfig.drops) {
             if (entry instanceof DropTableReference reference) {
                 for (DropEntry drop : resolveDropTable(reference.tableName())) {
-                    resolvedDrops.add(new MobDrop<>(mobConfig.id, drop));
+                    resolvedDrops.add(new MobDrop<>(mobConfig, drop));
                 }
             } else {
-                resolvedDrops.add(new MobDrop<>(mobConfig.id, entry));
+                resolvedDrops.add(new MobDrop<>(mobConfig, entry));
             }
         }
 
@@ -80,7 +77,7 @@ public class ServerMobRegistry {
 
                 double dropChance = skillEntry.chance() * itemDrop.chance;
                 resolvedDrops.add(new MobDrop<>(
-                    mobConfig.id,
+                    mobConfig,
                     new RelicDrop(
                         itemDrop.itemId, skillEntry, itemDrop.amount, dropChance, itemDrop.flags
                     )
@@ -89,12 +86,6 @@ public class ServerMobRegistry {
         }
 
         return resolvedDrops;
-    }
-
-    public record MobDrop<T extends DropEntry>(String mobId, T drop) {
-        public <U extends DropEntry> MobDrop<U> withDrop(U drop) {
-            return new MobDrop<>(mobId, drop);
-        }
     }
 
     public static List<DropEntry> resolveDropTable(String dropTableName) {
@@ -131,93 +122,6 @@ public class ServerMobRegistry {
         return resolved;
     }
 
-    public enum SpawnCategory {
-        NONE(null),
-        PASSIVE("passive"),
-        HOSTILE("hostile"),
-        FLYING("flying"),
-        SWARM("swarm"),
-        WATER("water"),
-        MINI_BOSS("miniboss"),
-        UNCOMMON("uncommon"),
-        SPECIAL("special");
-
-        private static final Map<String, SpawnCategory> BY_VALUE =
-            Arrays.stream(values())
-                .filter(c -> c.value != null)
-                .collect(Collectors.toUnmodifiableMap(
-                    c -> c.value.toLowerCase(Locale.ROOT),
-                    Function.identity()
-                ));
-
-        public final String value;
-
-        SpawnCategory(String value) {
-            this.value = value;
-        }
-
-        public static SpawnCategory parse(String value) {
-            if (value == null || value.isBlank()) return NONE;
-
-            SpawnCategory category = BY_VALUE.get(value.toLowerCase(Locale.ROOT));
-            if (category == null)
-                throw new IllegalArgumentException("Unknown spawn category: " + value);
-
-            return category;
-        }
-    }
-
-    public static class MobConfig {
-        public final String id;
-        public final String template;
-
-        public final SpawnCategory spawnCategory;
-        public final Component display;
-
-        public final MobConfigSchema.Options options;
-
-        public final List<DropEntry> drops;
-        public final List<SkillEntry> skills;
-
-        public MobConfig(
-            String id, String template,
-            SpawnCategory spawnCategory, Component display, MobConfigSchema.Options options,
-            List<DropEntry> drops, List<SkillEntry> skills
-        ) {
-            this.id = id;
-            this.template = template;
-            this.spawnCategory = spawnCategory;
-            this.display = display;
-            this.options = options;
-            this.drops = drops;
-            this.skills = skills;
-        }
-
-        private static MobConfig parse(String mobId, MobConfigSchema.MobDefinition mobConfig) throws Exception {
-            return new MobConfig(
-                mobId, mobConfig.Template,
-                SpawnCategory.parse(mobConfig.SpawnCategory),
-                mobConfig.Display != null ? MiniMessageParser.parse(mobConfig.Display) : null,
-                mobConfig.Options,
-                DropEntry.parseList(mobConfig.Drops), SkillEntry.parseList(mobConfig.Skills)
-            );
-        }
-    }
-
-    public static class DropTableConfig {
-        public final String id;
-        public final List<DropEntry> drops;
-
-        public DropTableConfig(String id, List<DropEntry> drops) {
-            this.id = id;
-            this.drops = drops;
-        }
-
-        private static DropTableConfig parse(String dropTableId, DropTableConfigSchema.DropTableDefinition dropTableConfig) {
-            return new DropTableConfig(dropTableId, DropEntry.parseList(dropTableConfig.Drops));
-        }
-    }
-
     public static void buildIndexes() {
         mobConfigsByTemplate.clear();
 
@@ -249,14 +153,14 @@ public class ServerMobRegistry {
         mobConfigById.clear();
 
         LoaderOptions options = new LoaderOptions();
-        Yaml dropTableYaml = new Yaml(DropTableConfigSchema.constructor(options));
+        Yaml dropTableYaml = new Yaml(DropTableYamlSchema.constructor(options));
 
-        resourceManager.listResources("config/server/droptables", ConfigResourceReloader::isYamlResource)
+        resourceManager.listResources("config/server/mythicmobs/droptables", ConfigResourceReloader::isYamlResource)
             .forEach((id, resource) -> {
                 try (InputStream is = resource.open()) {
-                    DropTableConfigSchema dropTableConfig = dropTableYaml.load(is);
+                    DropTableYamlSchema dropTableConfig = dropTableYaml.load(is);
 
-                    for (Map.Entry<String, DropTableConfigSchema.DropTableDefinition> entry : dropTableConfig.entrySet()) {
+                    for (Map.Entry<String, DropTableYamlSchema.DropTableDefinition> entry : dropTableConfig.entrySet()) {
                         DropTableConfig dropTable = DropTableConfig.parse(entry.getKey(), entry.getValue());
                         registerDropTable(dropTable);
                     }
@@ -267,14 +171,14 @@ public class ServerMobRegistry {
 
         MiACompat.LOGGER.info("Loaded {} drop tables", dropTableConfigById.size());
 
-        Yaml mobYaml = new Yaml(MobConfigSchema.constructor(options));
+        Yaml mobYaml = new Yaml(MobYamlSchema.constructor(options));
 
-        resourceManager.listResources("config/server/mobs", ConfigResourceReloader::isYamlResource)
+        resourceManager.listResources("config/server/mythicmobs/mobs", ConfigResourceReloader::isYamlResource)
             .forEach((id, resource) -> {
                 try (InputStream is = resource.open()) {
-                    MobConfigSchema mobConfig = mobYaml.load(is);
+                    MobYamlSchema mobConfig = mobYaml.load(is);
 
-                    for (Map.Entry<String, MobConfigSchema.MobDefinition> entry : mobConfig.entrySet()) {
+                    for (Map.Entry<String, MobYamlSchema.MobDefinition> entry : mobConfig.entrySet()) {
                         MobConfig mob = MobConfig.parse(entry.getKey(), entry.getValue());
                         registerMob(mob);
                     }

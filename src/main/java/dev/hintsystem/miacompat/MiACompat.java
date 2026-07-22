@@ -5,7 +5,7 @@ import dev.hintsystem.miacompat.client.hud.Hud;
 import dev.hintsystem.miacompat.client.screens.RelicCompendium;
 import dev.hintsystem.miacompat.config.Config;
 import dev.hintsystem.miacompat.mods.SupportIris;
-import dev.hintsystem.miacompat.server.ConfigResourceReloader;
+import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;

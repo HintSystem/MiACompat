@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.server.mythic;
+package dev.hintsystem.miacompat.server.config.mythic;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
