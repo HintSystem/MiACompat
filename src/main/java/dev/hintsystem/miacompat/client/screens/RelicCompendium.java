@@ -1,21 +1,24 @@
 package dev.hintsystem.miacompat.client.screens;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.client.KeyBindings;
 import dev.hintsystem.miacompat.client.MiaIcons;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
 import dev.hintsystem.miacompat.server.ServerMobRegistry;
-import dev.hintsystem.miacompat.server.config.mythic.drop.MobDrop;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
 import dev.hintsystem.miacompat.server.config.geary.item.RelicGrade;
 import dev.hintsystem.miacompat.server.config.mythic.drop.ItemDrop;
+import dev.hintsystem.miacompat.server.config.mythic.drop.MobDrop;
 import dev.hintsystem.miacompat.server.config.mythic.drop.RelicLayer;
 import dev.hintsystem.miacompat.server.config.mythic.mob.MobConfig;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -35,6 +38,8 @@ public class RelicCompendium extends Screen {
     private static final Identifier BACKGROUND_SPRITE = Identifier.withDefaultNamespace("social_interactions/background");
     private static final int BG_MARGIN = 8;
 
+    private final HeaderAndFooterLayout layout;
+
     public final EnumMap<RelicGrade, List<Relic>> relicsByGrade = new EnumMap<>(RelicGrade.class);
     public final Map<Identifier, List<MobDrop<ItemDrop>>> relicDropByPrefabId = new HashMap<>();
 
@@ -46,7 +51,8 @@ public class RelicCompendium extends Screen {
         .thenComparing(r -> r.config.name.getString());
 
     public RelicCompendium() {
-        super(Component.literal("Relic Compendium"));
+        super(Component.translatable("screen.miacompat.relic_compendium"));
+        this.layout = new HeaderAndFooterLayout(this);
     }
 
     public int windowX() { return (this.width - windowWidth()) / 2; }
@@ -60,7 +66,21 @@ public class RelicCompendium extends Screen {
     public int listHeight() { return windowHeight() - BG_MARGIN*2; }
 
     @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) return true;
+
+        if (KeyBindings.OPEN_RELIC_COMPENDIUM.matches(event)) {
+            this.onClose();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     protected void init() {
+        this.layout.addTitleHeader(this.title, this.font);
+
         relicDropByPrefabId.clear();
         relicsByGrade.clear();
 
@@ -101,6 +121,9 @@ public class RelicCompendium extends Screen {
             this.minecraft, this.font, this.relicsByGrade,
             listX(), listY(), listWidth(), listHeight()
         ));
+
+        this.layout.visitWidgets(this::addRenderableWidget);
+        this.layout.arrangeElements();
     }
 
     public static class Relic {

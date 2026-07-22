@@ -1,4 +1,6 @@
 {
+    "screen.miacompat.relic_compendium": "Relic Compendium",
+
     "key.category.miacompat.general": "MiA Compat",
     "key.miacompat.open_relic_compendium": "Open Relic Compendium",
     "key.miacompat.open_config": "Open Config"
