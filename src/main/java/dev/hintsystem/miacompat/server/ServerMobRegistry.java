@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -30,28 +31,36 @@ public class ServerMobRegistry {
         return Collections.unmodifiableMap(mobConfigById);
     }
 
+    @Nullable
+    public static MobConfig getMob(String id) {
+        return mobConfigById.get(id.toLowerCase(Locale.ROOT));
+    }
+
     public static List<MobConfig> getMobsWithTemplate(String template) {
         return Collections.unmodifiableList(
-            mobConfigsByTemplate.get(template.toLowerCase(Locale.ROOT))
+            mobConfigsByTemplate.getOrDefault(template.toLowerCase(Locale.ROOT), List.of())
         );
     }
 
-    public static List<DropEntry> resolveDrops(MobConfig mobConfig) {
-        List<DropEntry> resolvedDrops = new ArrayList<>();
+    public static List<MobDrop<?>> resolveDrops(MobConfig mobConfig) {
+        List<MobDrop<?>> resolvedDrops = new ArrayList<>();
         for (DropEntry entry : mobConfig.drops) {
             if (entry instanceof DropTableReference reference) {
-                resolvedDrops.addAll(resolveDropTable(reference.tableName()));
+                for (DropEntry drop : resolveDropTable(reference.tableName())) {
+                    resolvedDrops.add(new MobDrop<>(mobConfig.id, drop));
+                }
             } else {
-                resolvedDrops.add(entry);
+                resolvedDrops.add(new MobDrop<>(mobConfig.id, entry));
             }
         }
 
+        resolvedDrops.addAll(resolveRelicDrops(mobConfig));
         return resolvedDrops;
     }
 
-    public static List<RelicDrop> resolveRelicDrops(MobConfig mobConfig) {
-        List<RelicDrop> resolvedDrops = new ArrayList<>();
-        for (SkillEntry skillEntry  : mobConfig.skills) {
+    public static List<MobDrop<RelicDrop>> resolveRelicDrops(MobConfig mobConfig) {
+        List<MobDrop<RelicDrop>> resolvedDrops = new ArrayList<>();
+        for (SkillEntry skillEntry : mobConfig.skills) {
             if (!"relicDrop".equals(skillEntry.customSkillName()))
                 continue;
 
@@ -69,12 +78,23 @@ public class ServerMobRegistry {
             for (DropEntry dropEntry : resolveDropTable(dropTableName)) {
                 if (!(dropEntry instanceof ItemDrop itemDrop)) continue;
 
-                double dropChance = skillEntry.chance() * itemDrop.chance();
-                resolvedDrops.add(new RelicDrop(skillEntry, itemDrop.itemId(), dropChance));
+                double dropChance = skillEntry.chance() * itemDrop.chance;
+                resolvedDrops.add(new MobDrop<>(
+                    mobConfig.id,
+                    new RelicDrop(
+                        itemDrop.itemId, skillEntry, itemDrop.amount, dropChance, itemDrop.flags
+                    )
+                ));
             }
         }
 
         return resolvedDrops;
+    }
+
+    public record MobDrop<T extends DropEntry>(String mobId, T drop) {
+        public <U extends DropEntry> MobDrop<U> withDrop(U drop) {
+            return new MobDrop<>(mobId, drop);
+        }
     }
 
     public static List<DropEntry> resolveDropTable(String dropTableName) {

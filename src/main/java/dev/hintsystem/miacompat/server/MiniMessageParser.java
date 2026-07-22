@@ -1,9 +1,10 @@
 package dev.hintsystem.miacompat.server;
 
-import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.client.MiaIcons;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.resources.Identifier;
 import com.mojang.serialization.JsonOps;
 
 import com.google.gson.Gson;
@@ -32,8 +33,11 @@ public class MiniMessageParser {
             }
 
             //noinspection PatternValidation
+            Identifier spriteId = layerSpriteIdFromEmojyName(name);
+
+            //noinspection PatternValidation
             SpriteObjectContents sprite = ObjectContents.sprite(
-                Key.key(MiACompat.getMiANamespace(), "ui/prefixes/layer/" + name)
+                Key.key(spriteId.getNamespace(), spriteId.getPath())
             );
 
             return Tag.selfClosingInserting(
@@ -42,6 +46,14 @@ public class MiniMessageParser {
                     .shadowColor(ShadowColor.none())
             );
         });
+    }
+
+    private static Identifier layerSpriteIdFromEmojyName(String layerEmojy) {
+        int prefixLength = "layer_".length();
+        String layerNoPrefix = layerEmojy.substring(prefixLength);
+
+        String layerName = layerEmojy.substring(0, layerNoPrefix.indexOf('_'));
+        return MiaIcons.getLayerSpriteId(layerName);
     }
 
     public static final MiniMessage MINI_MESSAGE = MiniMessage.builder()

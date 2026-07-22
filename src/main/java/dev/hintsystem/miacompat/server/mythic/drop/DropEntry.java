@@ -10,7 +10,7 @@ import java.util.*;
 
 import org.jetbrains.annotations.Nullable;
 
-public sealed interface DropEntry permits ItemDrop, DropTableReference, ExperienceDrop {
+public sealed interface DropEntry permits ItemDrop, RelicDrop, DropTableReference, ExperienceDrop {
     static List<DropEntry> parseList(@Nullable List<String> drops) {
         if (drops == null) return List.of();
 

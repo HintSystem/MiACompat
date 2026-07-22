@@ -4,6 +4,7 @@ import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.utils.GearyData;
 import dev.hintsystem.miacompat.utils.ItemUtils;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -51,6 +52,7 @@ public class GearyItemDebug {
 
         itemInfo.append("\nmodel: ").append(ItemUtils.getMiAModelId(itemStack));
 
-        MiACompat.LOGGER.info("\nitem: {}, {} {}", itemStack, itemStack.getCustomName(), itemInfo);
+        MiACompat.LOGGER.info("\nitem: {}, {}\nlore: {} {}", itemStack, itemStack.getCustomName(),
+            itemStack.get(DataComponents.LORE), itemInfo);
     }
 }

@@ -146,6 +146,34 @@ tasks.register("updateServerConfigs", Copy) {
     }
 }
 
+tasks.register("updateServerTextures", Copy) {
+    group = "build setup"
+    description = "Copies Mine in Abyss server textures into the mod resources"
+
+    def repo = project.server_config_repo
+    def output = file("src/main/resources/assets/miacompat/textures/gui/sprites/mia_icons")
+
+    doFirst {
+        delete(output)
+    }
+
+    into(output)
+
+    def emotes = "${repo}/servers_shared/survwild/plugins/Emojy/emotes"
+
+    // orthcoin and mittytoken
+    from(emotes) {
+        include "*"
+        into ""
+    }
+
+    from("${emotes}/ui") {
+        include "prefixes/layer/layer_*_square.png"
+    }
+
+    includeEmptyDirs = false
+}
+
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 21
 }

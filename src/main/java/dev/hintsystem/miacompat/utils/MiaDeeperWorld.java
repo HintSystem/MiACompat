@@ -16,19 +16,30 @@ public class MiaDeeperWorld {
     public static final int X_SHIFT = 16384;
 
     public enum LayerInfo {
-        Orth("Orth", 0, null, 0xFFA812, List.of()),
-        L1("Edge of the Abyss", 0, 0, 0xDB4040, 0xBA1E1E,
+        Orth("Orth", "layer_orth", 0xFFA812, 0, null, List.of()),
+
+        L1("Edge of the Abyss", "layer_1", 0xDB4040, 0xBA1E1E,
+            0, 0,
             List.of(MobEffects.HUNGER)),
-        L2("Forest of Temptation", 49152, -1368, 0x175ABF, 0x286FBF,
+
+        L2("Forest of Temptation", "layer_2", 0x175ABF, 0x286FBF,
+            49152, -1368,
             List.of(MobEffects.POISON, MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS)),
-        L3("Great Fault", 81920, -2424, 0xD428B1, 0xE82CC2,
+
+        L3("Great Fault", "layer_3", 0xD428B1, 0xE82CC2,
+            81920, -2424,
             List.of(MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS)),
-        L4("The Goblets of Giants", 131072, -3834, 0x557151,
+
+        L4("The Goblets of Giants", "layer_4", 0x557151,
+            131072, -3834,
             List.of(MobEffects.WITHER, MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS)),
-        L5("Sea of Corpses", 196608, -5629, 0x424767,
+
+        L5("Sea of Corpses", "layer_5", 0x424767,
+            196608, -5629,
             List.of(MobEffects.WITHER, MobEffects.HUNGER, MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.WEAKNESS, MobEffects.DARKNESS));
 
         public final String title;
+        public final String iconName;
         public final int centerX;
         public final int startSection;
         public final Integer startY;
@@ -36,12 +47,13 @@ public class MiaDeeperWorld {
         public final Integer subtitleColor;
         public final List<Holder<@NotNull MobEffect>> ascensionEffects;
 
-        LayerInfo(String title, int centerX, Integer startY, int titleColor, List<Holder<@NotNull MobEffect>> ascensionEffects) {
-            this(title, centerX, startY, titleColor, null, ascensionEffects);
+        LayerInfo(String title, String iconName, int titleColor, int centerX, Integer startY, List<Holder<@NotNull MobEffect>> ascensionEffects) {
+            this(title, iconName, titleColor, null, centerX, startY, ascensionEffects);
         }
 
-        LayerInfo(String title, int centerX, Integer startY, int titleColor, Integer subtitleColor, List<Holder<@NotNull MobEffect>> ascensionEffects) {
+        LayerInfo(String title, String iconName, int titleColor, Integer subtitleColor, int centerX, Integer startY, List<Holder<@NotNull MobEffect>> ascensionEffects) {
             this.title = title;
+            this.iconName = iconName;
             this.centerX = centerX;
             this.startSection = sectionFromX(centerX);
             this.startY = startY;

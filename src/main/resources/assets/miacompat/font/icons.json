@@ -8,7 +8,7 @@
         },
         {
             "type": "bitmap",
-            "file": "miacompat:gui/orthcoin.png",
+            "file": "miacompat:gui/sprites/mia_icons/orthcoin.png",
             "height": 8,
             "ascent": 7,
             "chars": ["$"]
