@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.client.screens.ConfigScreen;
 import dev.hintsystem.miacompat.client.screens.RelicCompendium;
 
 import net.minecraft.client.KeyMapping;
@@ -27,7 +28,7 @@ public class KeyBindings {
         }
 
         while (OPEN_CONFIG.consumeClick()) {
-            client.setScreen(MiACompat.config.createScreen(client.screen));
+            client.setScreen(ConfigScreen.create(client.screen, MiACompat.config));
         }
     }
 }

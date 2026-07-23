@@ -149,7 +149,7 @@ public class RelicList extends AbstractScrollArea {
         if (relic.isHidden())
             borderColor = ARGB.white(0.1f);
 
-        if (!hovered && (relic.isUnlocked() || relic.isHidden())) {
+        if (!hovered && (relic.isDiscovered() || relic.isHidden())) {
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                 SLOT_BORDER_SPRITE, x, y, SLOT_SIZE, SLOT_SIZE, borderColor);
         }
@@ -169,7 +169,7 @@ public class RelicList extends AbstractScrollArea {
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                 SLOT_SPRITE, x, y, SLOT_SIZE, SLOT_SIZE, SLOT_HOVER_ALPHA);
 
-            if (relic.isUnlocked() || relic.isHidden())
+            if (relic.isDiscovered() || relic.isHidden())
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                     SLOT_BORDER_SPRITE, x, y, SLOT_SIZE, SLOT_SIZE, borderColor);
         }

@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.config.PersistentGsonData;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -15,40 +16,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.phys.AABB;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.Nullable;
 
 public class BonfireTracker {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path SAVE_PATH = MiACompat.CONFIG_FOLDER.resolve("bonfire.json");
-
     public static Display.ItemDisplay trackedBonfireEntity;
-    public static BonfireData bonfireData = new BonfireData();
+    public static final BonfireData bonfireData = new BonfireData();
 
     private static final int MAX_LOST_BONFIRE_TICKS = 10;
     private static int lostBonfireTicks = 0;
-
-    public static class BonfireData {
-        public int x, y, z;
-        public boolean isBonfireSet;
-        public long lastSetTimestamp;
-
-        public BonfireData() {
-            setPos(BlockPos.ZERO);
-            this.isBonfireSet = false;
-            this.lastSetTimestamp = 0;
-        }
-
-        public void setPos(Vec3i pos) { this.x = pos.getX(); this.y = pos.getY(); this.z = pos.getZ(); }
-        public BlockPos getBlockPos() { return new BlockPos(x, y, z); }
-    }
 
     public static void tick(Minecraft client) {
         if (!MiACompat.isMiAServer()) return;
@@ -117,7 +96,7 @@ public class BonfireTracker {
         if (bonfireData.isBonfireSet != isBonfireSet) {
             if (isBonfireSet) bonfireData.lastSetTimestamp = Util.getEpochMillis();
             bonfireData.isBonfireSet = isBonfireSet;
-            saveToFile();
+            bonfireData.saveToFile();
 
             MiACompat.LOGGER.info("[MiACompat] Bonfire {} detected! ({})",
                 isBonfireSet ? "spawn point set" : "spawn point remove",
@@ -144,28 +123,36 @@ public class BonfireTracker {
         return null;
     }
 
-    public static void saveToFile() {
-        try {
-            Files.createDirectories(SAVE_PATH.getParent());
-            Files.writeString(SAVE_PATH, GSON.toJson(bonfireData));
-        } catch (IOException e) {
-            MiACompat.LOGGER.error("Failed to save Mine in Abyss bonfire data!", e);
+    public static void loadFromFile() { bonfireData.loadFromFile(); }
+
+    public static class BonfireData extends PersistentGsonData<BonfireData> {
+        public int x, y, z;
+        public boolean isBonfireSet;
+        public long lastSetTimestamp;
+
+        public BonfireData() {
+            setPos(BlockPos.ZERO);
+            this.isBonfireSet = false;
+            this.lastSetTimestamp = 0;
         }
-    }
 
-    public static void loadFromFile() {
-        if (!Files.isRegularFile(SAVE_PATH)) return;
+        public void setPos(Vec3i pos) { this.x = pos.getX(); this.y = pos.getY(); this.z = pos.getZ(); }
+        public BlockPos getBlockPos() { return new BlockPos(x, y, z); }
 
-        try {
-            BonfireData data = GSON.fromJson(Files.readString(SAVE_PATH), BonfireData.class);
+        @Override
+        public String getDataTitle() { return "MiACompat bonfire data"; }
 
-            if (data != null) {
-                bonfireData = data;
-                MiACompat.LOGGER.info("Loaded last bonfire at {} (set={})",
-                    bonfireData.getBlockPos(), bonfireData.isBonfireSet);
-            }
-        } catch (IOException e) {
-            MiACompat.LOGGER.error("Failed to load Mine in Abyss bonfire data!", e);
+        @Override
+        public Path getFilePath() { return MiACompat.CONFIG_FOLDER.resolve("bonfire.json"); }
+
+        @Override
+        protected void applyData(BonfireData data) {
+            setPos(data.getBlockPos());
+            this.isBonfireSet = data.isBonfireSet;
+            this.lastSetTimestamp = data.lastSetTimestamp;
         }
+
+        @Override
+        protected Class<BonfireData> getDataClass() { return BonfireData.class; }
     }
 }

@@ -2,6 +2,7 @@ package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.client.*;
 import dev.hintsystem.miacompat.client.hud.Hud;
+import dev.hintsystem.miacompat.client.screens.ConfigScreen;
 import dev.hintsystem.miacompat.client.screens.RelicCompendium;
 import dev.hintsystem.miacompat.config.Config;
 import dev.hintsystem.miacompat.mods.SupportIris;
@@ -82,7 +83,7 @@ public class MiACompat implements ClientModInitializer {
         ResourceLoader resourceLoader = ResourceLoader.get(PackType.CLIENT_RESOURCES);
         resourceLoader.registerReloader(id("server_configs"), new ConfigResourceReloader());
 
-        InventoryTracker.loadCompendium();
+        CompendiumTracker.loadFromFile();
         BonfireTracker.loadFromFile();
         config.loadFromFile();
 
@@ -94,7 +95,7 @@ public class MiACompat implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
             KeyBindings.tickKeybinds(c);
 
-            InventoryTracker.tick(c);
+            CompendiumTracker.tick(c);
             BonfireTracker.tick(c);
             ghostSeekTracker.tick(c);
             hud.tick();
@@ -150,7 +151,7 @@ public class MiACompat implements ClientModInitializer {
 
                 .then(ClientCommandManager.literal("config")
                     .executes(context -> {
-                        client.execute(() -> client.setScreen(config.createScreen(null)));
+                        client.execute(() -> client.setScreen(ConfigScreen.create(client.screen, MiACompat.config)));
                         return 1;
                     }))
 

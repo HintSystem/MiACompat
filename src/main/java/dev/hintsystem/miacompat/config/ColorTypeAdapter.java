@@ -1,46 +1,60 @@
 package dev.hintsystem.miacompat.config;
 
 import java.awt.*;
-import java.lang.reflect.Type;
+import java.io.IOException;
 
-import com.google.gson.*;
+import com.google.gson.JsonParseException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 
-public class ColorTypeAdapter implements JsonSerializer<Color>, JsonDeserializer<Color> {
+public class ColorTypeAdapter extends TypeAdapter<Color> {
     @Override
-    public JsonElement serialize(Color src, Type typeOfSrc, JsonSerializationContext context) {
-        // Format as #RRGGBBAA or #RRGGBB if alpha is 255
-        String hex = String.format("#%02X%02X%02X", src.getRed(), src.getGreen(), src.getBlue());
-        if (src.getAlpha() != 255) {
-            hex += String.format("%02X", src.getAlpha());
+    public void write(JsonWriter out, Color value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
         }
-        return new JsonPrimitive(hex);
+
+        // Format as #RRGGBBAA or #RRGGBB if alpha is max
+        String hex = String.format("#%02X%02X%02X", value.getRed(), value.getGreen(), value.getBlue());
+        if (value.getAlpha() != 255) {
+            hex += String.format("%02X", value.getAlpha());
+        }
+
+        out.value(hex);
     }
 
     @Override
-    public Color deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-        throws JsonParseException {
-        String hex = json.getAsString();
+    public Color read(JsonReader in) throws IOException {
+        if (in.peek() == JsonToken.NULL) {
+            in.nextNull();
+            return null;
+        }
 
-        // Remove # if present
+        String hex = in.nextString();
+
         if (hex.startsWith("#")) {
             hex = hex.substring(1);
         }
 
-        // Parse based on length
         int r, g, b, a = 255;
-        if (hex.length() == 6) {
-            // #RRGGBB
-            r = Integer.parseInt(hex.substring(0, 2), 16);
-            g = Integer.parseInt(hex.substring(2, 4), 16);
-            b = Integer.parseInt(hex.substring(4, 6), 16);
-        } else if (hex.length() == 8) {
-            // #RRGGBBAA
-            r = Integer.parseInt(hex.substring(0, 2), 16);
-            g = Integer.parseInt(hex.substring(2, 4), 16);
-            b = Integer.parseInt(hex.substring(4, 6), 16);
-            a = Integer.parseInt(hex.substring(6, 8), 16);
-        } else {
-            throw new JsonParseException("Invalid color format: " + json.getAsString());
+        switch (hex.length()) {
+            case 6 -> {
+                // #RRGGBB
+                r = Integer.parseInt(hex.substring(0, 2), 16);
+                g = Integer.parseInt(hex.substring(2, 4), 16);
+                b = Integer.parseInt(hex.substring(4, 6), 16);
+            }
+            case 8 -> {
+                // #RRGGBBAA
+                r = Integer.parseInt(hex.substring(0, 2), 16);
+                g = Integer.parseInt(hex.substring(2, 4), 16);
+                b = Integer.parseInt(hex.substring(4, 6), 16);
+                a = Integer.parseInt(hex.substring(6, 8), 16);
+            }
+            default -> throw new JsonParseException("Invalid color: #" + hex);
         }
 
         return new Color(r, g, b, a);
