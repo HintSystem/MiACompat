@@ -1,6 +1,5 @@
 package dev.hintsystem.miacompat.server.config.geary.item;
 
-import dev.hintsystem.miacompat.client.CooldownTracker;
 import dev.hintsystem.miacompat.server.MiniMessageParser;
 import dev.hintsystem.miacompat.server.config.geary.ItemYamlSchema;
 
@@ -24,11 +23,11 @@ public class ItemConfig {
     public final List<Component> lore;
 
     @Nullable
-    public final CooldownTracker.GearCooldowns gearCooldowns;
+    public final ItemCooldowns itemCooldowns;
 
     ItemConfig(
         ItemYamlSchema original, Identifier prefabId,
-        Item type, Component name, Identifier modelId, List<Component> lore, @Nullable CooldownTracker.GearCooldowns gearCooldowns
+        Item type, Component name, Identifier modelId, List<Component> lore, @Nullable ItemCooldowns itemCooldowns
     ) {
         this.original = original;
         this.prefabId = prefabId;
@@ -36,7 +35,7 @@ public class ItemConfig {
         this.name = name;
         this.modelId = modelId;
         this.lore = lore;
-        this.gearCooldowns = gearCooldowns;
+        this.itemCooldowns = itemCooldowns;
     }
 
     public ItemYamlSchema getOriginal() {
@@ -61,7 +60,7 @@ public class ItemConfig {
 
         return new ItemConfig(
             itemConfig, prefabId,
-            type, MiniMessageParser.parse(item.itemName), itemModel, lore, CooldownTracker.GearCooldowns.fromItemConfig(itemConfig)
+            type, MiniMessageParser.parse(item.itemName), itemModel, lore, ItemCooldowns.fromItemConfig(itemConfig)
         );
     }
 }

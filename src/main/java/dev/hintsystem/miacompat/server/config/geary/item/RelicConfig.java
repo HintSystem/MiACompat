@@ -14,7 +14,7 @@ public class RelicConfig extends ItemConfig {
     public final RelicGrade grade;
 
     RelicConfig(RelicGrade grade, ItemConfig itemConfig) {
-        super(itemConfig.getOriginal(), itemConfig.prefabId, itemConfig.type, itemConfig.name, itemConfig.modelId, itemConfig.lore, itemConfig.gearCooldowns);
+        super(itemConfig.getOriginal(), itemConfig.prefabId, itemConfig.type, itemConfig.name, itemConfig.modelId, itemConfig.lore, itemConfig.itemCooldowns);
         this.grade = grade;
     }
 

@@ -25,6 +25,8 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
@@ -74,6 +76,19 @@ public class MiACompat implements ClientModInitializer {
     public static boolean isMiAServer() {
         ServerData serverInfo = Minecraft.getInstance().getCurrentServer();
         return serverInfo != null && serverInfo.ip.contains("mineinabyss");
+    }
+
+    /** @return RTT for client to server, returns 0 if no connection or player info */
+    public static int getServerLatency() {
+        Minecraft client = Minecraft.getInstance();
+        ClientPacketListener connection = client.getConnection();
+        if (client.player != null && connection != null) {
+            PlayerInfo info = connection.getPlayerInfo(client.player.getUUID());
+
+            if (info != null) return info.getLatency();
+        }
+
+        return 0;
     }
 
 	@Override

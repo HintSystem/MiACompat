@@ -1,10 +1,11 @@
 package dev.hintsystem.miacompat.server;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.client.CooldownTracker;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
 import dev.hintsystem.miacompat.server.config.geary.ItemYamlSchema;
+import dev.hintsystem.miacompat.server.config.geary.item.ActionCooldown;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
+import dev.hintsystem.miacompat.server.config.geary.item.ItemCooldowns;
 import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
 import dev.hintsystem.miacompat.utils.ItemUtils;
 
@@ -14,10 +15,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -25,6 +23,9 @@ import org.yaml.snakeyaml.Yaml;
 
 public class ServerItemRegistry {
     private static final Map<Identifier, ItemConfig> itemConfigByPrefabId = new HashMap<>();
+
+    private static final Map<String, List<ActionCooldown>> actionCooldownByDisplay = new HashMap<>();
+    private static final Set<String> actionFailMessages = new HashSet<>();
 
     public static Map<Identifier, ItemConfig> getAllItems() {
         return Collections.unmodifiableMap(itemConfigByPrefabId);
@@ -44,17 +45,50 @@ public class ServerItemRegistry {
     @Nullable
     public static ItemConfig getItem(Identifier prefabId) { return itemConfigByPrefabId.get(prefabId); }
 
+    public static List<ActionCooldown> getActionCooldownsByDisplay(String display) {
+        if (display == null) return List.of();
+        List<ActionCooldown> cooldowns = actionCooldownByDisplay.get(display);
+
+        return cooldowns != null ? cooldowns : List.of();
+    }
+
+    public static boolean isActionFailMessage(String message) {
+        return actionFailMessages.contains(message);
+    }
+
     private static void registerItem(ItemConfig item) {
         ItemConfig prev = itemConfigByPrefabId.putIfAbsent(item.prefabId, item);
         if (prev != null)
             MiACompat.LOGGER.warn("Item {} already registered with prefab id '{}'",
                 ItemUtils.itemDescriptor(item), item.prefabId);
 
-        if (item.gearCooldowns != null) CooldownTracker.registerGearCooldowns(item.gearCooldowns);
+        if (item.itemCooldowns != null) registerItemCooldowns(item.itemCooldowns);
+    }
+
+    private static void registerItemCooldowns(ItemCooldowns cooldowns) {
+        registerActionCooldown(cooldowns.leftClick);
+        registerActionCooldown(cooldowns.rightClick);
+    }
+
+    private static void registerActionCooldown(ActionCooldown cooldown) {
+        if (cooldown == null) return;
+
+        if (cooldown.cooldownDisplay != null) {
+            actionCooldownByDisplay
+                .computeIfAbsent(cooldown.cooldownDisplay, (k) -> new ArrayList<>())
+                .add(cooldown);
+        }
+
+        if (cooldown.failMessage != null) {
+            actionFailMessages.add(cooldown.failMessage);
+        }
     }
 
     public static void loadFromResources(ResourceManager resourceManager) {
         itemConfigByPrefabId.clear();
+
+        actionCooldownByDisplay.clear();
+        actionFailMessages.clear();
 
         Yaml yaml = new Yaml(ItemYamlSchema.constructor(new LoaderOptions()));
 

@@ -26,7 +26,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
@@ -177,9 +176,9 @@ public class RelicCompendium extends Screen {
             MutableComponent dropChances = Component.empty();
             for (var mobDrop : drops) {
                 RelicLayer.fromMobDrop(mobDrop).ifPresent((l) -> {
-                    AtlasSprite sprite = MiaIcons.getLayerSprite(l.info.iconName);
-
-                    dropChances.append(Component.object(sprite)).append(" ");
+                    dropChances.append(
+                        MiaIcons.getLayerSpriteComponent(l.info.iconName)
+                    ).append(" ");
                 });
 
                 dropChances.append(

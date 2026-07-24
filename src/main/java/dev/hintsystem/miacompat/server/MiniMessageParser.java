@@ -12,11 +12,10 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.object.ObjectContents;
-import net.kyori.adventure.text.object.SpriteObjectContents;
 
 public class MiniMessageParser {
     /** Only resolves layer emojies */
-    public static TagResolver emojyResolver(boolean stripEmojies) {
+    public static TagResolver createEmojyResolver(boolean stripEmojies) {
         return TagResolver.resolver("emojy", (args, ctx) -> {
             String name = args.popOr("Missing emojy name").value();
 
@@ -25,40 +24,44 @@ public class MiniMessageParser {
             }
 
             int prefixLength = "layer_".length();
-            String layerNoPrefix = name.substring(prefixLength);
+            int nextSplit = name.indexOf('_', prefixLength);
 
-            String layerName = name.substring(0, layerNoPrefix.indexOf('_'));
-            Identifier spriteId = MiaIcons.getLayerSpriteId(layerName);
-
-            SpriteObjectContents sprite = ObjectContents
-                .sprite(spriteId);
+            Identifier spriteId = MiaIcons.getLayerSpriteId(
+                nextSplit != -1
+                    ? name.substring(0, nextSplit)
+                    : name
+            );
 
             return Tag.selfClosingInserting(
-                net.kyori.adventure.text.Component.object(sprite)
+                net.kyori.adventure.text.Component
+                    .object(ObjectContents.sprite(MiaIcons.ATLAS_ID, spriteId))
                     .color(NamedTextColor.WHITE)
                     .shadowColor(ShadowColor.none())
             );
         });
     }
 
+    private static final TagResolver EMOJY_RESOLVER = createEmojyResolver(false);
+    private static final TagResolver STRIPPED_EMOJY_RESOLVER = createEmojyResolver(true);
+
     public static final MiniMessage MINI_MESSAGE = MiniMessage.builder()
-        .tags(TagResolver.resolver(TagResolver.standard(), emojyResolver(false)))
+        .tags(TagResolver.standard())
         .build();
 
-    public static final MiniMessage MINI_MESSAGE_STRIP_EMOJIES = MiniMessage.builder()
-        .tags(TagResolver.resolver(TagResolver.standard(), emojyResolver(true)))
-        .build();
+    public static String stripTags(String input) {
+        if (input == null) return null;
+
+        return MINI_MESSAGE.stripTags(input, STRIPPED_EMOJY_RESOLVER);
+    }
 
     public static Component parse(String input) {
-        return parse(MINI_MESSAGE, input);
+        return parse(input, false);
     }
 
     public static Component parse(String input, boolean stripEmojies) {
-        return parse(stripEmojies ? MINI_MESSAGE_STRIP_EMOJIES : MINI_MESSAGE, input);
-    }
-
-    public static Component parse(MiniMessage parser, String input) {
-        net.kyori.adventure.text.Component component = parser.deserialize(input);
+        net.kyori.adventure.text.Component component = MINI_MESSAGE.deserialize(
+            input, stripEmojies ? STRIPPED_EMOJY_RESOLVER : EMOJY_RESOLVER
+        );
 
         return MinecraftClientAudiences.of().asNative(component);
     }

@@ -11,17 +11,18 @@ import net.minecraft.resources.Identifier;
 
 public class MiaIcons {
     public static final String SPRITE_PATH = "mia_icons/";
+    public static final Identifier ATLAS_ID = AtlasIds.GUI;
 
     public static final Identifier ORTH_COIN_SPRITE = MiACompat.id(SPRITE_PATH + "orthcoin");
 
     /** @param layerName e.g. `layer_1`, `layer_orth` */
-    public static AtlasSprite getLayerSprite(String layerName) {
-        return getAtlasSprite(getLayerSpriteId(layerName));
+    public static Identifier getLayerSpriteId(String layerName) {
+        return MiACompat.id(SPRITE_PATH + "prefixes/layer/" + layerName + "_square");
     }
 
     /** @param layerName e.g. `layer_1`, `layer_orth` */
-    public static Identifier getLayerSpriteId(String layerName) {
-        return MiACompat.id(SPRITE_PATH + "prefixes/layer/" + layerName + "_square");
+    public static Component getLayerSpriteComponent(String layerName) {
+        return getSpriteComponent(getLayerSpriteId(layerName));
     }
 
     public static Component getSpriteComponent(Identifier id) {
@@ -30,6 +31,6 @@ public class MiaIcons {
     }
 
     public static AtlasSprite getAtlasSprite(Identifier id) {
-        return new AtlasSprite(AtlasIds.GUI, id);
+        return new AtlasSprite(ATLAS_ID, id);
     }
 }

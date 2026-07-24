@@ -1,9 +1,9 @@
 package dev.hintsystem.miacompat.client.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.client.CooldownTracker;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
+import dev.hintsystem.miacompat.server.config.geary.item.ItemCooldowns;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -15,9 +15,9 @@ public final class GearCooldownOverlay {
         if (!MiACompat.config.showGearCooldownsInItemSlots) return false;
 
         ItemConfig itemConfig = ServerItemRegistry.getItem(itemStack);
-        if (itemConfig == null || itemConfig.gearCooldowns == null) return false;
+        if (itemConfig == null || itemConfig.itemCooldowns == null) return false;
 
-        CooldownTracker.GearCooldowns cooldowns = itemConfig.gearCooldowns;
+        ItemCooldowns cooldowns = itemConfig.itemCooldowns;
         float leftPercent = cooldowns.leftClick != null ? cooldowns.leftClick.getPercent() : 0f;
         float rightPercent = cooldowns.rightClick != null ? cooldowns.rightClick.getPercent() : 0f;
 
