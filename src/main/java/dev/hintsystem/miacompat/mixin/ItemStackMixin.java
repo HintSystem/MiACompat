@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin;
 
-import dev.hintsystem.miacompat.client.tooltip.OrthWorthTooltip;
+import dev.hintsystem.miacompat.gui.tooltip.OrthWorthTooltip;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;

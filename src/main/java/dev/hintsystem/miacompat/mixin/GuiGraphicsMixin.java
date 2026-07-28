@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mixin;
 
-import dev.hintsystem.miacompat.client.hud.GearCooldownOverlay;
+import dev.hintsystem.miacompat.gui.hud.GearCooldownOverlay;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;

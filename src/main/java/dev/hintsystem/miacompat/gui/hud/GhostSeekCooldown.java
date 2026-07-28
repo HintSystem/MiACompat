@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.client.hud;
+package dev.hintsystem.miacompat.gui.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.GhostSeekTracker;

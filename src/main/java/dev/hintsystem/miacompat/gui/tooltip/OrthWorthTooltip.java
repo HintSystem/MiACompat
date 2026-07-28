@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.client.tooltip;
+package dev.hintsystem.miacompat.gui.tooltip;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.InventoryTracker;

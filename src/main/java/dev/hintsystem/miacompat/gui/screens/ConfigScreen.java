@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.client.screens;
+package dev.hintsystem.miacompat.gui.screens;
 
 import dev.hintsystem.miacompat.client.GhostSeekRenderer;
 import dev.hintsystem.miacompat.config.Config;

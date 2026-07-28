@@ -1,16 +1,20 @@
 package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.client.screens.ConfigScreen;
-import dev.hintsystem.miacompat.client.screens.RelicCompendium;
+import dev.hintsystem.miacompat.gui.screens.ConfigScreen;
+import dev.hintsystem.miacompat.gui.screens.compendium.CompendiumScreen;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-
 import com.mojang.blaze3d.platform.InputConstants;
 
 public class KeyBindings {
     public static final KeyMapping.Category CATEGORY_GENERAL = KeyMapping.Category.register(MiACompat.id("general"));
+
+    public static final KeyMapping OPEN_MOB_COMPENDIUM = new KeyMapping(
+        "key.miacompat.open_mob_compendium",
+        InputConstants.UNKNOWN.getValue(), CATEGORY_GENERAL
+    );
 
     public static final KeyMapping OPEN_RELIC_COMPENDIUM = new KeyMapping(
         "key.miacompat.open_relic_compendium",
@@ -23,8 +27,12 @@ public class KeyBindings {
     );
 
     public static void tickKeybinds(Minecraft client) {
+        while (OPEN_MOB_COMPENDIUM.consumeClick()) {
+            client.setScreen(new CompendiumScreen(CompendiumScreen.CompendiumTabId.MOBS));
+        }
+
         while (OPEN_RELIC_COMPENDIUM.consumeClick()) {
-            client.setScreen(new RelicCompendium());
+            client.setScreen(new CompendiumScreen(CompendiumScreen.CompendiumTabId.RELICS));
         }
 
         while (OPEN_CONFIG.consumeClick()) {

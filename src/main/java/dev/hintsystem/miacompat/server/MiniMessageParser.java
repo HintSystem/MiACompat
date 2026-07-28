@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.server;
 
-import dev.hintsystem.miacompat.client.MiaIcons;
+import dev.hintsystem.miacompat.gui.MiaIcons;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;

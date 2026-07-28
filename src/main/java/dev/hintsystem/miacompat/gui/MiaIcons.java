@@ -1,4 +1,4 @@
-package dev.hintsystem.miacompat.client;
+package dev.hintsystem.miacompat.gui;
 
 import dev.hintsystem.miacompat.MiACompat;
 

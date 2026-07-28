@@ -1,7 +1,10 @@
 {
-    "screen.miacompat.relic_compendium": "Relic Compendium",
+    "screen.miacompat.compendium.title": "Compendium",
+    "screen.miacompat.compendium.tab.relics": "Relics",
+    "screen.miacompat.compendium.tab.mobs": "Mobs",
 
     "key.category.miacompat.general": "MiA Compat",
     "key.miacompat.open_relic_compendium": "Open Relic Compendium",
+    "key.miacompat.open_mob_compendium": "Open Mob Compendium",
     "key.miacompat.open_config": "Open Config"
 }

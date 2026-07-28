@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.mods;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.client.screens.ConfigScreen;
+import dev.hintsystem.miacompat.gui.screens.ConfigScreen;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

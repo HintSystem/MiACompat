@@ -1,10 +1,10 @@
 package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.client.*;
-import dev.hintsystem.miacompat.client.hud.Hud;
-import dev.hintsystem.miacompat.client.screens.ConfigScreen;
-import dev.hintsystem.miacompat.client.screens.RelicCompendium;
 import dev.hintsystem.miacompat.config.Config;
+import dev.hintsystem.miacompat.gui.hud.Hud;
+import dev.hintsystem.miacompat.gui.screens.ConfigScreen;
+import dev.hintsystem.miacompat.gui.screens.compendium.CompendiumScreen;
 import dev.hintsystem.miacompat.mods.SupportIris;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
 
@@ -172,7 +172,7 @@ public class MiACompat implements ClientModInitializer {
 
                 .then(ClientCommandManager.literal("compendium")
                     .executes(context -> {
-                        client.execute(() -> client.setScreen(new RelicCompendium()));
+                        client.execute(() -> client.setScreen(new CompendiumScreen(CompendiumScreen.CompendiumTabId.RELICS)));
                         return 1;
                     }))
 
