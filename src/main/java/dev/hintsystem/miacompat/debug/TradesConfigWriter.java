@@ -3,6 +3,8 @@ package dev.hintsystem.miacompat.debug;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.GearyData;
 
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +27,15 @@ public class TradesConfigWriter {
 
     private static final HashMap<String, Integer> orthTrades = new LinkedHashMap<>();
 
-    public static void onMerchantMenu(MerchantMenu menu) {
+    public static void readScreen(Screen screen) {
+        if (!(screen instanceof AbstractContainerScreen<?> containerScreen)) return;
+
+        if (containerScreen.getMenu() instanceof MerchantMenu merchantMenu) {
+            TradesConfigWriter.readMerchantMenu(merchantMenu);
+        }
+    }
+
+    public static void readMerchantMenu(MerchantMenu menu) {
         for (MerchantOffer offer : menu.getOffers()) {
             ItemStack baseCost = offer.getBaseCostA();
 

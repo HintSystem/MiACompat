@@ -2,6 +2,7 @@ package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.client.*;
 import dev.hintsystem.miacompat.config.Config;
+import dev.hintsystem.miacompat.debug.DebugTrigger;
 import dev.hintsystem.miacompat.gui.hud.Hud;
 import dev.hintsystem.miacompat.gui.screens.ConfigScreen;
 import dev.hintsystem.miacompat.gui.screens.compendium.CompendiumScreen;
@@ -102,26 +103,18 @@ public class MiACompat implements ClientModInitializer {
         BonfireTracker.loadFromFile();
         config.loadFromFile();
 
-        Minecraft client = Minecraft.getInstance();
-
         KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_RELIC_COMPENDIUM);
         KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_CONFIG);
 
         ClientTickEvents.END_CLIENT_TICK.register(c -> {
             KeyBindings.tickKeybinds(c);
 
-            CompendiumTracker.tick(c);
             BonfireTracker.tick(c);
+            CompendiumTracker.tick(c);
             ghostSeekTracker.tick(c);
             hud.tick();
 
-//            if(!InputConstants.isKeyDown(c.getWindow(), InputConstants.KEY_V)) return;
-//
-//            if (client.screen instanceof AbstractContainerScreen<?> containerScreen) {
-//                if (containerScreen.getMenu() instanceof MerchantMenu merchantMenu) {
-//                    TradesConfigWriter.onMerchantMenu(merchantMenu);
-//                }
-//            }
+            //DebugTrigger.checkDebugKeys(c);
         });
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.HELD_ITEM_TOOLTIP, id("miacompat_hud"), hud);
@@ -146,11 +139,11 @@ public class MiACompat implements ClientModInitializer {
             return InteractionResult.PASS;
         });
 
-        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (!world.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
+        AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
+            if (!level.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
             if (!config.clearBreadcrumbsOnFind) return InteractionResult.PASS;
 
-            for (Entity entityNear : world.getEntities(player, interaction.getBoundingBox().inflate(1.5))) {
+            for (Entity entityNear : level.getEntities(player, interaction.getBoundingBox().inflate(1.5))) {
                 if (entityNear instanceof Display.ItemDisplay itemDisplay && GhostSeekTracker.isPrayingSkeleton(itemDisplay)) {
                     ghostSeekTracker.clearMeasurements();
                     break;
@@ -159,6 +152,8 @@ public class MiACompat implements ClientModInitializer {
 
             return InteractionResult.PASS;
         });
+
+        Minecraft client = Minecraft.getInstance();
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 

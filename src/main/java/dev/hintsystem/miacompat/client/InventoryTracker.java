@@ -30,10 +30,6 @@ public class InventoryTracker {
 
     public static Map<Identifier, Integer> orthTrades = new HashMap<>();
 
-
-
-
-
     public static MutableComponent getContainerCoinWorthLabel(ItemStack itemStack) {
         return getContainerCoinWorthLabel(ItemUtils.getContainerContents(itemStack));
     }
