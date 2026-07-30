@@ -53,7 +53,7 @@ public class SupportXaeroMinimap {
     public static boolean shouldShowBonfireWaypoint() {
         return MiACompat.config.showBonfireWaypoint
             && MiACompat.isMiAServer()
-            && BonfireTracker.bonfireData.isBonfireSet;
+            && BonfireTracker.bonfireData.isLinked;
     }
 
     public static void updateBonfireWaypoint() {

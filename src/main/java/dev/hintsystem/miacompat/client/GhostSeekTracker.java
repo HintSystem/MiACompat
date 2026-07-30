@@ -88,6 +88,8 @@ public class GhostSeekTracker {
     }
 
     public void tick(Minecraft client) {
+        if (client.player == null) return;
+
         if (MiACompat.config.breadcrumbDuration > 0) {
             measurements.removeIf(m -> Instant.now().isAfter(
                 m.timestamp.plusSeconds(MiACompat.config.breadcrumbDuration)

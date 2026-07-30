@@ -12,7 +12,6 @@ import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.TextAlignment;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -47,17 +46,16 @@ public class CurseMeter implements HudElement {
     private BlockPos lastPlayerPos = BlockPos.ZERO;
     private MiaDeeperWorld.LayerInfo currentLayer = MiaDeeperWorld.LayerInfo.Orth;
 
-    protected void tick() {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return;
+    protected void tick(Minecraft client) {
+        if (client.player == null) return;
 
         if (curseAccrued >= 3 || curseStacks > 0) { animationTicks++; } else { animationTicks = 0; }
         if (curseTicks > 0) { curseTicks--; } else { curseStacks = 0; }
 
-        int changeY = player.blockPosition().getY() - lastPlayerPos.getY();
-        double changeDistance = player.blockPosition().distSqr(lastPlayerPos);
+        int changeY = client.player.blockPosition().getY() - lastPlayerPos.getY();
+        double changeDistance = client.player.blockPosition().distSqr(lastPlayerPos);
 
-        lastPlayerPos = player.blockPosition();
+        lastPlayerPos = client.player.blockPosition();
         currentLayer = MiaDeeperWorld.LayerInfo.fromUnwrappedY(MiaDeeperWorld.unwrap(lastPlayerPos).getY());
         if (changeDistance > 32 * 32) return;
 

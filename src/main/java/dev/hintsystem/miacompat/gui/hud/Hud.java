@@ -5,6 +5,7 @@ import dev.hintsystem.miacompat.MiACompat;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
@@ -36,8 +37,8 @@ public class Hud implements HudElement {
         curseMeter = new CurseMeter();
     }
 
-    public void tick() {
-        curseMeter.tick();
+    public void tick(Minecraft client) {
+        curseMeter.tick(client);
     }
 
     @Override

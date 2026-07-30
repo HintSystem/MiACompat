@@ -36,6 +36,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.CommonColors;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
@@ -106,34 +108,43 @@ public class MiACompat implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_RELIC_COMPENDIUM);
         KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_CONFIG);
 
-        ClientTickEvents.END_CLIENT_TICK.register(c -> {
-            KeyBindings.tickKeybinds(c);
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            ProfilerFiller profiler = Profiler.get();
 
-            BonfireTracker.tick(c);
-            CompendiumTracker.tick(c);
-            ghostSeekTracker.tick(c);
-            hud.tick();
+            profiler.push("MiACompat");
+            profiler.push("keybinds");
 
-            //DebugTrigger.checkDebugKeys(c);
+            KeyBindings.tickKeybinds(client);
+            DebugTrigger.checkDebugKeys(client);
+
+            profiler.popPush("trackers");
+
+            EntityTracker.tick(client);
+            BonfireTracker.tick(client);
+            CompendiumTracker.tick(client);
+            ghostSeekTracker.tick(client);
+
+            profiler.popPush("hud");
+
+            hud.tick(client);
+
+            profiler.pop();
+            profiler.pop();
         });
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.HELD_ITEM_TOOLTIP, id("miacompat_hud"), hud);
 
         WorldRenderEvents.END_MAIN.register(this::onRenderWorld);
 
-        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (!world.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
+        UseEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
+            if (!level.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
 
-            Display.ItemDisplay bonfire = BonfireTracker.findBonfire(
-                world.getEntities(player, interaction.getBoundingBox().inflate(0.5))
-            );
-            if (bonfire != null) BonfireTracker.setTrackedBonfire(bonfire);
-
+            BonfireTracker.onInteraction(level, player, interaction);
             return InteractionResult.PASS;
         });
 
-        UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (!world.isClientSide()) return InteractionResult.PASS;
+        UseItemCallback.EVENT.register((player, level, hand) -> {
+            if (!level.isClientSide()) return InteractionResult.PASS;
 
             CooldownTracker.onItemRightClick(player.getItemInHand(hand));
             return InteractionResult.PASS;
@@ -196,7 +207,7 @@ public class MiACompat implements ClientModInitializer {
                     .executes(context -> {
                         var bonfire = BonfireTracker.bonfireData;
 
-                        if (bonfire.lastSetTimestamp == 0) {
+                        if (bonfire.lastLinkedTimestamp == 0) {
                             context.getSource().sendFeedback(
                                 Component.literal("No bonfire has been tracked yet. Link yourself to a bonfire again to start tracking.")
                                     .setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW))
@@ -204,7 +215,7 @@ public class MiACompat implements ClientModInitializer {
                             return 1;
                         }
 
-                        Instant instant = Instant.ofEpochMilli(bonfire.lastSetTimestamp);
+                        Instant instant = Instant.ofEpochMilli(bonfire.lastLinkedTimestamp);
                         ZonedDateTime localTime = instant.atZone(ZoneId.systemDefault());
 
                         Duration duration = Duration.between(localTime, ZonedDateTime.now());
@@ -233,7 +244,7 @@ public class MiACompat implements ClientModInitializer {
 
                         String pos = String.format("(%d, %d, %d)", bonfire.x, bonfire.y, bonfire.z);
 
-                        MutableComponent bonfireSetMessage = bonfire.isBonfireSet
+                        MutableComponent bonfireSetMessage = bonfire.isLinked
                             ? Component.literal("You have a linked bonfire\n").setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN))
                             : Component.literal("You have no linked bonfire\n").setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED));
 

@@ -10,6 +10,8 @@ import dev.hintsystem.miacompat.utils.ItemUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
 
 import java.nio.file.Path;
@@ -21,17 +23,25 @@ import java.util.Set;
 import com.google.gson.Gson;
 
 public class CompendiumTracker {
-    public static final int CHECK_DISCOVERED_RELICS_TICKS = 48;
+    public static final int SCAN_DISCOVERED_RELICS_TICKS = 48;
 
     private static final CompendiumData compendiumData = new CompendiumData();
-    public static int relicCheckTicks = 0;
+    private static int relicCheckTicks = 0;
 
     public static void tick(Minecraft client) {
-        relicCheckTicks = (relicCheckTicks + 1) % CHECK_DISCOVERED_RELICS_TICKS;
+        if (client.player == null) return;
 
-        LocalPlayer player = client.player;
-        if (player == null || relicCheckTicks != 0) return;
+        ProfilerFiller profiler = Profiler.get();
+        profiler.push("scanDiscoveredRelics");
 
+        relicCheckTicks = (relicCheckTicks + 1) % SCAN_DISCOVERED_RELICS_TICKS;
+        if (relicCheckTicks != 0)
+            scanDiscoveredRelics(client.player);
+
+        profiler.pop();
+    }
+
+    private static void scanDiscoveredRelics(LocalPlayer player) {
         for (ItemStack itemStack : ItemUtils.iterateContainedItems(player.getInventory())) {
             ItemConfig item = ServerItemRegistry.getItem(itemStack);
             if (!(item instanceof RelicConfig relic)) continue;
