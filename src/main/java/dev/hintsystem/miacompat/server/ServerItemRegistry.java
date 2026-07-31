@@ -8,7 +8,7 @@ import dev.hintsystem.miacompat.server.config.geary.item.ActionCooldown;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemCooldowns;
 import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
-import dev.hintsystem.miacompat.utils.ItemUtils;
+import dev.hintsystem.miacompat.utils.ItemUtil;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -38,7 +38,7 @@ public class ServerItemRegistry {
         if (prefabs.isEmpty()) return null;
 
         if (prefabs.size() > 1)
-            MiACompat.LOGGER.warn("Item {} has multiple prefabs: {}", ItemUtils.itemDescriptor(item), prefabs);
+            MiACompat.LOGGER.warn("Item {} has multiple prefabs: {}", ItemUtil.itemDescriptor(item), prefabs);
 
         return getItem(prefabs.iterator().next());
     }
@@ -61,7 +61,7 @@ public class ServerItemRegistry {
         ItemConfig prev = itemConfigByPrefabId.putIfAbsent(item.prefabId, item);
         if (prev != null)
             MiACompat.LOGGER.warn("Item {} already registered with prefab id '{}'",
-                ItemUtils.itemDescriptor(item), item.prefabId);
+                ItemUtil.itemDescriptor(item), item.prefabId);
 
         if (item.itemCooldowns != null) registerItemCooldowns(item.itemCooldowns);
     }

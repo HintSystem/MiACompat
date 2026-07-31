@@ -14,7 +14,7 @@ import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemUtils {
+public class ItemUtil {
     public static Identifier getMiAModelId(ItemStack itemStack) {
         Identifier modelId = itemStack.get(DataComponents.ITEM_MODEL);
         if (modelId == null || !Objects.equals(modelId.getNamespace(), MiACompat.getMiANamespace())) return null;

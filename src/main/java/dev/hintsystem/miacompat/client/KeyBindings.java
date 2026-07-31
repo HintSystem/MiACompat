@@ -23,7 +23,7 @@ public class KeyBindings {
 
     public static final KeyMapping OPEN_CONFIG = new KeyMapping(
         "key.miacompat.open_config",
-        InputConstants.UNKNOWN.getValue(), CATEGORY_GENERAL
+        InputConstants.KEY_G, CATEGORY_GENERAL
     );
 
     public static void tickKeybinds(Minecraft client) {

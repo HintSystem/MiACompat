@@ -64,7 +64,7 @@ public class CompendiumScreen extends Screen {
     protected void init() {
         this.layout.addTitleHeader(this.title, this.font);
 
-        this.addWidget(tabBar);
+        //this.addWidget(tabBar);
 
         this.layout.visitWidgets(widget -> {
             widget.setTabOrderGroup(1);
@@ -96,7 +96,7 @@ public class CompendiumScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
+        //this.tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
 
         WindowTab windowTab = this.tabManager.getCurrentWindowTab();
         if (windowTab != null) windowTab.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -106,9 +106,7 @@ public class CompendiumScreen extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (this.tabBar.keyPressed(event)) {
-            return true;
-        } else if (super.keyPressed(event)) {
+        if (super.keyPressed(event)) {
             return true;
         }
 

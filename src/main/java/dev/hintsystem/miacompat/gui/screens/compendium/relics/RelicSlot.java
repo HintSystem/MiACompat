@@ -7,6 +7,7 @@ import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
 import dev.hintsystem.miacompat.server.config.mythic.drop.ItemDrop;
 import dev.hintsystem.miacompat.server.config.mythic.drop.MobDrop;
 import dev.hintsystem.miacompat.server.config.mythic.drop.RelicLayer;
+import dev.hintsystem.miacompat.utils.ColorUtil;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +48,7 @@ public class RelicSlot {
     public final ItemStack item;
 
     public final int borderColor;
+    public final int adjustedBorderColor;
 
     public RelicSlot(RelicConfig config, @Nullable List<MobDrop<ItemDrop>> drops) {
         this.config = config;
@@ -58,6 +61,13 @@ public class RelicSlot {
         }
 
         this.borderColor = textColor != null ? textColor.getValue() : 0;
+
+        float luma = ColorUtil.getLuma(this.borderColor);
+        float boost = Math.max(0f, (180f - luma) / 180f) * 2.6f;
+
+        this.adjustedBorderColor = luma < 160
+            ? ColorUtil.adjustHSB(this.borderColor, 1.15f, 1f + boost)
+            : this.borderColor;
 
         List<Component> lore = new ArrayList<>(config.lore);
         lore.set(0, Component.literal(
@@ -87,15 +97,15 @@ public class RelicSlot {
     }
 
     public List<Component> getTooltip(Minecraft minecraft) {
-        MutableComponent dropChances = Component.empty();
+        MutableComponent obtainInfo = Component.empty();
         for (var mobDrop : drops) {
             RelicLayer.fromMobDrop(mobDrop).ifPresent((l) -> {
-                dropChances.append(
+                obtainInfo.append(
                     MiaIcons.getLayerSpriteComponent(l.info.iconName)
                 ).append(" ");
             });
 
-            dropChances.append(
+            obtainInfo.append(
                 Component.literal(
                     String.format(Locale.ROOT, "%.3f", mobDrop.drop().chance * 100)
                         .replaceAll("\\.?0+$", "")
@@ -106,27 +116,30 @@ public class RelicSlot {
             return List.of(
                 Component.literal("???").setStyle(Style.EMPTY
                     .withColor(ChatFormatting.GRAY).withItalic(true)),
-                dropChances
+                obtainInfo
             );
         }
 
+        if (isDiscovered())
+            obtainInfo.append(Component.literal("✔").setStyle(Style.EMPTY
+                .withColor(ChatFormatting.GREEN)));
+
         List<Component> tooltip = Screen.getTooltipFromItem(minecraft, item);
-        if (!dropChances.equals(Component.empty()))
-            tooltip.add(1, dropChances);
+        if (!obtainInfo.equals(Component.empty()))
+            tooltip.add(1, obtainInfo);
 
         return tooltip;
     }
 
-
     public void render(GuiGraphics guiGraphics, Font font, int x, int y, boolean hovered) {
-        int borderColor = hovered ? ARGB.color(1f, this.borderColor) : ARGB.color(0.7f, this.borderColor);
-        if (isHidden())
-            borderColor = ARGB.white(0.1f);
+        int border = isHidden()
+            ? ARGB.white(0.1f)
+            : ARGB.color(hovered ? 1f : 0.75f, adjustedBorderColor);
 
         // border underlay
         if (!hovered && (isDiscovered() || isHidden())) {
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                SLOT_BORDER_SPRITE, x, y, SLOT_SIZE, SLOT_SIZE, borderColor);
+                SLOT_BORDER_SPRITE, x, y, SLOT_SIZE, SLOT_SIZE, border);
         }
 
         // background
@@ -149,7 +162,7 @@ public class RelicSlot {
             // border overlay
             if (isDiscovered() || isHidden())
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                    SLOT_BORDER_SPRITE, x, y, SLOT_SIZE, SLOT_SIZE, borderColor);
+                    SLOT_BORDER_SPRITE, x, y, SLOT_SIZE, SLOT_SIZE, border);
         }
     }
 }

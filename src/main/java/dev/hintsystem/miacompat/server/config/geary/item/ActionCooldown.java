@@ -137,8 +137,8 @@ public class ActionCooldown {
         if (cooldownCandidates.isEmpty()) return null;
         if (cooldownCandidates.size() == 1) return cooldownCandidates.getFirst();
 
-        ActionCooldown closest = null;
         long closestDiff = Long.MAX_VALUE;
+        ActionCooldown closest = null;
 
         // find cooldown whose triggered end time is closest to the observed end time
         for (ActionCooldown cooldown : cooldownCandidates) {
@@ -150,8 +150,6 @@ public class ActionCooldown {
             }
         }
 
-        // reject cooldowns that are too far from the predicted end times to avoid false positives
-        if (closestDiff > MAX_COOLDOWN_TIME_DIFF_MS) return null;
         return closest;
     }
 

@@ -3,7 +3,7 @@ package dev.hintsystem.miacompat.client;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.GearyData;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader.Stopwatch;
-import dev.hintsystem.miacompat.utils.ItemUtils;
+import dev.hintsystem.miacompat.utils.ItemUtil;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -32,7 +32,7 @@ public class InventoryTracker {
     public static Map<Identifier, Integer> orthTrades = new HashMap<>();
 
     public static MutableComponent getContainerCoinWorthLabel(ItemStack itemStack) {
-        return getContainerCoinWorthLabel(ItemUtils.getContainerContents(itemStack));
+        return getContainerCoinWorthLabel(ItemUtil.getContainerContents(itemStack));
     }
 
     /** @return Component with coin worth info, otherwise empty component if nothing to display */
@@ -61,7 +61,7 @@ public class InventoryTracker {
         CoinWorth worth = new CoinWorth();
         if (items == null) return worth;
 
-        for (ItemStack stack : ItemUtils.iterateContainedItems(items)) {
+        for (ItemStack stack : ItemUtil.iterateContainedItems(items)) {
             Integer itemsPerCoin = InventoryTracker.getItemsPerCoin(stack);
             if (itemsPerCoin == null) continue;
 

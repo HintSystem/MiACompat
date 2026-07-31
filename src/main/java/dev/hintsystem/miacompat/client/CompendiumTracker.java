@@ -6,7 +6,7 @@ import dev.hintsystem.miacompat.server.ServerItemRegistry;
 import dev.hintsystem.miacompat.server.ServerMobRegistry;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
-import dev.hintsystem.miacompat.utils.ItemUtils;
+import dev.hintsystem.miacompat.utils.ItemUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -52,7 +52,7 @@ public class CompendiumTracker {
     }
 
     private static void scanDiscoveredRelics(LocalPlayer player) {
-        for (ItemStack itemStack : ItemUtils.iterateContainedItems(player.getInventory())) {
+        for (ItemStack itemStack : ItemUtil.iterateContainedItems(player.getInventory())) {
             ItemConfig item = ServerItemRegistry.getItem(itemStack);
             if (!(item instanceof RelicConfig relic)) continue;
 
