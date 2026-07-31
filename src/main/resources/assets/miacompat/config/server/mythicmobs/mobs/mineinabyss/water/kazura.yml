@@ -1,0 +1,30 @@
+kazura:
+  Type: SQUID
+  SpawnCategory: water
+  Display: "<#A9CCCA>Kazura"
+  Health: 5
+  Damage: 0
+  # Don't override vanilla squid goals, other pathfinders don't work with them (swap to fish if ever necessary)
+#  AIGoalSelectors:
+#    - clear
+#  AITargetSelectors:
+#    - clear
+  Options:
+    Collidable: true
+    Silent: true
+    FollowRange: 20
+    Interactable: true
+    MovementSpeed: 0.2
+    PreventOtherDrops: true
+  Model:
+    Id: kazura
+    ViewRadius: 48
+    DamageTint: true
+    Scale: 2.0
+  Drops:
+    - exp 10-15
+    - geary mineinabyss:kazura_squid_ink_sac 1-2 0.8
+
+
+  Skills:
+    - skill{s=displayHealth} ~onDamaged

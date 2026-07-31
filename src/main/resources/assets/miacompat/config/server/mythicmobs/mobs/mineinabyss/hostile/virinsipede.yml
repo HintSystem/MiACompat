@@ -1,0 +1,48 @@
+virinsipede:
+  Type: ZOMBIE
+  SpawnCategory: uncommon
+  Display: "<#C42D2D>Virinsipede"
+  Health: 150
+  Damage: 10
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - randomstroll
+    - float
+    - randomlookaround
+  AITargetSelectors:
+    - clear
+    - players
+  Options:
+    KnockbackResistance: 1
+    Collidable: true
+    DigOutOfGround: true
+    FollowRange: 32
+    MaxCombatDistance: 128
+    LockPitch: true
+    Interactable: true
+    MovementSpeed: 0.3
+    Silent: true
+    PreventSunburn: true
+    PreventOtherDrops: true
+    PreventJockeyMounts: true
+  DamageModifiers:
+    - PROJECTILE 0.5
+  Model:
+    Id: virinsipede
+    ViewRadius: 48
+    DamageTint: true
+  Drops:
+    - exp 15-25
+    - geary mineinabyss:virinsipede_segments 4-10 0.8
+    - geary mineinabyss:virinsipede_antlers 1-2 0.3 nolooting
+
+  Skills:
+    - skill{s=displayHealth} ~onDamaged
+    - skill{s=virinburrow} @Self ~onTimer:60
+    - state{mid=virinsipede;s=attack} @self ~onAttack
+    - skill{s=Changetarget} ~onTimer:160 <99%
+    - skill{s=virinAmbient;delay=<random.0to8>} @self ~onTimer:95 0.33
+    - skill{s=virinHurt} @self ~onHurt
+    - skill{s=virinDeath} @self ~onDeath
+

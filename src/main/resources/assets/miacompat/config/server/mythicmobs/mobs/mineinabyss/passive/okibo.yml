@@ -1,0 +1,33 @@
+okibo:
+  Type: PIG
+  SpawnCategory: passive
+  Display: "<#10DEA7>Okibo"
+  Health: 40
+  Damage: 0
+  AIGoalSelectors:
+    - clear
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+    - float
+  AITargetSelectors:
+    - clear
+  Options:
+    Collidable: true
+    Silent: true
+    Interactable: true
+    MovementSpeed: 0.2
+    KnockbackResistance: 0.2
+    PreventOtherDrops: true
+  Model:
+    Id: okibo
+    ViewRadius: 48
+    DamageTint: true
+    Scale: 2.75
+  Drops:
+    - exp 20-25
+    - geary mineinabyss:okibo_meat_raw 1-2 0.6
+    - geary mineinabyss:okibo_fur 1-2 0.7
+
+  Skills:
+    - skill{s=displayHealth} ~onDamaged

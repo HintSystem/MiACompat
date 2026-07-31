@@ -2,6 +2,7 @@ package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.GearyData;
+import dev.hintsystem.miacompat.server.config.ConfigResourceReloader.Stopwatch;
 import dev.hintsystem.miacompat.utils.ItemUtils;
 
 import net.minecraft.ChatFormatting;
@@ -87,20 +88,22 @@ public class InventoryTracker {
     private static Map<Identifier, Integer> loadOrthTrades(ResourceManager resourceManager) {
         Identifier id = MiACompat.id("config/orth_mob_trades.json");
 
-        try (InputStream stream = resourceManager.getResourceOrThrow(id).open()) {
-            InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+        try (Stopwatch sw = Stopwatch.start("Loaded {} orth mob drop trades")) {
+            try (InputStream stream = resourceManager.getResourceOrThrow(id).open()) {
+                Map<Identifier, Integer> result = new LinkedHashMap<>();
 
-            Type type = new TypeToken<LinkedHashMap<String, Integer>>() {}.getType();
-            Map<String, Integer> raw = GSON.fromJson(reader, type);
+                try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                    Type type = new TypeToken<LinkedHashMap<String, Integer>>() {}.getType();
+                    Map<String, Integer> raw = GSON.fromJson(reader, type);
 
-            Map<Identifier, Integer> result = new LinkedHashMap<>();
-            for (var entry : raw.entrySet()) {
-                result.put(Identifier.parse(entry.getKey()), entry.getValue());
+                    for (var entry : raw.entrySet()) {
+                        result.put(Identifier.parse(entry.getKey()), entry.getValue());
+                    }
+
+                    sw.args(result.size());
+                    return result;
+                }
             }
-
-            MiACompat.LOGGER.info("Loaded {} orth mob drop trades", result.size());
-
-            return result;
         } catch (Exception e) {
             throw new RuntimeException("Failed to load " + id, e);
         }

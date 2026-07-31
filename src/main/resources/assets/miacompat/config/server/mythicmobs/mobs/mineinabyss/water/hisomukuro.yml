@@ -1,0 +1,43 @@
+hisomukuro:
+  Type: SALMON
+  SpawnCategory: water
+  Display: "<#c7bcad>Hisomukuro"
+  Health: 80
+  Damage: 8
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - movetowardstarget
+    - fleeplayers
+  AITargetSelectors:
+    - players
+  Options:
+    Collidable: true
+    Silent: true
+    FollowRange: 20
+    Interactable: true
+    MovementSpeed: 0.9
+    PreventOtherDrops: true
+  Geary:
+    pathfinders:
+      - type: RandomSwimmingGoal
+        priority: 8
+        speed: 1.0
+        chance: 1
+  Model:
+    Id: hisomukuro
+    ViewRadius: 48
+    DamageTint: true
+  Drops:
+    - exp 20-30
+    - BONE 0-5 1
+    - geary mineinabyss:hisomukuro_rib 2-6 0.7
+
+  Skills:
+    - skill{s=displayHealth} ~onDamaged
+    - skill{s=HS_ball} @target ~onTimer:10
+    - skill{s=HS_charge} @self ~onTimer:1
+    - skill{s=HSAmbient;delay=<random.0to10>} @self ~onTimer:95 0.33
+    - setstance{stance=hscharge} @self ~onSpawnOrLoad
+    # - effect:sound{s=entity.polar_bear.warning;v=3;p=1} @self ~onSpawnOrLoad
+    # - skill{s=HS_grab} @self ~oninteract

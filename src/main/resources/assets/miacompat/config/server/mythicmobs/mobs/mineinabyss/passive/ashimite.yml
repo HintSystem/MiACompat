@@ -1,0 +1,90 @@
+ashimite:
+  Type: SHEEP
+  SpawnCategory: passive
+  Health: 35
+  Display: "<#2597D9>Ashimite"
+  AIGoalSelectors:
+    - clear
+    - fleeplayers{distance=5;speed=1.5;safespeed=1.5;conditions=[ - inlineofsight true ]}
+    - panicWhenOnFire
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+  AITargetSelectors:
+    - clear
+    - players
+  Options:
+    KnockbackResistance: 0.0
+    Collidable: true
+    Color: LIGHT_BLUE
+    Silent: true
+    FollowRange: 48
+    Interactable: true
+    PreventOtherDrops: true
+    MovementSpeed: 0.45
+  Drops:
+    - exp 5-10
+    - geary mineinabyss:ashimite_meat_raw 1-2 0.6
+    - geary mineinabyss:ashimite_hoof 1-2 0.3
+    - geary mineinabyss:ashimite_antlers 1 0.3
+    - LIGHT_BLUE_WOOL 1-2 0.6
+
+
+  Model:
+    Id: ashimite
+    ViewRadius: 48
+    #Drive: true
+    DamageTint: true
+  DamageModifiers:
+    - PROJECTILE 5.0
+    - SUFFOCATION 0.05
+  Skills:
+    - skill{s=displayHealth} ~onDamaged
+
+    #- bodyclamp{m=orbpiercer;c=15} @self ~onSpawnOrLoad
+    #- setspeed{type=walking;speed=2.0} @self ~onSpawnOrLoad
+    - skill{s=deerAmbient;delay=<random.0to10>} @self ~onTimer:95 0.33
+    - skill{s=deerHurt} @self ~onHurt
+    - skill{s=deerDeath} @self ~onDeath
+baby_ashimite:
+  Type: SHEEP
+  Health: 12
+  Display: "<#2597D9>Baby Ashimite"
+  AIGoalSelectors:
+    - clear
+    - gotoparent
+    - randomstroll
+    - panicWhenOnFire
+    - lookatplayers
+    - randomlookaround
+  AITargetSelectors:
+    - clear
+    - players
+  Options:
+    KnockbackResistance: 0.0
+    Collidable: true
+    Color: LIGHT_BLUE
+    Silent: true
+    FollowRange: 48
+    Interactable: true
+    PreventOtherDrops: true
+    #MovementSpeed: 0.25"
+  Drops:
+    - exp 1-10
+    - geary mineinabyss:ashimite_antlers 2 1.0
+    - geary mineinabyss:ashimite_meat_raw 1-2 0.3
+    - geary mineinabyss:ashimite_hoof 1 0.1
+    - LIGHT_BLUE_WOOL 1 0.3
+  Model:
+    Id: ashimite
+    ViewRadius: 48
+    #Drive: true
+    DamageTint: true
+    Scale: 0.5
+  Skills:
+    - skill{s=displayHealth} ~onDamaged
+    #- bodyclamp{m=orbpiercer;c=15} @self ~onSpawnOrLoad
+    - setspeed{type=walking;speed=1.8} @self ~onSpawn 0.2
+    - skill{s=deerAmbient;delay=<random.0to10>} @self ~onTimer:95 0.33
+    - skill{s=deerHurt} @self ~onHurt
+    - skill{s=deerDeath} @self ~onDeath

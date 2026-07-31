@@ -20,6 +20,8 @@ public class MobYamlSchema extends LinkedHashMap<String, MobYamlSchema.MobDefini
         public Integer Damage;
 
         public Options Options;
+        public Model Model;
+
         public List<String> DamageModifiers;
         public List<String> Drops;
         public List<String> Skills;
@@ -32,6 +34,31 @@ public class MobYamlSchema extends LinkedHashMap<String, MobYamlSchema.MobDefini
         public Boolean PreventSunburn;
         public Boolean PreventOtherDrops;
         public Boolean Collidable;
+
+        public Options inheritFrom(Options parent) {
+            if (parent == null) return this;
+
+            Options o = new Options();
+
+            o.FollowRange = inherit(FollowRange, parent.FollowRange);
+            o.MaxCombatDistance = inherit(MaxCombatDistance, parent.MaxCombatDistance);
+            o.KnockbackResistance = inherit(KnockbackResistance, parent.KnockbackResistance);
+            o.PreventSunburn = inherit(PreventSunburn, parent.PreventSunburn);
+            o.PreventOtherDrops = inherit(PreventOtherDrops, parent.PreventOtherDrops);
+            o.Collidable = inherit(Collidable, parent.Collidable);
+
+            return o;
+        }
+
+        private static <T> T inherit(T child, T parent) {
+            return child != null ? child : parent;
+        }
+    }
+
+    public static class Model {
+        public String Id;
+        public Integer ViewRadius;
+        public Boolean DamageTint;
     }
 
     public static Constructor constructor(LoaderOptions loaderOptions) {

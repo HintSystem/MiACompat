@@ -11,6 +11,8 @@ import org.yaml.snakeyaml.constructor.Constructor;
 public class DropTableYamlSchema extends LinkedHashMap<String, DropTableYamlSchema.DropTableDefinition> {
     public static class DropTableDefinition {
         public Integer MaxItems;
+        public Integer TotalItems;
+        public List<String> Conditions;
         public List<String> Drops;
     }
 

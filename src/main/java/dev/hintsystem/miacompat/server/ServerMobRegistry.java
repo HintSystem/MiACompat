@@ -2,6 +2,7 @@ package dev.hintsystem.miacompat.server;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
+import dev.hintsystem.miacompat.server.config.ConfigResourceReloader.Stopwatch;
 import dev.hintsystem.miacompat.server.config.mythic.DropTableConfig;
 import dev.hintsystem.miacompat.server.config.mythic.DropTableYamlSchema;
 import dev.hintsystem.miacompat.server.config.mythic.MobYamlSchema;
@@ -22,6 +23,7 @@ public class ServerMobRegistry {
     private static final Map<String, DropTableConfig> dropTableConfigById = new HashMap<>();
     private static final Map<String, MobConfig> mobConfigById = new HashMap<>();
 
+    private static final Map<String, List<MobConfig>> mobConfigsByModelId = new HashMap<>();
     private static final Map<String, List<MobConfig>> mobConfigsByTemplate = new HashMap<>();
 
     public static Map<String, MobConfig> getAllMobs() {
@@ -92,10 +94,7 @@ public class ServerMobRegistry {
         return resolveDropTable(dropTableName, new HashSet<>());
     }
 
-    private static List<DropEntry> resolveDropTable(
-        String dropTableName,
-        Set<String> visited
-    ) {
+    private static List<DropEntry> resolveDropTable(String dropTableName, Set<String> visited) {
         String id = dropTableName.toLowerCase(Locale.ROOT);
 
         if (!visited.add(id)) {
@@ -122,28 +121,73 @@ public class ServerMobRegistry {
         return resolved;
     }
 
+    private static void resolveMob(MobConfig mob, Map<String, MobConfig> cache) {
+        resolveMob(mob, cache, new HashSet<>());
+    }
+
+    private static MobConfig resolveMob(MobConfig mob, Map<String, MobConfig> cache, Set<String> visited) {
+        if (mob.template == null)
+            return mob;
+
+        MobConfig cached = cache.get(mob.id);
+        if (cached != null)
+            return cached;
+
+        if (!visited.add(mob.id)) {
+            MiACompat.LOGGER.warn("Circular mob template detected: {}", mob.id);
+            return mob;
+        }
+
+        MobConfig template = getMob(mob.template);
+        if (template == null) {
+            MiACompat.LOGGER.warn("Unknown mob template '{}'", mob.template);
+            return mob;
+        }
+
+        MobConfig resolved = mob.inheritFrom(
+            resolveMob(template, cache, visited)
+        );
+
+        cache.put(mob.id, resolved);
+        return resolved;
+    }
+
     public static void buildIndexes() {
+        mobConfigsByModelId.clear();
         mobConfigsByTemplate.clear();
 
         for (MobConfig mob : mobConfigById.values()) {
-            if (mob.template == null || mob.template.isBlank())
-                continue;
+            mobConfigsByModelId
+                .computeIfAbsent(mob.modelId, k -> new ArrayList<>())
+                .add(mob);
 
-            String template = mob.template.toLowerCase(Locale.ROOT);
+            if (mob.template == null) continue;
+
             mobConfigsByTemplate
-                .computeIfAbsent(template, k -> new ArrayList<>())
+                .computeIfAbsent(mob.template, k -> new ArrayList<>())
                 .add(mob);
         }
     }
 
+    public static void resolveTemplatedMobs() {
+        Map<String, MobConfig> resolved = new HashMap<>();
+
+        for (MobConfig mob : mobConfigById.values()) {
+            if (mob.template == null) continue;
+            resolveMob(mob, resolved);
+        }
+
+        mobConfigById.putAll(resolved);
+    }
+
     private static void registerMob(MobConfig mob) {
-        MobConfig prev = mobConfigById.putIfAbsent(mob.id.toLowerCase(Locale.ROOT), mob);
+        MobConfig prev = mobConfigById.putIfAbsent(mob.id, mob);
         if (prev != null)
             MiACompat.LOGGER.warn("Mob {} already registered", mob.id);
     }
 
     private static void registerDropTable(DropTableConfig dropTable) {
-        DropTableConfig prev = dropTableConfigById.putIfAbsent(dropTable.id.toLowerCase(Locale.ROOT), dropTable);
+        DropTableConfig prev = dropTableConfigById.putIfAbsent(dropTable.id, dropTable);
         if (prev != null)
             MiACompat.LOGGER.warn("Drop table {} already registered", dropTable.id);
     }
@@ -155,40 +199,47 @@ public class ServerMobRegistry {
         LoaderOptions options = new LoaderOptions();
         Yaml dropTableYaml = new Yaml(DropTableYamlSchema.constructor(options));
 
-        resourceManager.listResources("config/server/mythicmobs/droptables", ConfigResourceReloader::isYamlResource)
-            .forEach((id, resource) -> {
-                try (InputStream is = resource.open()) {
-                    DropTableYamlSchema dropTableConfig = dropTableYaml.load(is);
+        try (Stopwatch sw = Stopwatch.start("Loaded {} drop tables")) {
+            resourceManager.listResources("config/server/mythicmobs/droptables", ConfigResourceReloader::isYamlResource)
+                .forEach((id, resource) -> {
+                    try (InputStream is = resource.open()) {
+                        DropTableYamlSchema dropTableConfig = dropTableYaml.load(is);
 
-                    for (Map.Entry<String, DropTableYamlSchema.DropTableDefinition> entry : dropTableConfig.entrySet()) {
-                        DropTableConfig dropTable = DropTableConfig.parse(entry.getKey(), entry.getValue());
-                        registerDropTable(dropTable);
+                        for (Map.Entry<String, DropTableYamlSchema.DropTableDefinition> entry : dropTableConfig.entrySet()) {
+                            DropTableConfig dropTable = DropTableConfig.parse(entry.getKey(), entry.getValue());
+                            registerDropTable(dropTable);
+                        }
+                    } catch (Exception e) {
+                        MiACompat.LOGGER.error("Failed to load drop table config '{}'", id, e);
                     }
-                } catch (Exception e) {
-                    MiACompat.LOGGER.error("Failed to load drop table config '{}'", id, e);
-                }
-            });
+                });
 
-        MiACompat.LOGGER.info("Loaded {} drop tables", dropTableConfigById.size());
+            sw.args(dropTableConfigById.size());
+        }
 
         Yaml mobYaml = new Yaml(MobYamlSchema.constructor(options));
 
-        resourceManager.listResources("config/server/mythicmobs/mobs", ConfigResourceReloader::isYamlResource)
-            .forEach((id, resource) -> {
-                try (InputStream is = resource.open()) {
-                    MobYamlSchema mobConfig = mobYaml.load(is);
+        try (Stopwatch sw = Stopwatch.start("Loaded {} mobs")) {
+            resourceManager.listResources("config/server/mythicmobs/mobs", ConfigResourceReloader::isYamlResource)
+                .forEach((id, resource) -> {
+                    try (InputStream is = resource.open()) {
+                        MobYamlSchema mobConfig = mobYaml.load(is);
 
-                    for (Map.Entry<String, MobYamlSchema.MobDefinition> entry : mobConfig.entrySet()) {
-                        MobConfig mob = MobConfig.parse(entry.getKey(), entry.getValue());
-                        registerMob(mob);
+                        for (Map.Entry<String, MobYamlSchema.MobDefinition> entry : mobConfig.entrySet()) {
+                            MobConfig mob = MobConfig.parse(entry.getKey(), entry.getValue());
+                            registerMob(mob);
+                        }
+                    } catch (Exception e) {
+                        MiACompat.LOGGER.error("Failed to load mob config '{}'", id, e);
                     }
-                } catch (Exception e) {
-                    MiACompat.LOGGER.error("Failed to load mob config '{}'", id, e);
-                }
-            });
+                });
 
-        MiACompat.LOGGER.info("Loaded {} mobs", mobConfigById.size());
+            sw.args(mobConfigById.size());
+        }
 
-        buildIndexes();
+        try (Stopwatch ignore = Stopwatch.start("Mobs resolved and indexed")) {
+            resolveTemplatedMobs();
+            buildIndexes();
+        }
     }
 }

@@ -1,0 +1,38 @@
+edusan:
+  Type: COD
+  SpawnCategory: water
+  Display: "<#800080>Edusan"
+  Health: 80
+  Damage: 0
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - movetowardstarget
+    - fleeplayers
+    - randomfly
+  AITargetSelectors:
+    - clear
+  Options:
+    Collidable: true
+    Silent: true
+    FollowRange: 20
+    Interactable: true
+    MovementSpeed: 0.3
+    PreventOtherDrops: true
+  Geary:
+    pathfinders:
+      - type: RandomSwimmingGoal
+        priority: 8
+        speed: 1.0
+        chance: 1
+  Model:
+    Id: edusan
+    ViewRadius: 48
+    DamageTint: true
+  Drops:
+    - exp 35-50
+    - geary mineinabyss:edusan_scale 4-8 1
+    - geary mineinabyss:edusan_whisker 1 0.2
+
+  Skills:
+    - skill{s=displayHealth} ~onDamaged

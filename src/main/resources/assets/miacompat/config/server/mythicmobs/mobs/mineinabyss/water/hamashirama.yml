@@ -1,0 +1,28 @@
+hamashirama:
+  Type: GLOW_SQUID
+  SpawnCategory: water
+  Display: "<#1B91B5>Hamashirama"
+  Health: 30
+  Damage: 0
+  # Don't override vanilla squid goals, other pathfinders don't work with them (swap to fish if ever necessary)
+#  AIGoalSelectors:
+#    - clear
+#  AITargetSelectors:
+#    - clear
+  Options:
+    Collidable: true
+    Silent: true
+    FollowRange: 20
+    Interactable: true
+    MovementSpeed: 0.2
+    PreventOtherDrops: true
+  Model:
+    Id: hamashirama
+    ViewRadius: 48
+    DamageTint: true
+  Drops:
+    - exp 20-25
+    - geary mineinabyss:hamashirama_raw 1-2 0.6
+
+  Skills:
+    - skill{s=displayHealth} ~onDamaged

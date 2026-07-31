@@ -1,0 +1,39 @@
+rohana:
+  Type: ALLAY
+  Prefabs: [ mineinabyss:custom_allay ]
+  SpawnCategory: flying
+  Display: "<#6C19BF>Rohana"
+  Health: 10
+  AIGoalSelectors:
+    - clear
+    - float
+    - randomFly
+    - movetowater
+    - randomlookaround
+  Options:
+    KnockbackResistance: 1
+    Collidable: true
+    Silent: true
+    FollowRange: 17
+    PreventOtherDrops: true
+    MovementSpeed: 0.32
+  Equipment:
+    - TORCH HAND
+  DamageModifiers:
+    - DROWNING -1
+  Model:
+    Id: rohana
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+  Drops:
+    - exp 12-18
+    - geary mineinabyss:rohana_powder 2 0.8
+    - geary mineinabyss:rohana_tail 2 0.4
+
+  Skills:
+    - bodyclamp{m=rohana;c=15} @self ~onSpawnOrLoad
+    #- setspeed{type=flying;speed=1} @self ~onSpawnOrLoad
+    - state{mid=rohana;s=attack} @self ~onAttack
+    - skill{s=displayHealth} ~onDamaged
+    - particle{p=effect;color=#EF44ED;power=1;delay=30} @self ~onDeath

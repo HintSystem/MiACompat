@@ -1,0 +1,36 @@
+billabonk:
+  Type: FROG
+  SpawnCategory: passive
+  Display: "<#b754c2>Billabonk"
+  Modules:
+    ThreatTable: true
+  AIGoalSelectors:
+    - clear
+    - fleeplayers{distance=5;speed=1.3;safespeed=1.3;conditions=[ - inlineofsight true ]}
+    - panicWhenOnFire
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+  AITargetSelectors:
+    - clear
+    - players
+  Drops:
+    - exp 1-10
+    - geary mineinabyss:billabonk_leg_raw 1-2 0.6
+    - lily_pad 1-2 0.4
+  Health: 20 # change this
+  Damage: 0
+  Options:
+    PreventOtherDrops: true
+    Silent: true   
+    Interactable: false
+  Model:
+    Id: billabonk
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+  Skills:
+    - skill{s=displayHealth} ~onDamaged
+    - effect:sound{s=mineinabyss:entity.billabonk.death;v=4;p=0.2} @self ~onDeath
+    - effect:sound{s=mineinabyss:entity.billabonk.hurt;v=4;p=0.2} @self ~onDamaged
+    - skill{s=breathe} @self ~onSpawnOrLoad

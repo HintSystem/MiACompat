@@ -1,0 +1,33 @@
+hashofu:
+  Type: ALLAY
+  Prefabs: [ mineinabyss:custom_allay ]
+  SpawnCategory: flying
+  Display: "<#454545>Hashofu"
+  Health: 20
+  AIGoalSelectors:
+    - clear
+    - float
+    - randomFly
+    - movetowater
+    - randomlookaround
+  Options:
+    KnockbackResistance: 1
+    Collidable: true
+    FollowRange: 17
+    PreventOtherDrops: true
+    Silent: true
+    MovementSpeed: 0.4
+  Model:
+    Id: hashofu
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+  Drops:
+    - exp 12-18
+    - geary mineinabyss:hashofu_tail_raw 1 0.8
+    - geary mineinabyss:hashofu_eye 2 0.65
+    - geary mineinabyss:hashofu_body 1-3
+  Skills:
+    - bodyclamp{m=hashofu;c=15} @self ~onSpawnOrLoad
+    #- setspeed{type=flying;speed=1.2} @self ~onSpawnOrLoad
+    - skill{s=displayHealth} ~onDamaged

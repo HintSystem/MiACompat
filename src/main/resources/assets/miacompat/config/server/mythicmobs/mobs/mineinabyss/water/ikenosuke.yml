@@ -1,0 +1,41 @@
+ikenosuke:
+  Type: COD
+  SpawnCategory: water
+  Display: "<#9ff3f3>Ikenosuke"
+  Modules:
+    ThreatTable: true
+  AIGoalSelectors:
+    - clear
+    - fleeplayers
+  AITargetSelectors:
+    - clear
+  Health: 12 # change this
+  Damage: 0 # keep this 0
+  Options:
+    Silent: false
+    FollowRange: 25
+    MovementSpeed: 0.4
+    KnockbackResistance: 0.0
+    Interactable: true
+    PreventOtherDrops: true
+  Geary:
+    pathfinders:
+      - type: RandomSwimmingGoal
+        priority: 8
+        speed: 1.0
+        chance: 1
+  Drops: # put stuff here
+    - exp 5-15
+    - geary mineinabyss:ikenosuke_raw 1-2 0.6
+    - prismarine_crystals 1-8 0.9
+
+  Model:
+    Id: ikenosuke
+    ViewRadius: 48
+
+  Skills:
+    ####### Misc
+    - skill{s=displayHealth} ~onDamaged
+    # - propel{v=0.25;delay=<random.0to10>;repeat=19;repeatInterval=1} @targetLocation ~onTimer:55 0.9 ?inBlock{b=WATER} ?inCombat{}
+    #- propel{v=0.1;delay=<random.0to20>;repeat=<random.40to70>;repeatInterval=1} @targetlocation ~onTimer:100 0.45 ?inBlock{b=WATER}
+    - effect:particles{particle=bubble;a=1;hs=0.1;vs=0.05;s=0;y=0} @self ~onTimer:2 ?inBlock{b=WATER} ?inCombat{} ?isMoving{}

@@ -1,0 +1,46 @@
+inkflower:
+  Type: SPIDER
+  SpawnCategory: hostile
+  Display: "Inkflower"
+  Health: 50
+  Damage: 11
+  AIGoalSelectors:
+    - clear
+    - spiderattack
+    - randomstroll
+    - randomlookaround
+    - float
+  AITargetSelectors:
+    - clear
+    - attacker
+    - players
+  Options:
+    KnockbackResistance: 1
+    Collidable: false
+    Silent: true
+    FollowRange: 48
+    MovementSpeed: 0.4
+    MaxCombatDistance: 24
+    DigOutOfGround: true
+    PreventOtherDrops: true
+  Equipment:
+    - DIAMOND_BOOTS{enchants=DEPTH_STRIDER:3} FEET
+    - TORCH HAND
+
+  Model:
+    Id: inkflower
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+  Skills:
+    # - CancelEvent{sync=true} ~onAttack
+    # - skill{s=Damage_8} @self ~onAttack
+    - skill{s=displayHealth} ~onDamaged
+
+
+    - bodyclamp{m=inkflower;c=15} @self ~onSpawnOrLoad
+    - setspeed{type=flying;speed=1.4} @self ~onSpawnOrLoad
+    - state{mid=inkflower;s=attack} @self ~onAttack
+    
+    #- skill{s=inkflower_airball} @target ~onTimer:20
+    - skill{s=Changetarget} ~onTimer:160 <99%

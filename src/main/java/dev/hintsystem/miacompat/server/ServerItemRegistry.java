@@ -2,6 +2,7 @@ package dev.hintsystem.miacompat.server;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
+import dev.hintsystem.miacompat.server.config.ConfigResourceReloader.Stopwatch;
 import dev.hintsystem.miacompat.server.config.geary.ItemYamlSchema;
 import dev.hintsystem.miacompat.server.config.geary.item.ActionCooldown;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
@@ -92,40 +93,42 @@ public class ServerItemRegistry {
 
         Yaml yaml = new Yaml(ItemYamlSchema.constructor(new LoaderOptions()));
 
-        String itemConfigPath = "config/server/geary/prefabs";
-        resourceManager.listResources(itemConfigPath, ConfigResourceReloader::isYamlResource)
-            .forEach((id, resource) -> {
-                try (InputStream is = resource.open()) {
-                    ItemYamlSchema itemConfig = yaml.load(is);
+        try (Stopwatch sw = Stopwatch.start("Loaded {} items")) {
+            String itemConfigPath = "config/server/geary/prefabs";
+            resourceManager.listResources(itemConfigPath, ConfigResourceReloader::isYamlResource)
+                .forEach((id, resource) -> {
+                    try (InputStream is = resource.open()) {
+                        ItemYamlSchema itemConfig = yaml.load(is);
 
-                    Path relative = Path.of(itemConfigPath).relativize(
-                        Path.of(id.getPath())
-                    );
+                        Path relative = Path.of(itemConfigPath).relativize(
+                            Path.of(id.getPath())
+                        );
 
-                    String prefabNamespace = relative.getName(0).toString();
+                        String prefabNamespace = relative.getName(0).toString();
 
-                    String filename = relative.getFileName().toString();
-                    String prefabName = filename.substring(0, filename.length() - ".yml".length());
+                        String filename = relative.getFileName().toString();
+                        String prefabName = filename.substring(0, filename.length() - ".yml".length());
 
-                    Identifier prefabId = Identifier.fromNamespaceAndPath(
-                        prefabNamespace, prefabName
-                    );
+                        Identifier prefabId = Identifier.fromNamespaceAndPath(
+                            prefabNamespace, prefabName
+                        );
 
-                    ItemConfig item = ItemConfig.parse(prefabId, itemConfig);
+                        ItemConfig item = ItemConfig.parse(prefabId, itemConfig);
 
-                    if (relative.startsWith("relics")) {
-                        item = RelicConfig.parse(item);
-                    } else {
-                        ItemConfig parsed = RelicConfig.tryParse(item);
-                        if (parsed != null) item = parsed;
+                        if (relative.startsWith("relics")) {
+                            item = RelicConfig.parse(item);
+                        } else {
+                            ItemConfig parsed = RelicConfig.tryParse(item);
+                            if (parsed != null) item = parsed;
+                        }
+
+                        registerItem(item);
+                    } catch (Exception e) {
+                        MiACompat.LOGGER.error("Failed to load item config '{}'", id, e);
                     }
+                });
 
-                    registerItem(item);
-                } catch (Exception e) {
-                    MiACompat.LOGGER.error("Failed to load item config '{}'", id, e);
-                }
-            });
-
-        MiACompat.LOGGER.info("Loaded {} items", itemConfigByPrefabId.size());
+            sw.args(itemConfigByPrefabId.size());
+        }
     }
 }

@@ -1,0 +1,171 @@
+vinebinder:
+  Type: ZOMBIE
+  SpawnCategory: hostile
+  Display: "<green>Vinebinder"
+  Modules:
+    ThreatTable: true
+  AIGoalSelectors:
+    - clear
+    - randomlookaround
+    - meleeattack
+    - lookatplayers
+  AITargetSelectors:
+    - clear
+    - players
+  Health: 20 # change this
+  Damage: 5 # keep this 0
+  Options:
+    PreventSunburn: true
+    Collidable: false
+    PreventOtherDrops: true
+    PreventJockeyMounts: true
+    Silent: true
+    FollowRange: 15
+    MovementSpeed: 0   # replaced with skills
+    KnockbackResistance: 1.0
+  Model:
+    Id: vinebinder
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+    Scale: 1
+
+  Drops:
+    - exp 10-15
+    - geary mineinabyss:plant_matter 1-2 0.6
+    - RareSaplingDrops
+
+
+  Skills:
+    ####### Misc
+    - skill{s=displayHealth} ~onDamaged
+
+
+    - skill{s=vbATTACK} @Self ~onAttack
+  #- skill{s=vinebinderwave} @target ~onTimer:20
+
+vineblaster:
+  Type: ZOMBIE
+  SpawnCategory: hostile
+  Modules:
+    ThreatTable: true
+  Display: "<green>Vineblaster"
+  AIGoalSelectors:
+    - clear
+    #- randomlookaround
+    - lookatplayers
+  AITargetSelectors:
+    - clear
+    - players
+  Health: 16 # change this
+  Damage: 0 # keep this 0
+  Options:
+    PreventSunburn: true
+    Silent: true
+    PreventOtherDrops: true
+    FollowRange: 15
+    MovementSpeed: 0   # replaced with skills
+    KnockbackResistance: 1.0
+    Collidable: false
+  Model:
+    Id: vineblaster
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+    Scale: 1
+  Drops:
+    - exp 10-15
+    - geary mineinabyss:plant_matter 1-2 0.6
+    - RareSaplingDrops
+
+  Skills:
+    ####### Misc
+    - skill{s=displayHealth} ~onDamaged
+
+    - skill:vineblasterattack @Self ~onTimer:40
+    # - skill{s=vineblastermortar} @target ~onTimer:20
+    - cancelevent{sync=true} @Self ~onAttack
+
+wanabushi:
+  Type: VINDICATOR
+  Modules:
+    ThreatTable: true
+  Display: "<green>Wanabushi"
+  Faction: ally
+  AIGoalSelectors:
+  - LookAtTarget{h=true}
+  - randomstroll
+  AITargetSelectors:
+  - 0 clear
+  - 1 monsters
+  - 2 nearestConditionalTarget{conditions=[
+        - entitytype PLAYER false
+      ]} 
+  Health: 60 # change this
+  Damage: 0 # keep this 0
+  Options:
+    PreventSunburn: true
+    AlwaysShowName: false
+    Silent: false
+    MovementSpeed: 0.35
+    MaxCombatDistance: 25
+    PreventOtherDrops: true
+    PreventBlockInfection: true
+    FollowRange: 25
+  Model:
+    Id: wanabushi
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+    Scale: 1
+  Skills:
+    ####### Misc
+    - skill{s=displayHealth} ~onDamaged
+    - skill{s=allyvineblasterattack} @Self ~onTimer:10
+    # - skill{s=vineblastermortar} @target ~onTimer:20
+    - cancelevent{sync=true} @Self ~onAttack
+    - remove{delay=500} @self ~onSpawn
+
+vinepoofer:
+  Type: ZOMBIE
+  SpawnCategory: hostile
+  Display: "<green>Vinepoofer"
+  Modules:
+    ThreatTable: true
+  AIGoalSelectors:
+    - clear
+    - randomlookaround
+    - lookatplayers
+  AITargetSelectors:
+    - clear
+    - players
+  Health: 20 # change this
+  Damage: 0 # keep this 0
+  Options:
+    PreventSunburn: true
+    Silent: true
+    PreventOtherDrops: true
+    FollowRange: 15
+    MovementSpeed: 0   # replaced with skills
+    KnockbackResistance: 1.0
+    Collidable: false
+  Model:
+    Id: vinepoofer
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+    Scale: 1
+  Drops:
+    - exp 10-15
+    - geary mineinabyss:plant_matter 1-2 0.6
+    - RareSaplingDrops
+
+  Skills:
+    ####### Misc
+    - skill{s=displayHealth} ~onDamaged
+
+    - skill:vinepooferattack @Self ~onTimer:30
+    # - skill{s=vinebinderwave} @target ~onTimer:20
+    - cancelevent{sync=true} @Self ~onAttack
+
+

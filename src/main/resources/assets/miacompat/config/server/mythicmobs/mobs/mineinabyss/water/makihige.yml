@@ -1,0 +1,47 @@
+makihige:
+  Type: ZOMBIE
+  SpawnCategory: water
+  Display: "<#FF771C>Makihige"
+  Health: 60
+  Damage: 0
+  AIGoalSelectors:
+    - randomstroll
+    - clear
+    - lookatplayers
+    - randomlookaround
+    - float
+    - fleeplayers{d=5;s=1.5;ss=1}
+  AITargetSelectors:
+    - clear
+  Options:
+    KnockbackResistance: 0.2
+    Collidable: true
+    Silent: true
+    Interactable: true
+    DigOutOfGround: true
+    MovementSpeed: 0.25
+    PreventOtherDrops: true
+    PreventSunburn: true
+  Equipment:
+    - DIAMOND_BOOTS{enchants=DEPTH_STRIDER:3} FEET
+  DamageModifiers:
+    - FALL 0.01
+    - DROWNING 0.01
+  Geary:
+    pathfinders:
+      - type: RandomSwimmingGoal
+        priority: 8
+        speed: 1.0
+        chance: 1
+  Model:
+    Id: makihige
+    ViewRadius: 48
+    DamageTint: true
+  Drops:
+    - exp 15-30
+    - geary mineinabyss:makihige_ink_sac 1-2 0.6
+    - geary mineinabyss:makihige_shell 1-2 0.3 nolooting
+    - geary mineinabyss:makihige_tentacle 1-2 0.4
+
+  Skills:
+    - skill{s=displayHealth} ~onDamaged

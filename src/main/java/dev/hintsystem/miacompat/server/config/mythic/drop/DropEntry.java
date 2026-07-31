@@ -1,6 +1,5 @@
 package dev.hintsystem.miacompat.server.config.mythic.drop;
 
-import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.config.mythic.MythicParser;
 
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -27,50 +26,61 @@ public sealed interface DropEntry permits ItemDrop, RelicDrop, DropTableReferenc
         List<String> container = MythicParser.tokenize(drop, ' ');
         String dropName = container.getFirst();
 
-        if (container.size() == 1)
-            return new DropTableReference(dropName);
-
         switch (dropName.toLowerCase(Locale.ROOT)) {
-            case "geary" -> {
-                return parseGearyDrop(container);
-            }
             case "experience", "exp", "xp" -> {
                 return new ExperienceDrop(MythicParser.IntRange.parse(container.get(1)));
             }
+            case "geary" -> {
+                Identifier itemId = Identifier.parse(container.get(1));
+
+                return parseItemDrop(
+                    container.subList(1, container.size()),
+                    itemId, Map.of()
+                );
+            }
             default -> {
+                if (container.size() == 1)
+                    return new DropTableReference(dropName);
+
                 MythicParser.Invocation invocation = MythicParser.Invocation.parse(dropName);
 
                 Identifier itemId = Identifier.withDefaultNamespace(
                     invocation.name().toLowerCase(Locale.ROOT)
                 );
 
-                if (BuiltInRegistries.ITEM.get(itemId).isEmpty())
+                if (!BuiltInRegistries.ITEM.containsKey(itemId))
                     throw new IllegalArgumentException("Invalid drop entry: " + drop);
 
-                return new ItemDrop(
-                    itemId, invocation.arguments(),
-                    MythicParser.IntRange.parse(container.get(1)), Double.parseDouble(container.get(2)),
-                    parseDropFlags(container, 3)
+                return parseItemDrop(
+                    container, itemId, invocation.arguments()
                 );
             }
         }
     }
 
-    private static ItemDrop parseGearyDrop(List<String> container) {
+    private static ItemDrop parseItemDrop(
+        List<String> container,
+        Identifier itemId, Map<String, String> arguments
+    ) {
+        double chance = 1;
+        if (container.size() > 2)
+            chance = Double.parseDouble(container.get(2));
+
         return new ItemDrop(
-            Identifier.parse(container.get(1)), Map.of(),
-            MythicParser.IntRange.parse(container.get(2)), Double.parseDouble(container.get(3)),
-            parseDropFlags(container, 4)
+            itemId, arguments,
+            MythicParser.IntRange.parse(container.get(1)), chance,
+            parseDropFlags(container)
         );
     }
 
-    private static EnumSet<ItemDrop.DropFlag> parseDropFlags(List<String> container, int flagsStartIndex) {
+    private static EnumSet<ItemDrop.DropFlag> parseDropFlags(List<String> container) {
         EnumSet<ItemDrop.DropFlag> flags = EnumSet.noneOf(ItemDrop.DropFlag.class);
 
-        for (int i = flagsStartIndex; i < container.size(); i++) {
+        for (int i = 3; i < container.size(); i++) {
             switch (container.get(i).toLowerCase(Locale.ROOT)) {
                 case "nolooting" -> flags.add(ItemDrop.DropFlag.NO_LOOTING);
-                default -> MiACompat.LOGGER.warn("Unknown drop flag '{}'", container.get(i));
+                default ->
+                    throw new IllegalArgumentException("Unknown drop flag '" + container.get(i) + "'");
             }
         }
 

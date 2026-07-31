@@ -115,8 +115,14 @@ tasks.register("updateServerConfigs", Copy) {
         into "geary/prefabs/mineinabyss/"
     }
 
-    // Include only praying skeletons for now TODO create mob compendium
     from("${repo}/servers_shared/survwild/plugins/MythicMobs/packs/survwild_prayingskels") {
+        include "DropTables/**"
+        include "mobs/**"
+
+        into "mythicmobs"
+    }
+
+    from("${repo}/servers_shared/survwild/plugins/MythicMobs/packs/survwild_mobs") {
         include "DropTables/**"
         include "mobs/**"
 

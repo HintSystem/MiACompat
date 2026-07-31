@@ -1,0 +1,41 @@
+squidfly:
+  Type: ALLAY
+  Prefabs: [ mineinabyss:custom_allay ]
+  SpawnCategory: flying
+  Display: "<#85512E>Squidfly"
+  Health: 16
+  Damage: 5
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - float
+    - randomFly
+    - randomlookaround
+  AITargetSelectors:
+    - clear
+    - attacker
+    - players
+  Options:
+    Collidable: true
+    DigOutOfGround: true
+    FollowRange: 32
+    MaxCombatDistance: 128
+    PreventOtherDrops: true
+    Silent: true
+    MovementSpeed: 0.7
+  Model:
+    Id: squidfly
+    ViewRadius: 48
+    Drive: false
+    DamageTint: true
+  Drops:
+    - exp 12-18
+    - geary mineinabyss:squidfly_brain_raw 1 0.8
+
+  Skills:
+    # - CancelEvent{sync=true} ~onAttack
+    # - skill{s=Damage_5} @self ~onAttack
+    - bodyclamp{m=squidfly;c=15} @self ~onSpawnOrLoad
+    #- setspeed{type=flying;speed=1.5} @self ~onSpawnOrLoad
+    - state{mid=squidfly;s=attack} @self ~onAttack
+    - skill{s=displayHealth} ~onDamaged

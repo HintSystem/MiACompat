@@ -3,6 +3,7 @@ package dev.hintsystem.miacompat.server.config.mythic;
 import dev.hintsystem.miacompat.server.config.mythic.drop.DropEntry;
 
 import java.util.List;
+import java.util.Locale;
 
 public class DropTableConfig {
     public final String id;
@@ -14,6 +15,9 @@ public class DropTableConfig {
     }
 
     public static DropTableConfig parse(String dropTableId, DropTableYamlSchema.DropTableDefinition dropTableConfig) {
-        return new DropTableConfig(dropTableId, DropEntry.parseList(dropTableConfig.Drops));
+        return new DropTableConfig(
+            dropTableId.toLowerCase(Locale.ROOT),
+            DropEntry.parseList(dropTableConfig.Drops)
+        );
     }
 }

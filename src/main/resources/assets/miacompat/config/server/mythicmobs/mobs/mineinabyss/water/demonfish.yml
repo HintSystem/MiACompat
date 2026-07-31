@@ -1,0 +1,46 @@
+demonfish:
+  Type: SALMON
+  SpawnCategory: water
+  Display: "<#1B91B5>Demonfish"
+  Modules:
+    ThreatTable: true
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - movetowardstarget
+    - fleeplayers
+  AITargetSelectors:
+    - clear
+    - attacker
+    - players
+  Health: 30 # change this
+  Damage: 4
+  Options:
+    Silent: false
+    FollowRange: 25
+    MovementSpeed: 0.9
+    Interactable: true
+    KnockbackResistance: 0.0
+    PreventOtherDrops: true
+  Drops:
+    - exp 5-15
+    - geary mineinabyss:demonfish_raw 1-2 0.6
+    - prismarine_shard 1-8 0.9 
+
+
+  Geary:
+    pathfinders:
+      - type: RandomSwimmingGoal
+        priority: 8
+        speed: 1.0
+        chance: 1
+  Model:
+    Id: demonfish
+    ViewRadius: 48
+    DamageTint: true
+  Skills:
+    ####### Misc
+    - skill{s=displayHealth} ~onDamaged
+    - look{immediately=true} @targetLocation ~onTimer:10
+    - propel{v=0.25;delay=<random.0to10>;repeat=19;repeatInterval=1} @targetLocation ~onTimer:55 0.9 ?inBlock{b=WATER} ?inCombat{}
+    - propel{v=0.1;delay=<random.0to20>;repeat=<random.40to70>;repeatInterval=1} @targetlocation ~onTimer:100 0.45 ?inBlock{b=WATER}
