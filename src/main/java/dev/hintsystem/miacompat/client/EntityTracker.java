@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.client;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.server.ServerMobRegistry;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -78,25 +79,33 @@ public class EntityTracker {
             if (scannedEntity.getTicksRemoved() > MAX_REMOVAL_TICKS) {
                 it.remove();
 
-                MiACompat.LOGGER.info("[{}] entity KILLED! {}",
-                    Math.round(scannedEntity.distanceTo(player)), scannedEntity.detectedModelId);
+                CompendiumTracker.addKilledMob(scannedEntity.mobModelId);
+
+                MiACompat.LOGGER.info("Killed mob '{}' from {} blocks away ({})",
+                    scannedEntity.mobModelId, Math.round(scannedEntity.distanceTo(player)),
+                    scannedEntity.mobPartModelId);
             }
         }
     }
 
     public static class ScannedEntity {
         public static final int MODEL_VIEW_DISTANCE = 48;
-        public static final int MODEL_VIEW_DISTANCE_SQR = MODEL_VIEW_DISTANCE * MODEL_VIEW_DISTANCE;
+        public static final int ENTITY_VIEW_DISTANCE_SQR = (MODEL_VIEW_DISTANCE-1) * (MODEL_VIEW_DISTANCE-1);
 
         public final UUID uuid;
-        private final Identifier detectedModelId;
+        private final Identifier mobPartModelId;
+        private final String mobModelId;
 
         private int ticksRemoved = 0;
         private Vec3 lastPosition;
 
-        public ScannedEntity(Entity entity, Identifier detectedModelId) {
+        public ScannedEntity(
+            Entity entity,
+            Identifier mobPartModelId, String mobModelId
+        ) {
             this.uuid = entity.getUUID();
-            this.detectedModelId = detectedModelId;
+            this.mobPartModelId = mobPartModelId;
+            this.mobModelId = mobModelId;
 
             updateEntity(entity.level());
         }
@@ -108,7 +117,7 @@ public class EntityTracker {
         public double distanceTo(Entity entity) { return this.lastPosition.distanceTo(entity.position()); }
 
         public boolean isOccluded(Level level, Player player) {
-            if (player.distanceToSqr(this.lastPosition) >= MODEL_VIEW_DISTANCE_SQR)
+            if (player.distanceToSqr(this.lastPosition) >= ENTITY_VIEW_DISTANCE_SQR)
                 return true;
 
             BlockHitResult result = level.clip(new ClipContext(
@@ -144,7 +153,10 @@ public class EntityTracker {
             Identifier itemModel = itemDisplay.getItemStack().get(DataComponents.ITEM_MODEL);
             if (itemModel == null) return null;
 
-            return new ScannedEntity(vehicle, itemModel);
+            String mobModelId = ServerMobRegistry.getMobModelId(itemModel);
+            if (mobModelId == null) return null;
+
+            return new ScannedEntity(vehicle, itemModel, mobModelId);
         }
     }
 }

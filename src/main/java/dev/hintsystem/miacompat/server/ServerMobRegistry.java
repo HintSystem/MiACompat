@@ -10,6 +10,7 @@ import dev.hintsystem.miacompat.server.config.mythic.SkillEntry;
 import dev.hintsystem.miacompat.server.config.mythic.drop.*;
 import dev.hintsystem.miacompat.server.config.mythic.mob.MobConfig;
 
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.InputStream;
@@ -26,6 +27,12 @@ public class ServerMobRegistry {
     private static final Map<String, List<MobConfig>> mobConfigsByModelId = new HashMap<>();
     private static final Map<String, List<MobConfig>> mobConfigsByTemplate = new HashMap<>();
 
+    public static boolean isExistingMobModel(String mobModelId) {
+        return mobConfigsByModelId.containsKey(
+            mobModelId.toLowerCase(Locale.ROOT)
+        );
+    }
+
     public static Map<String, MobConfig> getAllMobs() {
         return Collections.unmodifiableMap(mobConfigById);
     }
@@ -33,6 +40,24 @@ public class ServerMobRegistry {
     @Nullable
     public static MobConfig getMob(String id) {
         return mobConfigById.get(id.toLowerCase(Locale.ROOT));
+    }
+
+    @Nullable
+    public static String getMobModelId(Identifier mobPartModelId) {
+        if (!mobPartModelId.getNamespace().equals("modelengine"))
+            return null;
+
+        String path = mobPartModelId.getPath();
+
+        int lastSlash = path.lastIndexOf('/');
+        if (lastSlash != -1)
+            path = path.substring(0, lastSlash);
+
+        path = path.toLowerCase(Locale.ROOT);
+        if (!isExistingMobModel(path))
+            return null;
+
+        return path;
     }
 
     public static List<MobConfig> getMobsWithTemplate(String template) {

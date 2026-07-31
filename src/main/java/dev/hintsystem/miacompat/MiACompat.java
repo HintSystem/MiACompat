@@ -2,7 +2,6 @@ package dev.hintsystem.miacompat;
 
 import dev.hintsystem.miacompat.client.*;
 import dev.hintsystem.miacompat.config.Config;
-import dev.hintsystem.miacompat.debug.DebugTrigger;
 import dev.hintsystem.miacompat.gui.hud.Hud;
 import dev.hintsystem.miacompat.gui.screens.ConfigScreen;
 import dev.hintsystem.miacompat.gui.screens.compendium.CompendiumScreen;
@@ -12,6 +11,7 @@ import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -108,6 +108,10 @@ public class MiACompat implements ClientModInitializer {
         KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_RELIC_COMPENDIUM);
         KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_CONFIG);
 
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            CompendiumTracker.saveIfDirty();
+        });
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ProfilerFiller profiler = Profiler.get();
 
@@ -115,7 +119,7 @@ public class MiACompat implements ClientModInitializer {
             profiler.push("keybinds");
 
             KeyBindings.tickKeybinds(client);
-            DebugTrigger.checkDebugKeys(client);
+            //DebugTrigger.checkDebugKeys(client);
 
             profiler.popPush("trackers");
 

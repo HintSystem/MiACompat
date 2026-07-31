@@ -3,6 +3,7 @@ package dev.hintsystem.miacompat.client;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.config.PersistentGsonData;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.ServerMobRegistry;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
 import dev.hintsystem.miacompat.utils.ItemUtils;
@@ -24,9 +25,14 @@ import com.google.gson.Gson;
 
 public class CompendiumTracker {
     public static final int SCAN_DISCOVERED_RELICS_TICKS = 48;
+    public static final int SAVE_DATA_DELAY_TICKS = 100;
 
     private static final CompendiumData compendiumData = new CompendiumData();
+
     private static int relicCheckTicks = 0;
+    private static int saveDelayTicks = 0;
+
+    private static boolean dirty = false;
 
     public static void tick(Minecraft client) {
         if (client.player == null) return;
@@ -34,11 +40,15 @@ public class CompendiumTracker {
         ProfilerFiller profiler = Profiler.get();
         profiler.push("scanDiscoveredRelics");
 
-        relicCheckTicks = (relicCheckTicks + 1) % SCAN_DISCOVERED_RELICS_TICKS;
-        if (relicCheckTicks != 0)
+        if (relicCheckTicks++ >= SCAN_DISCOVERED_RELICS_TICKS) {
+            relicCheckTicks = 0;
             scanDiscoveredRelics(client.player);
+        }
 
         profiler.pop();
+
+        if (dirty && saveDelayTicks-- <= 0)
+            saveIfDirty();
     }
 
     private static void scanDiscoveredRelics(LocalPlayer player) {
@@ -46,8 +56,7 @@ public class CompendiumTracker {
             ItemConfig item = ServerItemRegistry.getItem(itemStack);
             if (!(item instanceof RelicConfig relic)) continue;
 
-            if (compendiumData.relics.add(relic.prefabId))
-                compendiumData.saveToFile();
+            addDiscoveredRelic(relic);
         }
     }
 
@@ -55,8 +64,37 @@ public class CompendiumTracker {
         return compendiumData.relics.contains(prefabId);
     }
 
-    public static void loadFromFile() {
-        compendiumData.loadFromFile();
+    /** @return {@code true}, if relic has not been seen before */
+    public static boolean addDiscoveredRelic(RelicConfig relic) {
+        if (!compendiumData.relics.add(relic.prefabId))
+            return false;
+
+        markDirty();
+        return true;
+    }
+
+    public static void addKilledMob(String mobModelId) {
+        if (!ServerMobRegistry.isExistingMobModel(mobModelId)) {
+            MiACompat.LOGGER.warn("Tried to add unregistered mob model '{}' to compendium", mobModelId);
+            return;
+        }
+
+        compendiumData.mobs.merge(mobModelId, 1, Integer::sum);
+        markDirty();
+    }
+
+    public static void markDirty() {
+        dirty = true;
+        saveDelayTicks = SAVE_DATA_DELAY_TICKS;
+    }
+
+    public static void loadFromFile() { compendiumData.loadFromFile(); }
+
+    public static void saveIfDirty() {
+        if (!dirty) return;
+
+        compendiumData.saveToFile();
+        dirty = false;
     }
 
     public static class CompendiumData extends PersistentGsonData<CompendiumData> {
@@ -82,6 +120,10 @@ public class CompendiumTracker {
         @Override
         protected void applyData(CompendiumData data) {
             relics.addAll(data.relics);
+
+            data.mobs.forEach((mob, count) ->
+                mobs.merge(mob, count, Math::max)
+            );
         }
 
         @Override
