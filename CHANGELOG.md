@@ -1,10 +1,3 @@
-- Set config screen keybind to `G`
-- Added mob kill tracking to compendium
-  - *No mob compendium yet, coming later*
-- Relic compendium improvements
-  - Added checkmark for discovered relics
-  - Brightened border for discovered relics
-- Improve cooldown overlay stability
-- Improve bonfire tracking
-  - *Saved bonfire will be reset and needs to be relinked again*
-- Fixed cooldowns being registered repeatedly whenever resources were reloaded
+- Added praying skeleton kill tracking to compendium
+  - Praying skeleton kills are only tracked when killed with a melee weapon or bare hands
+- Fixed ghost seek head slot overlay rendering as a purple *(missing)* texture
