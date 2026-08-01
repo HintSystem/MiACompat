@@ -68,11 +68,14 @@ public class MiACompat implements ClientModInitializer {
 
     public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(MOD_ID, path); }
 
+    public static Identifier idMiA(String path) { return Identifier.fromNamespaceAndPath(getMiANamespace(), path); }
+
+    public static String getMiANamespace() { return "mineinabyss"; }
+
     public static Style getIconStyle() {
         return Style.EMPTY.withColor(CommonColors.WHITE).withFont(new FontDescription.Resource(id("icons")));
     }
 
-    public static String getMiANamespace() { return "mineinabyss"; }
 
     public static boolean isMiAServer() {
         ServerData serverInfo = Minecraft.getInstance().getCurrentServer();

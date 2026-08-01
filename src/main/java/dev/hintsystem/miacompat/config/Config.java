@@ -61,6 +61,8 @@ public class Config extends PersistentData {
         Color.decode("#17D8C5")
     );
 
+    public boolean fixGhostSeekCameraOverlay = true;
+
     @Override
     public String getDataTitle() { return "MiACompat settings"; }
 

@@ -302,6 +302,16 @@ public class ConfigScreen {
 
             .group(breadcrumbColorsGroup.build())
 
+            .group(OptionGroup.createBuilder()
+                .name(Component.literal("Fixes"))
+
+                .option(Option.<Boolean>createBuilder()
+                    .name(Component.literal("Fix Ghost Seek Head Slot Overlay"))
+                    .binding(Config.DEFAULTS.fixGhostSeekCameraOverlay, () -> config.fixGhostSeekCameraOverlay, val -> config.fixGhostSeekCameraOverlay = val)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+
+                .build())
 
             .build();
 
