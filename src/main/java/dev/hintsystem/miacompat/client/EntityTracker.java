@@ -12,6 +12,7 @@ import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -19,16 +20,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.jetbrains.annotations.Nullable;
 
 public class EntityTracker {
     public static final int SCAN_ENTITIES_TICKS = 15;
-    public static final int MAX_REMOVAL_TICKS = 40;
 
     private static final Map<UUID, ScannedEntity> scannedEntities = new HashMap<>();
 
@@ -40,15 +37,44 @@ public class EntityTracker {
         ProfilerFiller profiler = Profiler.get();
         profiler.push("scanAddedEntities");
 
-        ticksScanned = (ticksScanned + 1) % SCAN_ENTITIES_TICKS;
-        if (ticksScanned == 0)
+        if (ticksScanned++ >= SCAN_ENTITIES_TICKS) {
+            ticksScanned = 0;
             scanAddedEntities(client.level);
+        }
 
         profiler.popPush("updateScannedEntities");
 
         updateScannedEntities(client.level, client.player);
 
         profiler.pop();
+    }
+
+    public static void onEntityAttacked(Player player, Level level, Entity entity) {
+        if (!(entity instanceof Interaction interaction)) return;
+
+        List<Entity> entitiesNear = level.getEntities(player,
+            interaction.getBoundingBox().inflate(1.5));
+
+        Set<UUID> visited = new HashSet<>();
+        for (Entity near : entitiesNear) {
+            if (!(near instanceof Display.ItemDisplay itemDisplay)) continue;
+
+            AttackedEntity attackedEntity = AttackedEntity.fromItemDisplay(itemDisplay);
+            if (attackedEntity == null) continue;
+
+            if (!visited.add(attackedEntity.uuid)) continue;
+
+            // Prioritize attacked entities
+            scannedEntities.compute(attackedEntity.uuid, (k, v) -> {
+                if (!(v instanceof AttackedEntity existing)) {
+                    attackedEntity.onAttacked();
+                    return attackedEntity;
+                }
+
+                existing.onAttacked();
+                return v;
+            });
+        }
     }
 
     public static void scanAddedEntities(ClientLevel level) {
@@ -63,49 +89,92 @@ public class EntityTracker {
     }
 
     private static void updateScannedEntities(ClientLevel level, LocalPlayer player) {
-        Iterator<ScannedEntity> it = scannedEntities.values().iterator();
+        scannedEntities.values()
+            .removeIf(scannedEntity -> scannedEntity.tickRemoval(level, player));
+    }
 
-        while (it.hasNext()) {
-            ScannedEntity scannedEntity = it.next();
+    private static final class PrayingSkeleton extends AttackedEntity {
+        public PrayingSkeleton(Entity entity, Identifier mobPartModelId) {
+            super(entity, mobPartModelId, "praying_skeleton");
+            this.removalAfterAttackTicks = 20;
+        }
 
-            if (scannedEntity.updateEntity(level))
-                continue;
+        @Override
+        public void onAttacked() {
+            super.onAttacked();
 
-            if (scannedEntity.tickRemoval() && scannedEntity.isOccluded(level, player)) {
-                it.remove();
-                continue;
+            if (!MiACompat.config.clearBreadcrumbsOnFind) return;
+            MiACompat.ghostSeekTracker.clearMeasurements();
+        }
+
+        @Override
+        protected void onKilled(Player player) {
+            CompendiumTracker.addKilledPrayingSkeleton();
+
+            MiACompat.LOGGER.info("Killed praying skeleton from {} blocks away ({})",
+                Math.round(distanceTo(player)), mobPartModelId);
+        }
+    }
+
+    public static class AttackedEntity extends ScannedEntity {
+        protected int removalAfterAttackTicks = 80;
+
+        public AttackedEntity(Entity entity, Identifier mobPartModelId, String mobName) {
+            super(entity, mobPartModelId, mobName);
+        }
+
+        @Override
+        public boolean tickRemoval(Level level, Player player) {
+            if (ticksRemoved++ >= removalAfterAttackTicks) return true;
+
+            if (!updateEntity(level) && !isOccluded(level, player)) {
+                onKilled(player);
+                return true;
             }
 
-            if (scannedEntity.getTicksRemoved() > MAX_REMOVAL_TICKS) {
-                it.remove();
+            return false;
+        }
 
-                CompendiumTracker.addKilledMob(scannedEntity.mobModelId);
+        public void onAttacked() {
+            this.ticksRemoved = 0;
+        }
 
-                MiACompat.LOGGER.info("Killed mob '{}' from {} blocks away ({})",
-                    scannedEntity.mobModelId, Math.round(scannedEntity.distanceTo(player)),
-                    scannedEntity.mobPartModelId);
-            }
+        @Nullable
+        public static AttackedEntity fromItemDisplay(Display.ItemDisplay itemDisplay) {
+            Entity vehicle = itemDisplay.getVehicle();
+            if (vehicle == null) return null;
+
+            Identifier itemModel = itemDisplay.getItemStack().get(DataComponents.ITEM_MODEL);
+            if (itemModel == null) return null;
+
+            if (ServerMobRegistry.isPrayingSkeletonModel(itemModel))
+                return new PrayingSkeleton(vehicle, itemModel);
+
+            return null;
         }
     }
 
     public static class ScannedEntity {
         public static final int MODEL_VIEW_DISTANCE = 48;
         public static final int ENTITY_VIEW_DISTANCE_SQR = (MODEL_VIEW_DISTANCE-1) * (MODEL_VIEW_DISTANCE-1);
+        public static final int ENTITY_VERT_VIEW_DISTANCE = 30;
+
+        public static final int MAX_REMOVAL_TICKS = 40;
 
         public final UUID uuid;
-        private final Identifier mobPartModelId;
-        private final String mobModelId;
+        protected final Identifier mobPartModelId;
+        protected final String mobName;
 
-        private int ticksRemoved = 0;
-        private Vec3 lastPosition;
+        protected int ticksRemoved = 0;
+        protected Vec3 lastPosition;
 
         public ScannedEntity(
             Entity entity,
-            Identifier mobPartModelId, String mobModelId
+            Identifier mobPartModelId, String mobName
         ) {
             this.uuid = entity.getUUID();
             this.mobPartModelId = mobPartModelId;
-            this.mobModelId = mobModelId;
+            this.mobName = mobName;
 
             updateEntity(entity.level());
         }
@@ -117,6 +186,9 @@ public class EntityTracker {
         public double distanceTo(Entity entity) { return this.lastPosition.distanceTo(entity.position()); }
 
         public boolean isOccluded(Level level, Player player) {
+            if (Math.abs(this.lastPosition.y - player.position().y) >= ENTITY_VERT_VIEW_DISTANCE)
+                return true;
+
             if (player.distanceToSqr(this.lastPosition) >= ENTITY_VIEW_DISTANCE_SQR)
                 return true;
 
@@ -130,19 +202,43 @@ public class EntityTracker {
             return result.getType() != HitResult.Type.MISS;
         }
 
-        /** @return {@code false}, if entity no longer exists */
+        /** @return {@code true}, if entity still exists */
         public boolean updateEntity(Level level) {
             Entity entity = level.getEntity(uuid);
             if (entity == null) return false;
 
             this.lastPosition = entity.position();
-            this.ticksRemoved = 0;
             return true;
         }
 
-        /** @return {@code true}, if entity is removed for first tick */
-        public boolean tickRemoval() {
-            return this.ticksRemoved++ == 0;
+        /** @return {@code true}, if entity should be removed this tick */
+        public boolean tickRemoval(Level level, Player player) {
+            // entity still exists
+            if (updateEntity(level)) {
+                this.ticksRemoved = 0;
+                return false;
+            }
+
+            boolean instantRemoval = (this.ticksRemoved++ == 0)
+                && isOccluded(level, player);
+
+            // entity disappeared while it was blocked from view, remove it
+            if (instantRemoval) return true;
+
+            // entity was removed while in view and didn't return, consider killed
+            if (ticksRemoved > MAX_REMOVAL_TICKS) {
+                onKilled(player);
+                return true;
+            }
+
+            return false;
+        }
+
+        protected void onKilled(Player player) {
+            CompendiumTracker.addKilledMob(mobName);
+
+            MiACompat.LOGGER.info("Killed mob '{}' from {}({}) blocks away ({})",
+                mobName, Math.round(distanceTo(player)), lastPosition.y - player.position().y, mobPartModelId);
         }
 
         @Nullable

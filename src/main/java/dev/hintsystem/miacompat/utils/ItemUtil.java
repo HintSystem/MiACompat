@@ -1,6 +1,5 @@
 package dev.hintsystem.miacompat.utils;
 
-import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 
 import net.minecraft.core.component.DataComponents;
@@ -9,30 +8,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemUtil {
-    public static Identifier getMiAModelId(ItemStack itemStack) {
-        Identifier modelId = itemStack.get(DataComponents.ITEM_MODEL);
-        if (modelId == null || !Objects.equals(modelId.getNamespace(), MiACompat.getMiANamespace())) return null;
-
-        return modelId;
-    }
-
-    @Nullable
-    public static String getMiAModelName(ItemStack itemStack) {
-        Identifier modelId = getMiAModelId(itemStack);
-        return modelId != null ? getModelName(modelId) : null;
-    }
-
-    public static String getModelName(@NotNull Identifier modelId) {
+    public static String getMobNameFromModel(@NotNull Identifier modelId) {
         String path = modelId.getPath();
 
         int lastSlash = path.lastIndexOf('/');
-        return (lastSlash >= 0) ? path.substring(lastSlash + 1) : path;
+        return lastSlash != -1
+            ? path.substring(0, lastSlash) : path;
     }
 
     /** Describes an item without relying on its type, so custom items can be differentiated */

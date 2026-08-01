@@ -3,7 +3,9 @@ package dev.hintsystem.miacompat.client;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.config.PersistentGsonData;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.ServerLayerRegistry;
 import dev.hintsystem.miacompat.server.ServerMobRegistry;
+import dev.hintsystem.miacompat.server.config.SectionYamlSchema;
 import dev.hintsystem.miacompat.server.config.geary.item.ItemConfig;
 import dev.hintsystem.miacompat.server.config.geary.item.RelicConfig;
 import dev.hintsystem.miacompat.utils.ItemUtil;
@@ -83,6 +85,20 @@ public class CompendiumTracker {
         markDirty();
     }
 
+    public static void addKilledPrayingSkeleton() {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return;
+
+        SectionYamlSchema.Section section = ServerLayerRegistry.getSectionForPosition(player.blockPosition());
+        if (section == null) {
+            MiACompat.LOGGER.warn("Could not add praying skeleton to compendium, because player is not in a valid section");
+            return;
+        }
+
+        compendiumData.prayingSkeletons.merge(section.name, 1, Integer::sum);
+        markDirty();
+    }
+
     public static void markDirty() {
         dirty = true;
         saveDelayTicks = SAVE_DATA_DELAY_TICKS;
@@ -100,6 +116,7 @@ public class CompendiumTracker {
     public static class CompendiumData extends PersistentGsonData<CompendiumData> {
         public Set<Identifier> relics = new HashSet<>();
         public Map<String, Integer> mobs = new HashMap<>();
+        public Map<String, Integer> prayingSkeletons = new HashMap<>();
 
         @Override
         protected Gson getGson() {
@@ -123,6 +140,10 @@ public class CompendiumTracker {
 
             data.mobs.forEach((mob, count) ->
                 mobs.merge(mob, count, Math::max)
+            );
+
+            data.prayingSkeletons.forEach((skeleton, count) ->
+                prayingSkeletons.merge(skeleton, count, Math::max)
             );
         }
 

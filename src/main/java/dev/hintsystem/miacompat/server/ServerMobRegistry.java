@@ -9,6 +9,7 @@ import dev.hintsystem.miacompat.server.config.mythic.MobYamlSchema;
 import dev.hintsystem.miacompat.server.config.mythic.SkillEntry;
 import dev.hintsystem.miacompat.server.config.mythic.drop.*;
 import dev.hintsystem.miacompat.server.config.mythic.mob.MobConfig;
+import dev.hintsystem.miacompat.utils.ItemUtil;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -33,6 +34,10 @@ public class ServerMobRegistry {
         );
     }
 
+    public static boolean isPrayingSkeletonModel(Identifier modelId) {
+        return modelId.getPath().startsWith("praying_skeleton");
+    }
+
     public static Map<String, MobConfig> getAllMobs() {
         return Collections.unmodifiableMap(mobConfigById);
     }
@@ -47,17 +52,13 @@ public class ServerMobRegistry {
         if (!mobPartModelId.getNamespace().equals("modelengine"))
             return null;
 
-        String path = mobPartModelId.getPath();
+        String mobId = ItemUtil.getMobNameFromModel(mobPartModelId)
+            .toLowerCase(Locale.ROOT);
 
-        int lastSlash = path.lastIndexOf('/');
-        if (lastSlash != -1)
-            path = path.substring(0, lastSlash);
-
-        path = path.toLowerCase(Locale.ROOT);
-        if (!isExistingMobModel(path))
+        if (!isExistingMobModel(mobId))
             return null;
 
-        return path;
+        return mobId;
     }
 
     public static List<MobConfig> getMobsWithTemplate(String template) {

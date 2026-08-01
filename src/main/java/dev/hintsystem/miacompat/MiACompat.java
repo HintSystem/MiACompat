@@ -39,8 +39,6 @@ import net.minecraft.util.CommonColors;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Interaction;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 
@@ -155,16 +153,9 @@ public class MiACompat implements ClientModInitializer {
         });
 
         AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
-            if (!level.isClientSide() || !(entity instanceof Interaction interaction)) return InteractionResult.PASS;
-            if (!config.clearBreadcrumbsOnFind) return InteractionResult.PASS;
+            if (!level.isClientSide()) return InteractionResult.PASS;
 
-            for (Entity entityNear : level.getEntities(player, interaction.getBoundingBox().inflate(1.5))) {
-                if (entityNear instanceof Display.ItemDisplay itemDisplay && GhostSeekTracker.isPrayingSkeleton(itemDisplay)) {
-                    ghostSeekTracker.clearMeasurements();
-                    break;
-                }
-            }
-
+            EntityTracker.onEntityAttacked(player, level, entity);
             return InteractionResult.PASS;
         });
 
