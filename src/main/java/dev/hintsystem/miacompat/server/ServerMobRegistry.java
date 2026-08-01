@@ -230,7 +230,7 @@ public class ServerMobRegistry {
                     try (InputStream is = resource.open()) {
                         DropTableYamlSchema dropTableConfig = dropTableYaml.load(is);
 
-                        for (Map.Entry<String, DropTableYamlSchema.DropTableDefinition> entry : dropTableConfig.entrySet()) {
+                        for (Map.Entry<String, DropTableYamlSchema.DropTable> entry : dropTableConfig.entrySet()) {
                             DropTableConfig dropTable = DropTableConfig.parse(entry.getKey(), entry.getValue());
                             registerDropTable(dropTable);
                         }
@@ -250,7 +250,7 @@ public class ServerMobRegistry {
                     try (InputStream is = resource.open()) {
                         MobYamlSchema mobConfig = mobYaml.load(is);
 
-                        for (Map.Entry<String, MobYamlSchema.MobDefinition> entry : mobConfig.entrySet()) {
+                        for (Map.Entry<String, MobYamlSchema.Mob> entry : mobConfig.entrySet()) {
                             MobConfig mob = MobConfig.parse(entry.getKey(), entry.getValue());
                             registerMob(mob);
                         }

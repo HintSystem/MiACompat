@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.server.config.mythic;
 
-import dev.hintsystem.miacompat.server.config.RootMapYamlConstructor;
+import dev.hintsystem.miacompat.server.config.yaml.RootMapConstructor;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,8 +9,8 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
 
-public class MobYamlSchema extends LinkedHashMap<String, MobYamlSchema.MobDefinition> {
-    public static class MobDefinition {
+public class MobYamlSchema extends LinkedHashMap<String, MobYamlSchema.Mob> {
+    public static class Mob {
         public String Template;
         public String Type;
         public String SpawnCategory;
@@ -65,10 +65,9 @@ public class MobYamlSchema extends LinkedHashMap<String, MobYamlSchema.MobDefini
         PropertyUtils propertyUtils = new PropertyUtils();
         propertyUtils.setSkipMissingProperties(true);
 
-        Constructor constructor = new RootMapYamlConstructor<>(
-            MobYamlSchema::new,
-            MobYamlSchema.class,
-            MobDefinition.class,
+        Constructor constructor = new RootMapConstructor<>(
+            MobYamlSchema::new, MobYamlSchema.class,
+            Mob.class,
             loaderOptions
         );
         constructor.setPropertyUtils(propertyUtils);

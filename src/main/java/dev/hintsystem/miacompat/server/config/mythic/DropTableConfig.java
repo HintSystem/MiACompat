@@ -14,7 +14,7 @@ public class DropTableConfig {
         this.drops = drops;
     }
 
-    public static DropTableConfig parse(String dropTableId, DropTableYamlSchema.DropTableDefinition dropTableConfig) {
+    public static DropTableConfig parse(String dropTableId, DropTableYamlSchema.DropTable dropTableConfig) {
         return new DropTableConfig(
             dropTableId.toLowerCase(Locale.ROOT),
             DropEntry.parseList(dropTableConfig.Drops)

@@ -42,7 +42,7 @@ public class MobConfig {
         this.skills = skills;
     }
 
-    public static MobConfig parse(String mobId, MobYamlSchema.MobDefinition mobConfig) throws Exception {
+    public static MobConfig parse(String mobId, MobYamlSchema.Mob mobConfig) throws Exception {
         String template = mobConfig.Template != null && !mobConfig.Template.isBlank()
             ? mobConfig.Template.toLowerCase(Locale.ROOT) : null;
 

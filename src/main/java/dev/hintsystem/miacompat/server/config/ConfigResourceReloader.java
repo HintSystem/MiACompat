@@ -3,6 +3,7 @@ package dev.hintsystem.miacompat.server.config;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.client.InventoryTracker;
 import dev.hintsystem.miacompat.server.ServerItemRegistry;
+import dev.hintsystem.miacompat.server.ServerLayerRegistry;
 import dev.hintsystem.miacompat.server.ServerMobRegistry;
 
 import net.minecraft.resources.Identifier;
@@ -12,6 +13,22 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.slf4j.helpers.MessageFormatter;
 
 public class ConfigResourceReloader implements ResourceManagerReloadListener {
+
+    @Override
+    public void onResourceManagerReload(ResourceManager resourceManager) {
+        MiACompat.LOGGER.info("Loading Mine in Abyss config resources...");
+
+        try (Stopwatch ignore = Stopwatch
+            .start("Mine in Abyss configs loaded")
+            .timeFormat("in %.2f ms")
+        ) {
+            ServerLayerRegistry.loadFromResources(resourceManager);
+            ServerItemRegistry.loadFromResources(resourceManager);
+            ServerMobRegistry.loadFromResources(resourceManager);
+            InventoryTracker.loadFromResources(resourceManager);
+        }
+    }
+
     public static boolean isYamlResource(Identifier resourceId) {
         return resourceId.getNamespace().equals(MiACompat.MOD_ID)
             && resourceId.getPath().endsWith(".yml");
@@ -33,14 +50,13 @@ public class ConfigResourceReloader implements ResourceManagerReloadListener {
             return new Stopwatch(message);
         }
 
-        public Stopwatch args(Object ...args) {
-            this.args = args;
-            return this;
-        }
-
         public Stopwatch timeFormat(String format) {
             this.timeFormat = format;
             return this;
+        }
+
+        public void args(Object ...args) {
+            this.args = args;
         }
 
         public long elapsedNanos() { return System.nanoTime() - start; }
@@ -53,20 +69,6 @@ public class ConfigResourceReloader implements ResourceManagerReloadListener {
                 ? MessageFormatter.arrayFormat(message, args).getMessage() : message;
 
             MiACompat.LOGGER.info("{} {}", formattedMessage, String.format(timeFormat, elapsedMillis()));
-        }
-    }
-
-    @Override
-    public void onResourceManagerReload(ResourceManager resourceManager) {
-        MiACompat.LOGGER.info("Loading Mine in Abyss config resources...");
-
-        try (Stopwatch ignore = Stopwatch
-            .start("Mine in Abyss configs loaded")
-            .timeFormat("in %.2f ms")
-        ) {
-            ServerItemRegistry.loadFromResources(resourceManager);
-            ServerMobRegistry.loadFromResources(resourceManager);
-            InventoryTracker.loadFromResources(resourceManager);
         }
     }
 }

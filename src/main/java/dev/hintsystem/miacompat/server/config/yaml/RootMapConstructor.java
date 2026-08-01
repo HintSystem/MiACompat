@@ -1,17 +1,16 @@
-package dev.hintsystem.miacompat.server.config;
+package dev.hintsystem.miacompat.server.config.yaml;
 
 import java.util.Map;
 import java.util.function.Supplier;
 
 import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 
-public class RootMapYamlConstructor<R extends Map<String, V>, V> extends Constructor {
-    public RootMapYamlConstructor(
+public class RootMapConstructor<R extends Map<String, V>, V> extends ScalarConstructor {
+    public RootMapConstructor(
         Supplier<R> rootFactory,
         Class<R> rootType,
         Class<V> valueType,

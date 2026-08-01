@@ -97,8 +97,14 @@ tasks.register("updateServerConfigs", Copy) {
 
     into(output)
 
+    // Layer info
+    from("${repo}/servers_shared/common/plugins") {
+        include "MineInAbyss/layers.yml"
+        include "DeeperWorld/config.yml"
+    }
+
     // Include gear with ability cooldowns and potential relics
-    from("${repo}/servers_shared/survwild/plugins/Geary/prefabs/mineinabyss/") {
+    from("${repo}/servers_shared/survwild/plugins/Geary/prefabs/mineinabyss") {
         include "items/materials/black_flask.yml"
 
         include "items/gear/*.yml"

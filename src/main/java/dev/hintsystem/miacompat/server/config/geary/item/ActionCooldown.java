@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.server.config.geary.item;
 
 import dev.hintsystem.miacompat.server.MiniMessageParser;
+import dev.hintsystem.miacompat.server.config.StringParsers;
 import dev.hintsystem.miacompat.server.config.geary.ItemYamlSchema;
 
 import java.util.ArrayList;
@@ -173,43 +174,11 @@ public class ActionCooldown {
             }
         }
 
-        return length != null ? new ActionCooldown(parseLength(length), cooldownDisplay, failMessage) : null;
-    }
+        if (length == null) return null;
 
-    /**
-     * @return Length in milliseconds
-     */
-    public static long parseLength(String length) {
-        int splitAt = 0;
-        while (splitAt < length.length() && !Character.isLetter(length.charAt(splitAt))) {
-            splitAt++;
-        }
-
-        if (splitAt == 0 || splitAt == length.length()) {
-            throw new IllegalArgumentException("Not a valid duration: " + length);
-        }
-
-        double value = Double.parseDouble(length.substring(0, splitAt));
-        String unit = length.substring(splitAt);
-
-        final double TICK = 50;
-        final double SECOND = 1_000;
-        final double MINUTE = SECOND * 60;
-        final double HOUR = MINUTE * 60;
-        final double DAY = HOUR * 24;
-        final double WEEK = DAY * 7;
-        final double MONTH = DAY * 31;
-
-        return (long) switch (unit) {
-            case "ms" -> value;
-            case "t" -> value * TICK;
-            case "s" -> value * SECOND;
-            case "m" -> value * MINUTE;
-            case "h" -> value * HOUR;
-            case "d" -> value * DAY;
-            case "w" -> value * WEEK;
-            case "mo" -> value * MONTH;
-            default -> throw new IllegalArgumentException("Unknown duration unit '" + unit + "' in: " + length);
-        };
+        return new ActionCooldown(
+            StringParsers.parseDuration(length).toMillis(),
+            cooldownDisplay, failMessage
+        );
     }
 }
