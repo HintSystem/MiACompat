@@ -168,7 +168,7 @@ tasks.register("updateServerTextures", Copy) {
     description = "Copies Mine in Abyss server textures into mod resources"
 
     def repo = project.server_config_repo
-    def output = file("src/main/resources/assets/miacompat/textures/gui/sprites/mia_icons")
+    def output = file("src/main/resources/assets/miacompat/textures/gui/sprites/mineinabyss/icons")
 
     doFirst {
         delete(output)
@@ -178,10 +178,8 @@ tasks.register("updateServerTextures", Copy) {
 
     def emotes = "${repo}/servers_shared/survwild/plugins/Emojy/emotes"
 
-    // orthcoin and mittytoken
     from(emotes) {
-        include "*"
-        into ""
+        include "orthcoin.png"
     }
 
     from("${emotes}/ui") {

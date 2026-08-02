@@ -10,7 +10,7 @@ import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.resources.Identifier;
 
 public class MiaIcons {
-    public static final String SPRITE_PATH = "mia_icons/";
+    public static final String SPRITE_PATH = "mineinabyss/icons";
     public static final Identifier ATLAS_ID = AtlasIds.GUI;
 
     public static final Identifier ORTH_COIN_SPRITE = MiACompat.id(SPRITE_PATH + "orthcoin");
