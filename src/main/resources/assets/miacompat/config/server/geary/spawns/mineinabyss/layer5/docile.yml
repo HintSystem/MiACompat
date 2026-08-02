@@ -1,0 +1,30 @@
+# Spawn conditions
+
+l5_docile:
+  position: GROUND
+  regions: [ layerfive ]
+  spread: 5
+  conditions:
+    - blockBelow:
+        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite", "obsidian", "coal_block", "black_concrete", "deepslate", "cobbled_deepslate"]
+    - maxNearby:
+        amount: 5
+
+# Mob spawns
+
+# stinger,mantoyer
+l5_stinger:
+  inherit: l5_docile
+  type: mm:stinger
+  conditions:
+    - $inherit
+    - blockBelow:
+        deny: ["diorite"]
+l5_titanjaw:
+  inherit: l5_docile
+  type: mm:titanjaw
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 3

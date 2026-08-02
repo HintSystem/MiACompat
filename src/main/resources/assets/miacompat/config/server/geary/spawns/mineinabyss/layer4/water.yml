@@ -1,0 +1,52 @@
+# Spawn conditions
+
+l4_water:
+  position: WATER
+  regions: [ layerfour ]
+  amount: 1-3
+  spread: 5
+  conditions:
+    - maxNearby:
+        amount: 5
+    - isSourceLiquid: { }
+    - waterDepth: 2..600
+
+# Mob spawns
+
+# Common
+l4_kazura: { inherit: l4_water, type: mm:kazura }
+l4_rohana: { inherit: l4_water, type: mm:rohana }
+l4_spiralsquid: { inherit: l4_water, type: mm:spiralsquid }
+l4_ikenosuke: { inherit: l4_water, type: mm:ikenosuke }
+l4_hagamizukin:
+  inherit: l4_water
+  priority: 0.5
+  type: mm:hagamizukin
+  conditions:
+    - maxNearby:
+        amount: 3
+
+# Uncommon
+l4_uibuta:
+  inherit: l4_water
+  type: mm:uibuta
+  priority: 0.5
+  amount: 1
+  conditions: # Ensure we're at water surface
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 2
+   # - blockAbove:
+  #      allow: [ AIR ]
+l4_makihige:
+  inherit: l4_water
+  type: mm:makihige
+  priority: 0.5
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 3
+   # - blockAbove:
+    #    allow: [ AIR ]

@@ -1,0 +1,17 @@
+# Spawn conditions
+
+l3_water:
+  position: WATER
+  regions: [ layerthree ]
+  amount: 1-2
+  spread: 5
+  conditions:
+    - maxNearby:
+        amount: 7
+    - isSourceLiquid: { }
+    - waterDepth: 2..600
+
+# Mob spawns
+
+l3_ikenosuke: { inherit: l3_water, type: mm:ikenosuke }
+

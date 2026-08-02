@@ -1,0 +1,24 @@
+# Spawn conditions
+
+l2_flying:
+  position: AIR
+  regions: [ layertwo ]
+  conditions:
+    - gap: 15..600
+    - maxNearby:
+        amount: 2
+    - gapBelow: 16..600
+
+# Mob spawns
+
+# Common
+l2_hammerbeak: { inherit: l2_flying, type: mm:hammerbeak, priority: 0.5 }
+l2_cyatoria: { inherit: l2_flying, type: mm:cyatoria, priority: 0.5 }
+l2_dosetori: { inherit: l2_flying, type: mm:dosetori, priority: 0.1 }
+
+# Uncommon
+l2_corpse_weeper: { inherit: l2_flying, type: mm:corpse_weeper, priority: 0.3, chance: 0.5 }
+
+
+# Rare
+l2_splitjaw: { inherit: l2_flying, type: mm:splitjaw, priority: 0.01, chance: 0.05}

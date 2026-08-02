@@ -1,0 +1,20 @@
+# Spawn conditions
+
+l2_vineflowers:
+  position: GROUND
+  regions: [ layertwo ]
+  chance: 0.7
+  conditions:
+    - blockBelow:
+        allow: [ "#dirt", "moss_carpet", "#leaves" ]
+    - maxNearby:
+        amount: 4
+
+# Mob spawns
+
+#TODO re-enable when animation gets reworked
+l2_vinebinder: { inherit: l2_vineflowers, type: mm:vinebinder }
+l2_vinepoofer: { inherit: l2_vineflowers, type: mm:vinepoofer }
+l2_vineblaster: { inherit: l2_vineflowers, type: mm:vineblaster, priority: 0.7 }
+l2_spittleshrub: { inherit: l2_vineflowers, type: mm:spittleshrub, priority: 0.3, chance: 0.5 }
+

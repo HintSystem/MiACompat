@@ -118,7 +118,7 @@ tasks.register("updateServerConfigs", Copy) {
 
         exclude "items/relics/active/arcstaff.yml"
 
-        into "geary/prefabs/mineinabyss/"
+        into "geary/prefabs/mineinabyss"
     }
 
     from("${repo}/servers_shared/survwild/plugins/MythicMobs/packs/survwild_prayingskels") {
@@ -133,6 +133,12 @@ tasks.register("updateServerConfigs", Copy) {
         include "mobs/**"
 
         into "mythicmobs"
+    }
+
+    from("${repo}/servers/survival/plugins/Geary/spawns/mineinabyss") {
+        include "**"
+
+        into "geary/spawns/mineinabyss"
     }
 
     // Minecraft resources have to be lowercase

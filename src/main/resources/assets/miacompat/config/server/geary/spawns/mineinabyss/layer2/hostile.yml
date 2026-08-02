@@ -1,0 +1,62 @@
+# Spawn conditions
+
+l2_hostile:
+  position: GROUND
+  regions: [ layertwo ]
+  spread: 15
+  conditions:
+    - blockBelow:
+        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite" ]
+
+# Mob spawns
+
+l2_ottobas:
+  inherit: l2_hostile
+  type: mm:ottobas
+  priority: 0.25
+  conditions:
+    - $inherit
+    - gap: 2..600
+    - maxNearby:
+        amount: 2
+
+l2_silkfang:
+  inherit: l2_hostile
+  type: mm:silkfang
+  priority: 0.8
+  chance: 0.7
+  conditions:
+    - $inherit
+    - gap: 4..600
+    - maxNearby:
+        amount: 2
+
+l2_woodcrier:
+  inherit: l2_hostile
+  type: mm:woodcrier
+  priority: 0.5
+  chance: 0.4
+  conditions:
+    - $inherit
+    - maxNearby:
+        amount: 5
+
+
+
+l2_hammerbeakLarge:
+  inherit: l2_hostile
+  type: mm:hammerbeakLarge
+  priority: 0.25
+  chance: 0.7
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 2
+
+#l2_spawnrandomamongus:
+#  inherit: l2_hostile
+#  type: mm:spawnrandomamongus
+#  chance: 0.7
+#  amount: 1
+

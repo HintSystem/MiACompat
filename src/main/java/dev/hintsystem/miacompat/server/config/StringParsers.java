@@ -4,10 +4,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 
 import java.time.Duration;
+import java.util.Locale;
 
 public class StringParsers {
     public static Identifier parseIdentifier(String value) {
-        Identifier id = Identifier.tryParse(value);
+        Identifier id = Identifier.tryParse(
+            value.toLowerCase(Locale.ROOT) // mm:hammerbeakLarge has a capital letter in it
+        );
+
         if (id == null)
             throw new IllegalArgumentException("Not a valid identifier: " + value);
 

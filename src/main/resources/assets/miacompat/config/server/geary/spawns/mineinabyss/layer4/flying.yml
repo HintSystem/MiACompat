@@ -1,0 +1,22 @@
+# Spawn conditions
+
+namespaces: [ geary ]
+l4_flying:
+  position: AIR
+  regions: [ layerfour ]
+  conditions:
+    - gap: 10..600
+    - maxNearby:
+        amount: 3
+    - gapBelow: 16..600
+
+# Mob spawns
+
+# Common
+l4_onitsuchi: { inherit: l4_flying, type: mm:onitsuchi }
+l4_hammerbeakLarge:
+  inherit: l4_flying
+  type: mm:hammerbeakLarge
+  priority: 0.5
+  chance: 0.45
+# Uncommon

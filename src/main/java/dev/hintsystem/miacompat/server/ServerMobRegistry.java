@@ -3,6 +3,8 @@ package dev.hintsystem.miacompat.server;
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader.Stopwatch;
+import dev.hintsystem.miacompat.server.config.geary.SpawnConfig;
+import dev.hintsystem.miacompat.server.config.geary.SpawnsYamlSchema;
 import dev.hintsystem.miacompat.server.config.mythic.DropTableConfig;
 import dev.hintsystem.miacompat.server.config.mythic.DropTableYamlSchema;
 import dev.hintsystem.miacompat.server.config.mythic.MobYamlSchema;
@@ -15,6 +17,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.*;
 
 import org.jetbrains.annotations.Nullable;
@@ -24,9 +27,14 @@ import org.yaml.snakeyaml.Yaml;
 public class ServerMobRegistry {
     private static final Map<String, DropTableConfig> dropTableConfigById = new HashMap<>();
     private static final Map<String, MobConfig> mobConfigById = new HashMap<>();
+    private static final List<SpawnConfig> spawnConfigs = new ArrayList<>();
 
     private static final Map<String, List<MobConfig>> mobConfigsByModelId = new HashMap<>();
     private static final Map<String, List<MobConfig>> mobConfigsByTemplate = new HashMap<>();
+
+    public static boolean isPrayingSkeletonModel(Identifier modelId) {
+        return modelId.getPath().startsWith("praying_skeleton");
+    }
 
     public static boolean isExistingMobModel(String mobModelId) {
         return mobConfigsByModelId.containsKey(
@@ -34,12 +42,12 @@ public class ServerMobRegistry {
         );
     }
 
-    public static boolean isPrayingSkeletonModel(Identifier modelId) {
-        return modelId.getPath().startsWith("praying_skeleton");
-    }
-
     public static Map<String, MobConfig> getAllMobs() {
         return Collections.unmodifiableMap(mobConfigById);
+    }
+
+    public static List<SpawnConfig> getAllSpawns() {
+        return Collections.unmodifiableList(spawnConfigs);
     }
 
     @Nullable
@@ -178,6 +186,45 @@ public class ServerMobRegistry {
         return resolved;
     }
 
+    private static Map<String, SpawnConfig> resolveSpawns(Map<String, SpawnConfig> spawnsById) {
+        Map<String, SpawnConfig> resolvedSpawns = new HashMap<>();
+        for (SpawnConfig spawn : spawnsById.values()) {
+            resolveSpawn(spawn, spawnsById, resolvedSpawns, new HashSet<>());
+        }
+
+        return resolvedSpawns;
+    }
+
+    private static SpawnConfig resolveSpawn(
+        SpawnConfig spawn,
+        Map<String, SpawnConfig> unresolvedSpawns, Map<String, SpawnConfig> cache, Set<String> visited
+    ) {
+        if (spawn.inherit == null)
+            return spawn;
+
+        SpawnConfig cached = cache.get(spawn.id);
+        if (cached != null)
+            return cached;
+
+        if (!visited.add(spawn.id)) {
+            MiACompat.LOGGER.warn("Circular spawn inheritance detected: {}", spawn.id);
+            return spawn;
+        }
+
+        SpawnConfig parent = unresolvedSpawns.get(spawn.inherit);
+        if (parent == null) {
+            MiACompat.LOGGER.warn("Unknown spawn id '{}'", spawn.inherit);
+            return spawn;
+        }
+
+        SpawnConfig resolved = spawn.inheritFrom(
+            resolveSpawn(parent, unresolvedSpawns, cache, visited)
+        );
+
+        cache.put(spawn.id, resolved);
+        return resolved;
+    }
+
     public static void buildIndexes() {
         mobConfigsByModelId.clear();
         mobConfigsByTemplate.clear();
@@ -195,21 +242,15 @@ public class ServerMobRegistry {
         }
     }
 
-    public static void resolveTemplatedMobs() {
-        Map<String, MobConfig> resolved = new HashMap<>();
+    public static void resolveInheritance() {
+        Map<String, MobConfig> resolvedMobs = new HashMap<>();
 
         for (MobConfig mob : mobConfigById.values()) {
             if (mob.template == null) continue;
-            resolveMob(mob, resolved);
+            resolveMob(mob, resolvedMobs);
         }
 
-        mobConfigById.putAll(resolved);
-    }
-
-    private static void registerMob(MobConfig mob) {
-        MobConfig prev = mobConfigById.putIfAbsent(mob.id, mob);
-        if (prev != null)
-            MiACompat.LOGGER.warn("Mob {} already registered", mob.id);
+        mobConfigById.putAll(resolvedMobs);
     }
 
     private static void registerDropTable(DropTableConfig dropTable) {
@@ -218,9 +259,20 @@ public class ServerMobRegistry {
             MiACompat.LOGGER.warn("Drop table {} already registered", dropTable.id);
     }
 
+    private static void registerMob(MobConfig mob) {
+        MobConfig prev = mobConfigById.putIfAbsent(mob.id, mob);
+        if (prev != null)
+            MiACompat.LOGGER.warn("Mob {} already registered", mob.id);
+    }
+
+    private static void registerSpawn(SpawnConfig spawn) {
+        spawnConfigs.add(spawn);
+    }
+
     public static void loadFromResources(ResourceManager resourceManager) {
         dropTableConfigById.clear();
         mobConfigById.clear();
+        spawnConfigs.clear();
 
         LoaderOptions options = new LoaderOptions();
         Yaml dropTableYaml = new Yaml(DropTableYamlSchema.constructor(options));
@@ -263,8 +315,43 @@ public class ServerMobRegistry {
             sw.args(mobConfigById.size());
         }
 
+        Yaml spawnYaml = new Yaml(SpawnsYamlSchema.constructor(options));
+
+        try (Stopwatch sw = Stopwatch.start("Loaded {} mob spawns")) {
+            String spawnConfigPath = "config/server/geary/spawns";
+            Map<Path, Map<String, SpawnConfig>> spawnsByFilePath = new HashMap<>();
+
+            resourceManager.listResources(spawnConfigPath, ConfigResourceReloader::isYamlResource)
+                .forEach((id, resource) -> {
+                    try (InputStream is = resource.open()) {
+                        SpawnsYamlSchema spawnsConfig = spawnYaml.load(is);
+
+                        Path relativeFolder = Path.of(spawnConfigPath).relativize(
+                            Path.of(id.getPath()).getParent()
+                        );
+
+                        for (Map.Entry<String, SpawnsYamlSchema.Spawn> entry : spawnsConfig.entrySet()) {
+                            SpawnConfig spawn = SpawnConfig.parse(entry.getKey(), entry.getValue());
+
+                            spawnsByFilePath.computeIfAbsent(relativeFolder, k -> new HashMap<>())
+                                .put(spawn.id, spawn);
+                        }
+                    } catch (Exception e) {
+                        MiACompat.LOGGER.error("Failed to load mob spawn config '{}'", id, e);
+                    }
+                });
+
+            for (Map<String, SpawnConfig> spawnsById : spawnsByFilePath.values()) {
+                for (SpawnConfig spawn : resolveSpawns(spawnsById).values()) {
+                    registerSpawn(spawn);
+                }
+            }
+
+            sw.args(spawnConfigs.size());
+        }
+
         try (Stopwatch ignore = Stopwatch.start("Mobs resolved and indexed")) {
-            resolveTemplatedMobs();
+            resolveInheritance();
             buildIndexes();
         }
     }

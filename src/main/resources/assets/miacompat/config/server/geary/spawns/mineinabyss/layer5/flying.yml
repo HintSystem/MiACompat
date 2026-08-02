@@ -1,0 +1,14 @@
+# Spawn conditions
+
+l5_flying:
+  position: AIR
+  regions: [ layerfive ]
+  conditions:
+    - gap: 8..600
+    - gapBelow: 12..600
+
+# Mob spawns
+
+# Common
+# onitsuchi,chikyuoebi,uibuta,swarmhoarder
+l5_onitsuchi: { inherit: l5_flying, type: mm:onitsuchi, priority: 0.5 }

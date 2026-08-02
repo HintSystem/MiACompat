@@ -1,0 +1,54 @@
+# Spawn conditions
+
+l1_hostile:
+  position: GROUND
+  regions: [ layerone ]
+  spread: 5
+  conditions:
+    - blockBelow:
+        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite" ]
+    - maxNearby:
+        amount: 3
+
+# Mob spawns
+
+l1_silkfang:
+  inherit: l1_hostile
+  type: mm:silkfang
+  chance: 0.4
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 4
+
+l1_mantoyer:
+  inherit: l1_hostile
+  type: mm:mantoyer
+  chance: 0.7
+  amount: 1-2
+
+#l1_spawnrandomamongus:
+#  inherit: l1_hostile
+#  type: mm:spawnrandomamongus
+#  chance: 0.7
+#  amount: 1
+
+l1_woodcrier: # uncommon spawn
+  inherit: l1_hostile
+  type: mm:woodcrier
+  priority: 0.3
+  chance: 0.2
+  conditions:
+    - $inherit
+
+l1_hammerbeakLarge:
+  inherit: l1_flying
+  type: mm:hammerbeakLarge
+  priority: 0.05
+  chance: 0.05
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 1

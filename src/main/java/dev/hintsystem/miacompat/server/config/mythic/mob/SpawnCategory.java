@@ -6,8 +6,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.Nullable;
+
 public enum SpawnCategory {
-    NONE(null),
     PASSIVE("passive"),
     HOSTILE("hostile"),
     FLYING("flying"),
@@ -19,7 +20,6 @@ public enum SpawnCategory {
 
     private static final Map<String, SpawnCategory> BY_VALUE =
         Arrays.stream(values())
-            .filter(c -> c.value != null)
             .collect(Collectors.toUnmodifiableMap(
                 c -> c.value.toLowerCase(Locale.ROOT),
                 Function.identity()
@@ -31,8 +31,9 @@ public enum SpawnCategory {
         this.value = value;
     }
 
+    @Nullable
     public static SpawnCategory parse(String value) {
-        if (value == null || value.isBlank()) return NONE;
+        if (value == null) return null;
 
         SpawnCategory category = BY_VALUE.get(value.toLowerCase(Locale.ROOT));
         if (category == null)

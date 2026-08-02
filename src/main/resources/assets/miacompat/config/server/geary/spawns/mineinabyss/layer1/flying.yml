@@ -1,0 +1,21 @@
+# Spawn conditions
+
+l1_flying:
+  position: AIR
+  regions: [ layerone ]
+  conditions:
+    - gap: 7..600
+    - maxNearby:
+        amount: 3
+    - gapBelow: 10..600
+
+# Mob spawns
+
+l1_hammerbeak: { inherit: l1_flying, type: mm:hammerbeak }
+l1_cyatoria: { inherit: l1_flying, type: mm:cyatoria }
+
+l1_splitjaw:
+  inherit: l1_flying
+  type: mm:splitjaw
+  priority: 0.5
+  chance: 0.04

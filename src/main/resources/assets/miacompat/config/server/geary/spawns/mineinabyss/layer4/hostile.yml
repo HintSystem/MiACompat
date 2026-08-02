@@ -1,0 +1,93 @@
+# Spawn conditions
+
+l4_hostile:
+  position: GROUND
+  regions: [ layerfour ]
+  spread: 5
+  conditions:
+    - maxNearby:
+        amount: 3
+ #   - blockBelow:
+#        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite" ]
+
+# Mob spawns
+
+l4_kuongatari:
+  inherit: l4_hostile
+  type: mm:kuongatari
+  conditions:
+    - $inherit
+    - $remove blockBelow
+    - blockBelow:
+        allow: [ "#dirt", "moss_carpet", "green_terracotta", "green_concrete", "green_concrete_powder", "lime_terracotta", "lime_concrete", "lime_concrete_powder" ]
+        deny: [ "diorite" ]
+
+#l4_fapukuon:
+#  inherit: l4_hostile
+#  type: mm:fapukuon
+#  priority: 0.4
+#  chance: 0.7
+l4_swarmshocker: { inherit: l4_hostile, type: mm:swarmshocker, priority: 0.6 }
+
+l4_horncrier:
+  inherit: l4_hostile
+  priority: 0.3
+  type: mm:horncrier
+  conditions:
+    - $inherit
+    - $remove blockBelow
+    - blockBelow:
+        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite" ]
+        deny: ["moss_block"] # prevents from spawning on goblets
+
+#l4_hornballer:
+#  inherit: l4_hostile
+#  priority: 0.3
+#  chance: 0.1
+#  type: mm:hornballer
+
+
+
+l4_orbpiercer:
+  inherit: l4_hostile
+  type: mm:orbpiercer
+  chance: 0.017
+  priority: 0.15
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 2
+#    - mythicConditions:
+ #       - lightlevelfromblocks{l=<12}
+
+
+#l4_tama:
+#  inherit: l4_hostile
+#  type: mm:tama
+#  chance: 0.05
+#  priority: 0.4
+#  conditions:
+#    - $inherit
+#    - $remove maxNearby
+#    - maxNearby:
+#        amount: 1
+
+
+l4_tachikatana:
+  inherit: l4_hostile
+  type: mm:tachikatana
+  chance: 0.001
+  priority: 0.01
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 1
+
+
+#l4_spawnrandomamongus:
+#  inherit: l4_hostile
+#  type: mm:spawnrandomamongus
+#  chance: 0.3
+#  amount: 1

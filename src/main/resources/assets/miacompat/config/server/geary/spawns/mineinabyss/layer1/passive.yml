@@ -1,0 +1,34 @@
+# Spawn conditions
+
+l1_passive:
+  position: GROUND
+  regions: [ layerone ]
+  amount: 1-2
+  spread: 5
+  ySpread: 1
+  conditions:
+    - blockBelow:
+        allow: [ "#dirt", "moss_carpet" ]
+    - maxNearby:
+        amount: 4
+
+# Mob spawns
+
+l1_beniguma:
+  inherit: l1_passive
+  type: mm:beniguma
+  priority: 0.5
+
+l1_fuwagi: { inherit: l1_passive, type: mm:fuwagi }
+l1_okibo:
+  inherit: l1_passive
+  type: mm:okibo
+  amount: 1-2
+  chance: 0.2
+  priority: 0.3
+  regions: [ orth, layerone ]
+  conditions:
+    - blockBelow:
+        allow: [ "#dirt" ]
+    - maxNearby:
+        amount: 2

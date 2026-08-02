@@ -1,0 +1,25 @@
+# Spawn conditions
+
+l4_passive:
+  position: GROUND
+  regions: [ layerfour ]
+  amount: 1-2
+  spread: 5
+  ySpread: 1
+  conditions:
+    - blockBelow:
+        allow: [ "#dirt", "moss_carpet", "green_terracotta", "green_concrete", "green_concrete_powder", "lime_terracotta", "lime_concrete", "lime_concrete_powder" ]
+    - maxNearby:
+        amount: 5
+
+# Mob spawns
+
+l4_shroombear: { inherit: l4_passive, type: mm:shroombear }
+l4_hashofu:
+  inherit: l4_passive
+  type: mm:hashofu
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 3

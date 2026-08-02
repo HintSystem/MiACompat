@@ -1,0 +1,46 @@
+# Spawn conditions
+
+l3_hostile:
+  position: GROUND
+  regions: [ layerthree ]
+  spread: 20
+  conditions:
+    - maxNearby:
+        amount: 2
+ #   - blockBelow:
+#        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite" ]
+
+# Mob spawns
+
+#l3_silkfang:
+#  inherit: l3_hostile
+ # type: mm:silkfang
+#  conditions:
+#    - $inherit
+#    - gap: 4..600
+#    - maxNearby:
+     #   amount: 4
+
+
+l3_yomotsubi: { inherit: l3_hostile, type: mm:yomotsubi, priority: 0.3 }
+l3_daikonchu: { inherit: l3_hostile, type: mm:daikonchu }
+l3_himushi:
+  inherit: l3_hostile
+  type: mm:himushi
+  chance: 0.5
+  priority: 0.5
+  conditions:
+    - $inherit
+    - $remove blockBelow
+    - blockBelow:
+        allow: ["gilded_blackstone", "coal_block", "black_concrete", "obsidian" ]
+
+#l3_spawnrandomamongus:
+#  inherit: l3_hostile
+#  type: mm:spawnrandomamongus
+#  chance: 0.7
+
+#l3_fapukuon:
+#  inherit: l3_hostile
+#  type: mm:fapukuon
+#  priority: 0.4

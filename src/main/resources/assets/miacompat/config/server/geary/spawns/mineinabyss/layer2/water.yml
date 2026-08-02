@@ -1,0 +1,19 @@
+# Spawn conditions
+
+l2_water:
+  position: WATER
+  regions: [ layertwo ]
+  amount: 1-2
+  spread: 5
+  conditions:
+    - maxNearby:
+        amount: 3
+    - isSourceLiquid: { }
+    - waterDepth: 2..600
+
+# Mob spawns
+
+l2_ikenosuke: { inherit: l2_water, type: mm:ikenosuke }
+l2_rohana: { inherit: l2_water, type: mm:rohana }
+
+

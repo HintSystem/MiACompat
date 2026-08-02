@@ -1,0 +1,16 @@
+# Spawn conditions
+
+l1_water:
+  position: WATER
+  regions: [ layerone ]
+  amount: 1-2
+  spread: 5
+  conditions:
+    - maxNearby:
+        amount: 3
+    - isSourceLiquid: { }
+    - waterDepth: 2..600
+
+# Mob spawns
+
+l1_spiralsquid: { inherit: l1_water, type: mm:spiralsquid }

@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.introspector.MissingProperty;
+import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
@@ -26,12 +29,26 @@ public class RootMapConstructor<R extends Map<String, V>, V> extends ScalarConst
 
                 for (NodeTuple tuple : mapping.getValue()) {
                     String key = (String) constructObject(tuple.getKeyNode());
+                    Node valueNode = tuple.getValueNode();
 
-                    tuple.getValueNode().setType(valueType);
+                    // handle class properties (anything that isn't part of the map entries)
+                    try {
+                        Property property = getPropertyUtils().getProperty(rootType, key);
+                        if (!(property instanceof MissingProperty)) {
+                            valueNode.setType(property.getType());
+                            property.set(root, constructObject(valueNode));
+
+                            continue;
+                        }
+                    } catch (YAMLException ignored) {}
+                    catch (Exception e) {
+                        throw new YAMLException("Cannot create property=" + key);
+                    }
+
+                    valueNode.setType(valueType);
 
                     @SuppressWarnings("unchecked")
-                    V value = (V) constructObject(tuple.getValueNode());
-
+                    V value = (V) constructObject(valueNode);
                     root.put(key, value);
                 }
 

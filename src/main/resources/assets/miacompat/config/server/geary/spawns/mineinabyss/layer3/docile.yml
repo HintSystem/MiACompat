@@ -1,0 +1,18 @@
+# Spawn conditions
+
+l3_docile:
+  position: GROUND
+  spread: 20
+  regions: [ layerthree ]
+  conditions:
+    - blockBelow:
+        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite", "obsidian", "coal_block", "black_concrete" ]
+    - maxNearby:
+        amount: 4
+
+# Mob spawns
+
+l3_buroguro: { inherit: l3_docile, type: mm:buroguro, priority: 0.5  }
+l3_squidfly: { inherit: l3_docile, type: mm:squidfly, priority: 0.5  }
+l3_rockwalker: { inherit: l3_docile, type: mm:rockwalker }
+l3_hisoishi: { inherit: l3_docile, type: mm:hisoishi }

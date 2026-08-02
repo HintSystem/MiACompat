@@ -1,0 +1,20 @@
+# Spawn conditions
+
+l2_passive:
+  position: GROUND
+  regions: [ layertwo ]
+  amount: 1-2
+  spread: 7
+  ySpread: 1
+  conditions:
+    - blockBelow:
+        allow: [ "#dirt", "moss_carpet" ]
+    - maxNearby:
+        amount: 3
+
+# Mob spawns
+
+l2_fuwagi: { inherit: l2_passive, type: mm:fuwagi }
+l2_chimokami: { inherit: l2_passive, type: mm:chimokami }
+l2_tesuchi: { inherit: l2_passive, priority: 0.8, type: mm:tesuchi }
+l2_billabonk: { inherit: l2_passive, type: mm:billabonk, priority: 0.2 }

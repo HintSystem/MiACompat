@@ -1,0 +1,35 @@
+# Spawn conditions
+
+l5_passive:
+  position: GROUND
+  regions: [ layerfive ]
+  amount: 1-3
+  spread: 7
+  ySpread: 1
+  conditions:
+    - blockBelow:
+        allow: [ "#dirt", "moss_carpet", "green_terracotta", "lime_terracotta", "lime_concrete", "lime_concrete_powder" ]
+    - maxNearby:
+        amount: 5
+
+l5_passive_snow:
+  inherit: l5_passive
+  conditions:
+    - $inherit
+    - $remove blockBelow
+    - blockBelow:
+        allow: [ "#snow", "#ice" ]
+        deny: [ "packed_ice" ]
+
+# Mob spawns
+
+l5_abyssal_snail: { inherit: l5_passive, type: mm:abyssal_snail }
+l5_ashimite: { inherit: l5_passive_snow, type: mm:ashimite }
+l5_hashofu:
+  inherit: l5_passive
+  type: mm:hashofu
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 3

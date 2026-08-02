@@ -1,0 +1,58 @@
+# Spawn conditions
+
+l5_water:
+  position: WATER
+  regions: [ layerfive ]
+  amount: 1-3
+  spread: 5
+  conditions:
+    - maxNearby:
+        amount: 5
+    - isSourceLiquid: { }
+    - waterDepth: 2..600
+
+# Mob spawns
+
+# Common
+l5_demonfish: { inherit: l5_water, type: mm:demonfish }
+l5_hagamizukin: { inherit: l5_water, type: mm:hagamizukin }
+
+# Uncommon
+l5_uibuta:
+  inherit: l5_water
+  type: mm:uibuta
+  priority: 0.2
+  conditions: # Ensure we're at water surface
+    - $inherit
+    - blockAbove:
+        allow: [ AIR ]
+l5_makihige:
+  inherit: l5_water
+  type: mm:makihige
+  priority: 0.4
+  conditions:
+    - $inherit
+  #  - blockAbove:
+ #      allow: [ AIR ]
+
+# Rare
+l5_edusan:
+  inherit: l5_water
+  type: mm:edusan
+  priority: 0.1
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - $remove waterDepth
+    - maxNearby:
+        amount: 1
+    - waterDepth: 10..600
+
+l5_hisomukuro:
+  inherit: l5_water
+  type: mm:hisomukuro
+  priority: 0.2
+  conditions:
+    - $inherit
+    - maxNearby:
+        amount: 3

@@ -1,0 +1,133 @@
+# Spawn conditions
+
+l5_hostile:
+  position: GROUND
+  regions: [ layerfive ]
+  spread: 5
+  conditions:
+    - blockBelow:
+        allow: [ "#base_stone_overworld", "cobblestone", "#dirt", "moss_carpet", "cyan_terracotta", "white_concrete", "calcite", "deepslate", "cobbled_deepslate" ]
+    - maxNearby:
+        amount: 4
+
+l5_hostile_snow:
+  inherit: l5_hostile
+  conditions:
+    - $inherit
+    - $remove blockBelow
+    - blockBelow:
+        allow: [ "#snow", "#ice", "diorite", "white_concrete_powder" ]
+        deny: [ "packed_ice" ]
+
+l5_hostile_sand:
+  inherit: l5_hostile
+  conditions:
+    - $inherit
+    - $remove blockBelow
+    - blockBelow:
+        allow:
+          - "#sand"
+          - SANDSTONE
+          - RED_SANDSTONE
+          - RED_SANDSTONE_SLAB
+          - SANDSTONE_SLAB
+          - SANDSTONE_STAIRS
+          - SMOOTH_SANDSTONE
+          - SMOOTH_SANDSTONE_SLAB
+          - SOUL_SOIL
+          - SOUL_SAND
+
+l5_hostile_sea_of_glass:
+  inherit: l5_hostile
+  conditions:
+    - $inherit
+    - $remove blockBelow
+    - blockBelow:
+        allow: [ "magenta_stained_glass", "light_blue_stained_glass", "cyan_stained_glass", "purple_stained_glass", "blue_stained_glass" ]
+
+
+
+# Mob spawns
+
+# Default
+l5_chikyuoebi:
+  inherit: l5_hostile
+  type: mm:chikyuoebi
+  priority: 0.5
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 2
+l5_shiratsubi: { inherit: l5_hostile, type: mm:shiratsubi, priority: 0.5 }
+l5_swarmshocker: { inherit: l5_hostile, type: mm:swarmshocker }
+l5_kuongatari:
+  inherit: l5_hostile
+  type: mm:kuongatari
+  amount: 1-3
+  spread: 3
+l5_swarmhoarder: # uncommon spawn
+  inherit: l5_hostile
+  priority: 0.6 
+  type: mm:swarmhoarder
+l5_tachikatana: # rare spawn
+  inherit: l5_hostile
+  type: mm:tachikatana
+  chance: 0.03
+  priority: 0.03
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 2
+
+# Snow
+l5_octoliar: { inherit: l5_hostile_snow, type: mm:octoliar }
+l5_horncrier: { inherit: l5_hostile_snow, type: mm:horncrier }
+l5_tachikatana_snow: # rare spawn
+  inherit: l5_hostile_snow
+  type: mm:tachikatana
+  chance: 0.35
+  priority: 0.35
+  conditions:
+    - $inherit
+    - $remove maxNearby
+    - maxNearby:
+        amount: 2
+
+# Sand
+l5_spikewalker: { inherit: l5_hostile_sand, type: mm:spikewalker }
+l5_kagi_tachikiri: { inherit: l5_hostile_sand, type: mm:kagi_tachikiri }
+l5_virinsipede: { inherit: l5_hostile_sand, type: mm:virinsipede, priority: 0.1, chance: 0.05 }
+
+l5_ikonia: { inherit: l5_hostile_sand, type: mm:ikonia, priority: 0.04, chance: 0.04 }
+
+# Glass
+l5_sporemanta: { inherit: l5_hostile_sea_of_glass, type: mm:sporemanta, priority: 1, chance: 1 }
+
+#l5_hornballer:
+#  inherit: l5_hostile
+#  chance: 0.3
+#  type: mm:hornballer
+
+#l5_fapukuon:
+#  inherit: l5_hostile
+#  type: mm:fapukuon
+#  priority: 0.4
+#  chance: 0.3
+#l5_tama:
+#  inherit: l5_hostile
+#  type: mm:tama
+#  chance: 0.05
+#  priority: 0.4
+#  conditions:
+#    - $inherit
+#    - $remove maxNearby
+#    - maxNearby:
+#        amount: 1
+
+#l5_spawnrandomamongus:
+#  inherit: l5_hostile
+#  type: mm:spawnrandomamongus
+#  chance: 0.3
+#  amount: 1
