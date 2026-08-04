@@ -106,8 +106,9 @@ public class MiACompat implements ClientModInitializer {
         BonfireTracker.loadFromFile();
         config.loadFromFile();
 
-        KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_RELIC_COMPENDIUM);
         KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_CONFIG);
+        KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_MOB_COMPENDIUM);
+        KeyBindingHelper.registerKeyBinding(KeyBindings.OPEN_RELIC_COMPENDIUM);
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             CompendiumTracker.saveIfDirty();
@@ -176,7 +177,7 @@ public class MiACompat implements ClientModInitializer {
 
                 .then(ClientCommandManager.literal("compendium")
                     .executes(context -> {
-                        client.execute(() -> client.setScreen(new CompendiumScreen(CompendiumScreen.CompendiumTabId.RELICS)));
+                        client.execute(() -> client.setScreen(new CompendiumScreen(CompendiumScreen.CompendiumTabId.MOBS)));
                         return 1;
                     }))
 

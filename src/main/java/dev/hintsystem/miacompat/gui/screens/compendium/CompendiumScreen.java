@@ -4,6 +4,7 @@ import dev.hintsystem.miacompat.client.KeyBindings;
 import dev.hintsystem.miacompat.gui.components.WindowTab;
 import dev.hintsystem.miacompat.gui.components.WindowTabBar;
 import dev.hintsystem.miacompat.gui.components.WindowTabManager;
+import dev.hintsystem.miacompat.gui.screens.compendium.mobs.MobsTab;
 import dev.hintsystem.miacompat.gui.screens.compendium.relics.RelicsTab;
 
 import net.minecraft.client.KeyMapping;
@@ -21,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class CompendiumScreen extends Screen {
     private static final int MARGIN_Y = 64;
+    private static final int MIN_HEIGHT = 160;
+    private static final int MAX_HEIGHT = 400;
 
     private final HeaderAndFooterLayout layout;
 
@@ -64,7 +67,7 @@ public class CompendiumScreen extends Screen {
     protected void init() {
         this.layout.addTitleHeader(this.title, this.font);
 
-        //this.addWidget(tabBar);
+        this.addWidget(tabBar);
 
         this.layout.visitWidgets(widget -> {
             widget.setTabOrderGroup(1);
@@ -81,9 +84,15 @@ public class CompendiumScreen extends Screen {
 
     @Override
     public void repositionElements() {
+        int top = MARGIN_Y;
+        int height = Math.max(MIN_HEIGHT, this.height - MARGIN_Y*2);
+        if (height > MAX_HEIGHT) {
+            height = MAX_HEIGHT;
+            top = (this.height - MAX_HEIGHT) / 2;
+        }
+
         this.tabManager.setTabArea(new ScreenRectangle(
-            0, MARGIN_Y,
-            this.width, this.height - MARGIN_Y*2
+            0, top, this.width, height
         ));
 
         arrangeTabBar();
@@ -96,7 +105,7 @@ public class CompendiumScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        //this.tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
+        this.tabBar.render(guiGraphics, mouseX, mouseY, partialTick);
 
         WindowTab windowTab = this.tabManager.getCurrentWindowTab();
         if (windowTab != null) windowTab.render(guiGraphics, mouseX, mouseY, partialTick);

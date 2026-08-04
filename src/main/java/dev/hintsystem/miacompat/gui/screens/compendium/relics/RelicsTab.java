@@ -26,10 +26,10 @@ import org.jetbrains.annotations.Nullable;
 public class RelicsTab extends WindowTab {
     private static final Component TITLE = Component.translatable("screen.miacompat.compendium.tab.relics");
 
-    @Nullable private RelicList relicList;
-
     public final EnumMap<RelicGrade, List<RelicSlot>> relicsByGrade = new EnumMap<>(RelicGrade.class);
     public final Map<Identifier, List<MobDrop<ItemDrop>>> relicDropByPrefabId = new HashMap<>();
+
+    @Nullable private RelicList relicList;
 
     private static final Comparator<RelicSlot> RELIC_SORTER = Comparator
         .comparingInt(RelicSlot::layerOrder)
@@ -43,7 +43,7 @@ public class RelicsTab extends WindowTab {
     }
 
     @Override
-    public int getWindowWidth() { return listWidth() + BG_MARGIN*2; }
+    public int getContentWidth() { return listWidth(); }
 
     public int listWidth() { return RelicList.containerWidth(10); }
 

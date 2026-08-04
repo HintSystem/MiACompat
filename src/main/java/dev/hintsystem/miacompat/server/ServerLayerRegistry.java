@@ -22,6 +22,11 @@ public class ServerLayerRegistry {
     private static final Map<String, LayerYamlSchema.Layer> layerConfigById = new HashMap<>();
 
     @Nullable
+    public static LayerYamlSchema.Layer getLayer(String layerId) {
+        return layerConfigById.get(layerId);
+    }
+
+    @Nullable
     public static SectionYamlSchema.Section getSectionForPosition(Vec3i position) {
         for (SectionYamlSchema.Section section : sectionConfigById.values()) {
             if (section.region.contains(position))

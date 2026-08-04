@@ -35,7 +35,8 @@ public abstract class WindowTab implements Tab, Renderable {
         return this.title;
     }
 
-    public abstract int getWindowWidth();
+    public abstract int getContentWidth();
+    public int getContentHeight() { return -1; }
 
     public abstract void init(Minecraft minecraft, Font font);
 
@@ -49,12 +50,15 @@ public abstract class WindowTab implements Tab, Renderable {
     }
 
     public void updateWindowBounds(ScreenRectangle tabArea) {
-        int windowWidth = getWindowWidth();
+        int contentHeight = Math.min(tabArea.height(), getContentHeight());
+
+        int windowWidth = getContentWidth() + BG_MARGIN*2;
+        int windowHeight = contentHeight != -1 ? contentHeight : tabArea.height();
         int windowX = tabArea.left() + Math.floorDiv(tabArea.width() - windowWidth, 2);
 
         this.window = new ScreenRectangle(
             windowX, tabArea.top(),
-            windowWidth, tabArea.height()
+            windowWidth, windowHeight
         );
 
         this.content = new ScreenRectangle(
