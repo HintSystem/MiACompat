@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.server.config.mythic.drop;
 
-import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
+import dev.hintsystem.miacompat.server.config.LayerMeta;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -10,18 +10,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum RelicLayer {
-    L1("prayingskeleton_l1", MiaDeeperWorld.LayerInfo.L1),
-    L2("prayingskeleton_l2", MiaDeeperWorld.LayerInfo.L2),
-    L3("prayingskeleton_l3", MiaDeeperWorld.LayerInfo.L3),
-    L4("prayingskeleton_l4", MiaDeeperWorld.LayerInfo.L4),
-    L5("prayingskeleton_l5", MiaDeeperWorld.LayerInfo.L5);
+    L1("prayingskeleton_l1", LayerMeta.L1),
+    L2("prayingskeleton_l2", LayerMeta.L2),
+    L3("prayingskeleton_l3", LayerMeta.L3),
+    L4("prayingskeleton_l4", LayerMeta.L4),
+    L5("prayingskeleton_l5", LayerMeta.L5);
 
     public final String mobId;
-    public final MiaDeeperWorld.LayerInfo info;
+    public final LayerMeta meta;
 
-    RelicLayer(String relicDropMobId, MiaDeeperWorld.LayerInfo info) {
+    RelicLayer(String relicDropMobId, LayerMeta meta) {
         this.mobId = relicDropMobId;
-        this.info = info;
+        this.meta = meta;
     }
 
     private static final Map<String, RelicLayer> BY_MOB =

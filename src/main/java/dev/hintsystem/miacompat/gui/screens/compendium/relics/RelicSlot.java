@@ -100,7 +100,7 @@ public class RelicSlot {
         for (var mobDrop : drops) {
             RelicLayer.fromMobDrop(mobDrop).ifPresent((l) -> {
                 obtainInfo.append(
-                    MiaIcons.getLayerSpriteComponent(l.info.iconName)
+                    MiaIcons.getLayerSpriteComponent(l.meta)
                 ).append(" ");
             });
 

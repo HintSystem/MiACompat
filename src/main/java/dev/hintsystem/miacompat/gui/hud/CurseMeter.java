@@ -2,7 +2,10 @@ package dev.hintsystem.miacompat.gui.hud;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.mixin.GuiGraphicsAccessor;
-import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
+import dev.hintsystem.miacompat.server.ServerLayerRegistry;
+import dev.hintsystem.miacompat.server.config.LayerConfig;
+import dev.hintsystem.miacompat.server.config.LayerYamlSchema;
+import dev.hintsystem.miacompat.server.config.SectionYamlSchema;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 
@@ -17,6 +20,8 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -24,6 +29,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.effect.MobEffect;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,13 +46,15 @@ public class CurseMeter implements HudElement {
 
     public static final int CURSE_HEIGHT_GAIN = 10; // it takes going up this amount of blocks before being affected by the curse
 
+    public List<Holder<@NotNull MobEffect>> ascensionEffects = new ArrayList<>();
+    private String currentSection;
+
     private int animationTicks = 0;
     private int curseTicks = 0;
 
     public int curseStacks = 0;
     public int curseAccrued = 0;
     private BlockPos lastPlayerPos = BlockPos.ZERO;
-    private MiaDeeperWorld.LayerInfo currentLayer = MiaDeeperWorld.LayerInfo.Orth;
 
     protected void tick(Minecraft client) {
         if (client.player == null) return;
@@ -56,7 +66,7 @@ public class CurseMeter implements HudElement {
         double changeDistance = client.player.blockPosition().distSqr(lastPlayerPos);
 
         lastPlayerPos = client.player.blockPosition();
-        currentLayer = MiaDeeperWorld.LayerInfo.fromUnwrappedY(MiaDeeperWorld.unwrap(lastPlayerPos).getY());
+        updateAscensionEffects(lastPlayerPos);
         if (changeDistance > 32 * 32) return;
 
         int totalCurse = Math.max(curseAccrued + changeY, 0);
@@ -67,9 +77,34 @@ public class CurseMeter implements HudElement {
         if (curseStackGain > 0) { curseTicks = 200; }
     }
 
+    private void updateAscensionEffects(Vec3i position) {
+        SectionYamlSchema.Section section = ServerLayerRegistry.getSectionForPosition(position);
+        if (section == null) {
+            ascensionEffects.clear();
+            return;
+        }
+
+        if (section.name.equals(currentSection)) return;
+        ascensionEffects.clear();
+        currentSection = section.name;
+
+        LayerConfig layer = ServerLayerRegistry.getLayer(section);
+        for (LayerYamlSchema.Effect effect : layer.effects) {
+            if (!(effect instanceof LayerYamlSchema.PotionEffect potionEffect)) continue;
+
+            for (Identifier effectId : potionEffect.effects) {
+                BuiltInRegistries.MOB_EFFECT.get(effectId)
+                    .ifPresentOrElse(
+                        mobEffect -> ascensionEffects.add(mobEffect),
+                        () -> MiACompat.LOGGER.warn("Effect '{}' is not a valid mob effect", effectId)
+                    );
+            }
+        }
+    }
+
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, @NotNull DeltaTracker deltaTracker) {
-        if (currentLayer.ascensionEffects.isEmpty()) return;
+        if (ascensionEffects.isEmpty()) return;
 
         int xPos = guiGraphics.guiWidth() - BAR_BACKGROUND_WIDTH*2 - 10;
         int yPos = guiGraphics.guiHeight() - BAR_BACKGROUND_HEIGHT - 15;
@@ -86,12 +121,12 @@ public class CurseMeter implements HudElement {
 
         renderSoulSprite(guiGraphics, barX - 3, yPos + 1);
 
-        int effectX = xPos + BAR_BACKGROUND_WIDTH - 14;
-        int effectY = yPos + 3;
-        for (Holder<@NotNull MobEffect> mobEffectHolder : currentLayer.ascensionEffects) {
+        int effectX = xPos + BAR_BACKGROUND_WIDTH - 13;
+        int effectY = yPos + 2;
+        for (Holder<@NotNull MobEffect> mobEffectHolder : ascensionEffects) {
             Identifier effectTexture = Gui.getMobEffectSprite(mobEffectHolder);
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, effectTexture,
-                effectX, effectY, 12, 12, ARGB.color(0.4f, CommonColors.WHITE));
+                effectX, effectY, 12, 12, ARGB.color(0.34f, CommonColors.WHITE));
             effectY += 13;
         }
 

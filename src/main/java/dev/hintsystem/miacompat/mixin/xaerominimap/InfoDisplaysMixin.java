@@ -1,6 +1,10 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
-import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
+import dev.hintsystem.miacompat.server.ServerLayerRegistry;
+import dev.hintsystem.miacompat.server.config.LayerConfig;
+import dev.hintsystem.miacompat.server.config.LayerMeta;
+import dev.hintsystem.miacompat.server.config.SectionYamlSchema;
+import dev.hintsystem.miacompat.utils.DeeperWorld;
 
 import xaero.hud.minimap.info.InfoDisplay;
 import xaero.hud.minimap.info.InfoDisplayManager;
@@ -39,22 +43,24 @@ public class InfoDisplaysMixin {
                 .setDefaultState(true).setCodec(BuiltInConfigValueIOCodecs.BOOLEAN).setWidgetFactory(InfoDisplayCommonWidgetFactories.OFF_ON)
                 .setCompiler((displayInfo, compiler, session, availableWidth, playerPos) -> {
                     if (displayInfo.getEffectiveState()) {
-                        int section = MiaDeeperWorld.sectionFromX(playerPos.getX());
-                        MiaDeeperWorld.LayerInfo layer = MiaDeeperWorld.LayerInfo.fromUnwrappedY(
-                            MiaDeeperWorld.unwrapY(playerPos.getY(), section)
-                        );
 
-                        if (layer.ordinal() != 0) {
-                            String layerShort = "L" + layer.ordinal() + "S" + layer.getSubSection(section);
+                        SectionYamlSchema.Section section = ServerLayerRegistry.getSectionForPosition(playerPos);
+                        if (section == null) return;
+
+                        LayerConfig layer = ServerLayerRegistry.getLayer(section);
+                        if (layer == null) return;
+
+                        if (layer.meta != LayerMeta.Orth) {
+                            int sectionIndex = layer.getSectionIndex(section) + 1;
                             compiler.addLine(
-                                Component.literal(layerShort)
-                                    .setStyle(Style.EMPTY.withColor(layer.subtitleColor != null ? layer.subtitleColor : layer.titleColor))
+                                Component.literal("L" + layer.meta.ordinal() + "S" + sectionIndex)
+                                    .setStyle(Style.EMPTY.withColor(layer.getSubtitleColor()))
                             );
                         }
 
                         compiler.addLine(
-                            Component.literal(layer.title)
-                                .setStyle(Style.EMPTY.withColor(layer.titleColor).withBold(true))
+                            Component.literal(layer.name.getString())
+                                .setStyle(Style.EMPTY.withColor(layer.getTitleColor()).withBold(true))
                         );
                     }
                 })
@@ -66,7 +72,7 @@ public class InfoDisplaysMixin {
                 .setDefaultState(true).setCodec(BuiltInConfigValueIOCodecs.BOOLEAN).setWidgetFactory(InfoDisplayCommonWidgetFactories.OFF_ON)
                 .setCompiler((displayInfo, compiler, session, availableWidth, playerPos) -> {
                     if (displayInfo.getEffectiveState()) {
-                        BlockPos MiAPos = MiaDeeperWorld.unwrap(playerPos);
+                        BlockPos MiAPos = DeeperWorld.unwrap(playerPos);
                         String coords = MiAPos.getX() + ", " + MiAPos.getY() + ", " + MiAPos.getZ();
 
                         if (Minecraft.getInstance().font.width(coords) >= availableWidth) {

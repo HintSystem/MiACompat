@@ -2,6 +2,8 @@ package dev.hintsystem.miacompat.server;
 
 import dev.hintsystem.miacompat.MiACompat;
 import dev.hintsystem.miacompat.server.config.ConfigResourceReloader.Stopwatch;
+import dev.hintsystem.miacompat.server.config.LayerConfig;
+import dev.hintsystem.miacompat.server.config.LayerMeta;
 import dev.hintsystem.miacompat.server.config.LayerYamlSchema;
 import dev.hintsystem.miacompat.server.config.SectionYamlSchema;
 
@@ -11,7 +13,9 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -19,11 +23,19 @@ import org.yaml.snakeyaml.Yaml;
 
 public class ServerLayerRegistry {
     private static final Map<String, SectionYamlSchema.Section> sectionConfigById = new HashMap<>();
-    private static final Map<String, LayerYamlSchema.Layer> layerConfigById = new HashMap<>();
+    private static final Map<String, LayerConfig> layerConfigById = new HashMap<>();
 
+    private static final Map<String, LayerConfig> layerConfigBySectionId = new HashMap<>();
+
+    /** @param regionId layer id or section id */
     @Nullable
-    public static LayerYamlSchema.Layer getLayer(String layerId) {
-        return layerConfigById.get(layerId);
+    public static LayerConfig getLayer(String regionId) {
+        LayerConfig layer = layerConfigById.get(regionId);
+        return layer != null ? layer : layerConfigBySectionId.get(regionId);
+    }
+
+    public static LayerConfig getLayer(SectionYamlSchema.Section section) {
+        return layerConfigBySectionId.get(section.name);
     }
 
     @Nullable
@@ -36,9 +48,44 @@ public class ServerLayerRegistry {
         return null;
     }
 
+    private static void resolveLayerSections() {
+        layerConfigBySectionId.clear();
+
+        Set<String> claimedSectionIds = new HashSet<>();
+
+        for (LayerConfig layer : layerConfigById.values()) {
+            for (int i = 0; i < layer.sections.size(); i++) {
+                String sectionId = layer.sections.get(i);
+                SectionYamlSchema.Section section = sectionConfigById.get(sectionId);
+                if (section == null) {
+                    MiACompat.LOGGER.error("Layer '{}' references unknown section '{}'", layer.id, sectionId);
+                    continue;
+                }
+
+                if (layerConfigBySectionId.putIfAbsent(sectionId, layer) != null) {
+                    MiACompat.LOGGER.error("Section '{}' is assigned to multiple layers", sectionId);
+                    continue;
+                }
+
+                claimedSectionIds.add(sectionId);
+            }
+        }
+
+        for (String sectionId : sectionConfigById.keySet()) {
+            if (!claimedSectionIds.contains(sectionId)) {
+                MiACompat.LOGGER.error("Section '{}' does not belong to any layer", sectionId);
+            }
+        }
+    }
+
     private static void registerLayer(LayerYamlSchema.Layer layer) {
-        LayerYamlSchema.Layer prev = layerConfigById.putIfAbsent(layer.id, layer);
-        if (prev != null)
+        LayerMeta meta = LayerMeta.getById(layer.id);
+        if (meta == null) {
+            MiACompat.LOGGER.error("Loaded unknown layer '{}' with no matching LayerMeta enum", layer.id);
+            return;
+        }
+
+        if (layerConfigById.putIfAbsent(layer.id, new LayerConfig(layer, meta)) != null)
             MiACompat.LOGGER.error("Layer '{}' already registered", layer.id);
     }
 
@@ -76,6 +123,8 @@ public class ServerLayerRegistry {
                     registerLayer(layerConfig);
                 }
             }
+
+            resolveLayerSections();
 
             sw.args(sectionConfigById.size(), layerConfigById.size());
         } catch (Exception e) {

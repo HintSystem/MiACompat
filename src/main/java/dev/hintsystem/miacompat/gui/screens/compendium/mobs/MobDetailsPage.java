@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.gui.screens.compendium.mobs;
 
 import dev.hintsystem.miacompat.MiACompat;
-import dev.hintsystem.miacompat.server.config.LayerYamlSchema;
+import dev.hintsystem.miacompat.server.config.LayerMeta;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -70,9 +70,9 @@ public class MobDetailsPage extends AbstractWidget {
         int mobX = rect.left() + (rect.width() - MOB_SIZE) / 2;
         int mobY = rect.bottom() - MOB_SIZE + 2;
 
-        if (!selectedSlot.layers.isEmpty()) {
-            LayerYamlSchema.Layer layer = selectedSlot.layers.getFirst();
-            renderLayerBackground(guiGraphics, layer);
+        if (!selectedSlot.layerMetas.isEmpty()) {
+            renderLayerBackground(guiGraphics,
+                selectedSlot.layerMetas.iterator().next());
         }
 
         renderMobSprite(guiGraphics, selectedSlot.sprite, mobX + 2, mobY + 2, 0xC8000000);
@@ -88,15 +88,14 @@ public class MobDetailsPage extends AbstractWidget {
         );
     }
 
-    private void renderLayerBackground(GuiGraphics guiGraphics, LayerYamlSchema.Layer layer) {
-        if (layer == null) return;
-
-        switch (layer.id) {
-            case "layerone" -> renderPaintingSprite(guiGraphics, "skull_and_roses", 64, 64);
-            case "layertwo" -> renderPaintingSprite(guiGraphics, "bust", 64, 64);
-            case "layerthree" -> renderPaintingSprite(guiGraphics, "pigscene", 64, 64);
-            case "layerfour" -> renderPaintingSprite(guiGraphics, "pool", 128, 64);
-            case "layerfive" -> renderPaintingSprite(guiGraphics, "donkey_kong", 128, 96);
+    private void renderLayerBackground(GuiGraphics guiGraphics, LayerMeta layerMeta) {
+        switch (layerMeta) {
+            case Orth -> renderPaintingSprite(guiGraphics, "match", 64, 64);
+            case L1 -> renderPaintingSprite(guiGraphics, "skull_and_roses", 64, 64);
+            case L2 -> renderPaintingSprite(guiGraphics, "bust", 64, 64);
+            case L3 -> renderPaintingSprite(guiGraphics, "pigscene", 64, 64);
+            case L4 -> renderPaintingSprite(guiGraphics, "pool", 128, 64);
+            case L5 -> renderPaintingSprite(guiGraphics, "donkey_kong", 128, 96);
         }
     }
 

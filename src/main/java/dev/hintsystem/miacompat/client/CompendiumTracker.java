@@ -91,7 +91,7 @@ public class CompendiumTracker {
 
         SectionYamlSchema.Section section = ServerLayerRegistry.getSectionForPosition(player.blockPosition());
         if (section == null) {
-            MiACompat.LOGGER.warn("Could not add praying skeleton to compendium, because player is not in a valid section");
+            MiACompat.LOGGER.warn("Could not add praying skeleton to compendium, player is not in a valid section");
             return;
         }
 

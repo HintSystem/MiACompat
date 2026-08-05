@@ -1,6 +1,7 @@
 package dev.hintsystem.miacompat.gui;
 
 import dev.hintsystem.miacompat.MiACompat;
+import dev.hintsystem.miacompat.server.config.LayerMeta;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.data.AtlasIds;
@@ -20,9 +21,8 @@ public class MiaIcons {
         return MiACompat.id(SPRITE_PATH + "prefixes/layer/" + layerName + "_square");
     }
 
-    /** @param layerName e.g. `layer_1`, `layer_orth` */
-    public static Component getLayerSpriteComponent(String layerName) {
-        return getSpriteComponent(getLayerSpriteId(layerName));
+    public static Component getLayerSpriteComponent(LayerMeta layerMeta) {
+        return getSpriteComponent(getLayerSpriteId(layerMeta.spriteName));
     }
 
     public static Component getSpriteComponent(Identifier id) {

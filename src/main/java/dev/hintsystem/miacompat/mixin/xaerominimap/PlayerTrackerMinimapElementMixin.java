@@ -1,7 +1,7 @@
 package dev.hintsystem.miacompat.mixin.xaerominimap;
 
 import dev.hintsystem.miacompat.mods.SupportXaeroMinimap;
-import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
+import dev.hintsystem.miacompat.utils.DeeperWorld;
 
 import xaero.hud.minimap.player.tracker.PlayerTrackerMinimapElement;
 import xaero.hud.minimap.player.tracker.system.IRenderedPlayerTracker;
@@ -30,7 +30,7 @@ public class PlayerTrackerMinimapElementMixin<P> {
 
         double trackedX = system.getReader().getX(player);
 
-        cir.setReturnValue(MiaDeeperWorld.relativizeWrapped(
+        cir.setReturnValue(DeeperWorld.relativizeWrapped(
             new Vec3(clientPlayer.getX(), 0, 0),
             new Vec3(trackedX, 0, 0)
         ).x());
@@ -44,7 +44,7 @@ public class PlayerTrackerMinimapElementMixin<P> {
         double trackedX = system.getReader().getX(player);
         double trackedY = system.getReader().getY(player);
 
-        cir.setReturnValue(MiaDeeperWorld.relativizeWrapped(
+        cir.setReturnValue(DeeperWorld.relativizeWrapped(
             new Vec3(clientPlayer.getX(), clientPlayer.getY(), 0),
             new Vec3(trackedX, trackedY, 0)
         ).y());

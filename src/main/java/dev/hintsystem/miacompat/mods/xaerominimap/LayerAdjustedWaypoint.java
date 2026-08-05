@@ -1,6 +1,6 @@
 package dev.hintsystem.miacompat.mods.xaerominimap;
 
-import dev.hintsystem.miacompat.utils.MiaDeeperWorld;
+import dev.hintsystem.miacompat.utils.DeeperWorld;
 
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.hud.minimap.waypoint.WaypointColor;
@@ -24,7 +24,7 @@ public class LayerAdjustedWaypoint extends Waypoint {
     }
 
     public void updateForCamera() {
-        Vec3 relativePosition = MiaDeeperWorld.relativeToCamera(
+        Vec3 relativePosition = DeeperWorld.relativeToCamera(
             new Vec3(original.getX(), original.getY(), original.getZ())
         );
 
